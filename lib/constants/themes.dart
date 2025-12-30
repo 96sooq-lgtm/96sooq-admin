@@ -67,7 +67,7 @@ class AppThemes {
     fontWeight: FontWeight.w600,
     color: AppColors.blackTextColor,
   );
-    static const TextStyle f16w300 = TextStyle(
+  static const TextStyle f16w300 = TextStyle(
     fontSize: 16,
     fontWeight: FontWeight.w300,
     color: AppColors.blackTextColor,
@@ -122,6 +122,11 @@ class AppThemes {
     fontWeight: FontWeight.w600,
     color: AppColors.blackTextColor,
   );
+    static const TextStyle f20w300 = TextStyle(
+    fontSize: 20,
+    fontWeight: FontWeight.w300,
+    color: AppColors.blackTextColor,
+  );
   static const TextStyle f20w400 = TextStyle(
     fontSize: 20,
     fontWeight: FontWeight.w400,
@@ -135,6 +140,11 @@ class AppThemes {
   static const TextStyle f22w600 = TextStyle(
     fontSize: 22,
     fontWeight: FontWeight.w600,
+    color: AppColors.blackTextColor,
+  );
+  static const TextStyle f24w400 = TextStyle(
+    fontSize: 24,
+    fontWeight: FontWeight.w400,
     color: AppColors.blackTextColor,
   );
   static const TextStyle f24w500 = TextStyle(
@@ -187,7 +197,7 @@ class AppThemes {
     fontWeight: FontWeight.w800,
     color: AppColors.blackTextColor,
   );
-    static const TextStyle f36w600 = TextStyle(
+  static const TextStyle f36w600 = TextStyle(
     fontSize: 36,
     fontWeight: FontWeight.w600,
     color: AppColors.blackTextColor,

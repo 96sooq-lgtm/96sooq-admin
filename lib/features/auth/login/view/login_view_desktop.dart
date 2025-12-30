@@ -2,9 +2,10 @@ import 'package:_96sooq_admin/constants/colors.dart';
 import 'package:_96sooq_admin/constants/strings.dart';
 import 'package:_96sooq_admin/constants/themes.dart';
 import 'package:_96sooq_admin/features/auth/widgets/custom_textformfield.dart';
+import 'package:_96sooq_admin/features/home/view/home_view.dart';
+import 'package:_96sooq_admin/features/root/view/admin_root_view_.dart';
 import 'package:_96sooq_admin/features/shared/global_widgets/custom_button_widgets.dart';
 import 'package:flutter/material.dart';
-import 'package:flutter_svg/flutter_svg.dart';
 
 class LoginViewDesktop extends StatefulWidget {
   const LoginViewDesktop({super.key});
@@ -16,7 +17,6 @@ class LoginViewDesktop extends StatefulWidget {
 class _LoginViewDesktopState extends State<LoginViewDesktop> {
   final TextEditingController emailController = TextEditingController();
   final TextEditingController passwordController = TextEditingController();
-  // bool isObscure = false;
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -83,7 +83,6 @@ class _LoginViewDesktopState extends State<LoginViewDesktop> {
               Expanded(
                 flex: 6,
                 child: Container(
-                  padding: EdgeInsets.symmetric(horizontal: 80, vertical: 80),
                   decoration: BoxDecoration(
                     color: Colors.white,
                     borderRadius: BorderRadius.only(
@@ -91,33 +90,50 @@ class _LoginViewDesktopState extends State<LoginViewDesktop> {
                       bottomRight: Radius.circular(60),
                     ),
                   ),
-                  child: Column(
-                    mainAxisAlignment: .start,
-                    crossAxisAlignment: .start,
-                    children: [
-                      Text("Welcome", style: AppThemes.f36w600),
-                      Text(
-                        "Please enter your details to sign in.",
-                        style: AppThemes.f18w400,
+                  child: SingleChildScrollView(
+                    child: Padding(
+                      padding: const EdgeInsets.symmetric(
+                        horizontal: 80,
+                        vertical: 80,
                       ),
-                      SizedBox(height: 50),
-                      Text("Email Address", style: AppThemes.f20w500),
-                      SizedBox(height: 10),
-                      CustomTextFormField(
-                        controller: emailController,
-                        labelText: "Email Address",
+                      child: Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          Text("Welcome", style: AppThemes.f36w600),
+                          Text(
+                            "Please enter your details to sign in.",
+                            style: AppThemes.f18w400,
+                          ),
+                          const SizedBox(height: 50),
+                          Text("Email Address", style: AppThemes.f20w500),
+                          const SizedBox(height: 10),
+                          CustomTextFormField(
+                            controller: emailController,
+                            labelText: "Email Address",
+                          ),
+                          const SizedBox(height: 20),
+                          Text("Password", style: AppThemes.f20w500),
+                          const SizedBox(height: 10),
+                          CustomTextFormField(
+                            controller: passwordController,
+                            labelText: "Password",
+                            obscureText: true,
+                            isPassword: true,
+                          ),
+                          const SizedBox(height: 30),
+                          CustomButton(
+                            text: "Login",
+                            onPressed: () {
+                              Navigator.of(context).push(
+                                MaterialPageRoute(
+                                  builder: (context) => AdminRootView(),
+                                ),
+                              );
+                            },
+                          ),
+                        ],
                       ),
-                      Text("Password", style: AppThemes.f20w500),
-                      SizedBox(height: 10),
-                      CustomTextFormField(
-                        controller: passwordController,
-                        labelText: "Password",
-                        obscureText: true,
-                          isPassword: true,
-                      ),
-                      SizedBox(height: 20),
-                      CustomButton(text: "Login", onPressed: () {}),
-                    ],
+                    ),
                   ),
                 ),
               ),

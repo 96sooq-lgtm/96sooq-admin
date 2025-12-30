@@ -29,35 +29,41 @@ class CustomButton extends StatelessWidget {
         double buttonWidth = constraints.maxWidth;
         double buttonHeight = 56;
 
-        return GestureDetector(
-          onTap: isLoading ? null : onPressed,
-          child: Container(
-            width: buttonWidth,
-            height: buttonHeight,
-            decoration: BoxDecoration(
-              borderRadius: BorderRadius.circular(14),
-              color: color,
-            ),
-            child: Center(
-              child: (isLoading && isLoadingVisible)
-                  ? const SizedBox(
-                      height: 18,
-                      width: 18,
-                      child: CircularProgressIndicator(
-                        valueColor: AlwaysStoppedAnimation<Color>(Colors.white),
-                      ),
-                    )
-                  : Text(
-                      text,
-                      style:
-                          textStyle ??
-                          AppThemes.f16w600.copyWith(
-                            color: Colors.white,
-                            fontSize: fontSize, // Use fontSize here
+        return MouseRegion(
+          cursor: SystemMouseCursors.click,
+          hitTestBehavior: HitTestBehavior.opaque,
+          child: GestureDetector(
+            onTap: isLoading ? null : onPressed,
+            child: Container(
+              width: buttonWidth,
+              height: buttonHeight,
+              decoration: BoxDecoration(
+                borderRadius: BorderRadius.circular(12),
+                color: color,
+              ),
+              child: Center(
+                child: (isLoading && isLoadingVisible)
+                    ? const SizedBox(
+                        height: 18,
+                        width: 18,
+                        child: CircularProgressIndicator(
+                          valueColor: AlwaysStoppedAnimation<Color>(
+                            Colors.white,
                           ),
-                      textAlign: TextAlign.center,
-                      overflow: TextOverflow.ellipsis,
-                    ),
+                        ),
+                      )
+                    : Text(
+                        text,
+                        style:
+                            textStyle ??
+                            AppThemes.f16w400.copyWith(
+                              color: Colors.white,
+                              fontSize: fontSize, // Use fontSize here
+                            ),
+                        textAlign: TextAlign.center,
+                        overflow: TextOverflow.ellipsis,
+                      ),
+              ),
             ),
           ),
         );
