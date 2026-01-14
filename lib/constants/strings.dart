@@ -18,4 +18,8 @@ class AssetPath {
   static const String dealsIc = "assets/icons/deals.svg";
   static const String pendingRequestIc = "assets/icons/pending_request.svg";
   static const String addBannerIc = "assets/icons/add_banner.svg";
+  static const String subscriptionSelectedIc =
+      "assets/icons/subscription_selected.svg";
+  static const String subscriptionUnSelectedIc =
+      "assets/icons/subscription_unselected.svg";
 }

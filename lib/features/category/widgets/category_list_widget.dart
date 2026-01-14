@@ -19,7 +19,11 @@ class CategoryListWidget extends StatelessWidget {
       child: Row(
         children: [
           SizedBox(width: 40),
-          Expanded(flex: 4, child: Text(name, style: AppThemes.f20w300)),
+          Expanded(
+            flex: 4,
+            child: Text(name, style: AppThemes.f20w300, maxLines: 2),
+          ),
+          SizedBox(width: 8),
           Expanded(flex: 1, child: _StatusChip(isActive: isActive)),
           Expanded(
             flex: 2,

@@ -1,9 +1,18 @@
 import 'package:_96sooq_admin/constants/themes.dart';
+import 'package:_96sooq_admin/features/ad_bannner/view/ad_banner_view.dart';
 import 'package:_96sooq_admin/features/category/view/category_view.dart';
 import 'package:_96sooq_admin/features/home/view/home_view.dart';
+import 'package:_96sooq_admin/features/notifications/view/notifications_view.dart';
+import 'package:_96sooq_admin/features/offer_listings/view/offer_listing_view.dart';
+import 'package:_96sooq_admin/features/payments/view/payments_view.dart';
+import 'package:_96sooq_admin/features/promotion/view/promotion_view.dart';
+import 'package:_96sooq_admin/features/request_approval/view/request_approval_view.dart';
 import 'package:_96sooq_admin/features/root/cubit/admin_navigation_cubit.dart';
 import 'package:_96sooq_admin/features/root/widgets/admin_sidebar_widget.dart';
+import 'package:_96sooq_admin/features/settings/view/settings_view.dart';
 import 'package:_96sooq_admin/features/subcategory/view/subcategory_view.dart';
+import 'package:_96sooq_admin/features/terms_and_conditions/view/terms_and_condition_view.dart';
+import 'package:_96sooq_admin/features/user_management/view/user_management_view.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 
@@ -19,6 +28,15 @@ class _AdminRootDesktopViewState extends State<AdminRootDesktopView> {
     const HomeView(),
     const CategoryView(),
     const SubcategoryView(),
+    const PromotionView(),
+    const AdBannerView(),
+    const OfferListingView(),
+    const UserManagementView(),
+    const RequestApprovalView(),
+    const PaymentsView(),
+    const NotificationsView(),
+    const TermsAndConditionView(),
+    const SettingsView(),
   ];
   @override
   Widget build(BuildContext context) {

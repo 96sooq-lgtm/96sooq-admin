@@ -29,6 +29,7 @@ class _LoginViewDesktopState extends State<LoginViewDesktop> {
               Expanded(
                 flex: 3,
                 child: Container(
+                  height: 722,
                   decoration: BoxDecoration(
                     color: AppColors.primaryColor,
                     borderRadius: BorderRadius.only(
@@ -83,6 +84,7 @@ class _LoginViewDesktopState extends State<LoginViewDesktop> {
               Expanded(
                 flex: 6,
                 child: Container(
+                  height: 722,
                   decoration: BoxDecoration(
                     color: Colors.white,
                     borderRadius: BorderRadius.only(
