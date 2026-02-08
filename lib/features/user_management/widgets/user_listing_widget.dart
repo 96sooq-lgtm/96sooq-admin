@@ -1,4 +1,5 @@
 import 'package:_96sooq_admin/constants/themes.dart';
+import 'package:_96sooq_admin/core/bloc/language/widgets/dynamic_text.dart';
 import 'package:flutter/material.dart';
 
 class UserListingWidget extends StatelessWidget {
@@ -23,11 +24,11 @@ class UserListingWidget extends StatelessWidget {
           SizedBox(width: 40),
           Expanded(
             flex: 2,
-            child: Text(userName, style: AppThemes.f20w300, maxLines: 2),
+            child: DynamicText(userName, style: AppThemes.f20w300, maxLines: 2),
           ),
           Expanded(
             flex: 2,
-            child: Text(userEmail, style: AppThemes.f20w300, maxLines: 2),
+            child: DynamicText(userEmail, style: AppThemes.f20w300, maxLines: 2),
           ),
           Expanded(flex: 1, child: _StatusChip(isActive: isActive)),
           Expanded(
@@ -71,7 +72,7 @@ class _StatusChip extends StatelessWidget {
         borderRadius: BorderRadius.circular(25),
       ),
       child: Center(
-        child: Text(
+        child: DynamicText(
           isActive ? 'Active' : 'Block',
           style: AppThemes.f20w400.copyWith(
             color: isActive ? const Color(0xFF1E8E4E) : Color(0xFFF93939),

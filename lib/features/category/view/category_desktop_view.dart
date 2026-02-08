@@ -1,5 +1,6 @@
 import 'package:_96sooq_admin/constants/colors.dart';
 import 'package:_96sooq_admin/constants/themes.dart';
+import 'package:_96sooq_admin/core/bloc/language/widgets/dynamic_text.dart';
 import 'package:_96sooq_admin/features/auth/widgets/custom_textformfield.dart';
 import 'package:_96sooq_admin/features/category/widgets/category_list_widget.dart';
 import 'package:_96sooq_admin/features/shared/global_widgets/custom_button_widgets.dart';
@@ -28,9 +29,9 @@ class _CategoryDesktopViewState extends State<CategoryDesktopView> {
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
                   const SizedBox(height: 36),
-                  Text("Category", style: AppThemes.f28w600),
+                  DynamicText("Category", style: AppThemes.f28w600),
                   const SizedBox(height: 10),
-                  Text(
+                  DynamicText(
                     "Manage your marketplace categories",
                     style: AppThemes.f20w400,
                   ),
@@ -61,7 +62,7 @@ class _CategoryDesktopViewState extends State<CategoryDesktopView> {
                                     controller: searchController,
                                     cursorColor: AppColors.primaryColor,
                                     decoration: InputDecoration(
-                                      label: Text(
+                                      label: DynamicText(
                                         "Search Categories",
                                         style: AppThemes.f20w400.copyWith(
                                           color: Color(0xFF99A1Af),
@@ -118,7 +119,7 @@ class _CategoryDesktopViewState extends State<CategoryDesktopView> {
                                 SizedBox(width: 40),
                                 Expanded(
                                   flex: 4,
-                                  child: Text(
+                                  child: DynamicText(
                                     'Category Name',
                                     style: AppThemes.f20w500,
                                   ),
@@ -126,7 +127,7 @@ class _CategoryDesktopViewState extends State<CategoryDesktopView> {
                                 Expanded(
                                   flex: 2,
                                   child: Center(
-                                    child: Text(
+                                    child: DynamicText(
                                       'Status',
                                       style: AppThemes.f20w500,
                                     ),
@@ -135,7 +136,7 @@ class _CategoryDesktopViewState extends State<CategoryDesktopView> {
                                 Expanded(
                                   flex: 2,
                                   child: Center(
-                                    child: Text(
+                                    child: DynamicText(
                                       'Actions',
                                       style: AppThemes.f20w500,
                                       textAlign: TextAlign.right,

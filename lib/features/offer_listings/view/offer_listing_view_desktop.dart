@@ -1,5 +1,6 @@
 import 'package:_96sooq_admin/constants/colors.dart';
 import 'package:_96sooq_admin/constants/themes.dart';
+import 'package:_96sooq_admin/core/bloc/language/widgets/dynamic_text.dart';
 import 'package:_96sooq_admin/features/offer_listings/widgets/offer_listing_widget.dart';
 import 'package:_96sooq_admin/features/promotion/widgets/promotion_slab_listing_widget.dart';
 import 'package:_96sooq_admin/features/shared/global_widgets/custom_button_widgets.dart';
@@ -27,9 +28,9 @@ class _OfferListingViewDesktopState extends State<OfferListingViewDesktop> {
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
                   const SizedBox(height: 36),
-                  Text("Offers Listing", style: AppThemes.f28w600),
+                  DynamicText("Offers Listing", style: AppThemes.f28w600),
                   const SizedBox(height: 10),
-                  Text(
+                  DynamicText(
                     "Review and approve seller offers",
                     style: AppThemes.f20w400,
                   ),
@@ -54,7 +55,7 @@ class _OfferListingViewDesktopState extends State<OfferListingViewDesktop> {
                               mainAxisAlignment: .start,
                               crossAxisAlignment: .center,
                               children: [
-                                Text(
+                                DynamicText(
                                   "Pending Approval",
                                   style: AppThemes.f24w500,
                                 ),
@@ -74,7 +75,7 @@ class _OfferListingViewDesktopState extends State<OfferListingViewDesktop> {
                                 SizedBox(width: 40),
                                 Expanded(
                                   flex: 2,
-                                  child: Text(
+                                  child: DynamicText(
                                     'Offer Title',
                                     style: AppThemes.f20w500,
                                   ),
@@ -82,7 +83,7 @@ class _OfferListingViewDesktopState extends State<OfferListingViewDesktop> {
                                 Expanded(
                                   flex: 2,
                                   child: Center(
-                                    child: Text(
+                                    child: DynamicText(
                                       'Seller Name',
                                       style: AppThemes.f20w500,
                                     ),
@@ -91,7 +92,7 @@ class _OfferListingViewDesktopState extends State<OfferListingViewDesktop> {
                                 Expanded(
                                   flex: 2,
                                   child: Center(
-                                    child: Text(
+                                    child: DynamicText(
                                       'Date submitted',
                                       style: AppThemes.f20w500,
                                     ),
@@ -100,7 +101,7 @@ class _OfferListingViewDesktopState extends State<OfferListingViewDesktop> {
                                 Expanded(
                                   flex: 2,
                                   child: Center(
-                                    child: Text(
+                                    child: DynamicText(
                                       'Actions',
                                       style: AppThemes.f20w500,
                                       textAlign: TextAlign.right,
@@ -148,7 +149,7 @@ class _OfferListingViewDesktopState extends State<OfferListingViewDesktop> {
                               mainAxisAlignment: .start,
                               crossAxisAlignment: .center,
                               children: [
-                                Text(
+                                DynamicText(
                                   "Reviewed Offers",
                                   style: AppThemes.f24w500,
                                 ),
@@ -168,7 +169,7 @@ class _OfferListingViewDesktopState extends State<OfferListingViewDesktop> {
                                 SizedBox(width: 40),
                                 Expanded(
                                   flex: 2,
-                                  child: Text(
+                                  child: DynamicText(
                                     'Offer Title',
                                     style: AppThemes.f20w500,
                                   ),
@@ -176,7 +177,7 @@ class _OfferListingViewDesktopState extends State<OfferListingViewDesktop> {
                                 Expanded(
                                   flex: 2,
                                   child: Center(
-                                    child: Text(
+                                    child: DynamicText(
                                       'Seller Name',
                                       style: AppThemes.f20w500,
                                     ),
@@ -185,7 +186,7 @@ class _OfferListingViewDesktopState extends State<OfferListingViewDesktop> {
                                 Expanded(
                                   flex: 2,
                                   child: Center(
-                                    child: Text(
+                                    child: DynamicText(
                                       'Date submitted',
                                       style: AppThemes.f20w500,
                                     ),
@@ -194,7 +195,7 @@ class _OfferListingViewDesktopState extends State<OfferListingViewDesktop> {
                                 Expanded(
                                   flex: 2,
                                   child: Center(
-                                    child: Text(
+                                    child: DynamicText(
                                       'Actions',
                                       style: AppThemes.f20w500,
                                       textAlign: TextAlign.right,

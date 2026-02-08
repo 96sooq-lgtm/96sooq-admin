@@ -1,12 +1,20 @@
 import 'package:_96sooq_admin/constants/strings.dart';
+import 'package:_96sooq_admin/core/bloc/language/widgets/dynamic_text.dart';
+import 'package:_96sooq_admin/features/root/cubit/admin_navigation_cubit.dart';
 import 'package:_96sooq_admin/features/root/widgets/admin_sidebar_item_widget.dart';
+// IMPORT YOUR CUBIT HERE
+import 'package:_96sooq_admin/core/bloc/navigation/navigation_cubit.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter_bloc/flutter_bloc.dart';
 
 class AdminSidebarWidget extends StatelessWidget {
   const AdminSidebarWidget({super.key});
 
   @override
   Widget build(BuildContext context) {
+    // Watch the current index from the Cubit
+    final int currentIndex = context.watch<AdminNavigationCubit>().state;
+
     return Container(
       width: 360,
       padding: const EdgeInsets.only(left: 28, right: 28, bottom: 28),
@@ -17,83 +25,133 @@ class AdminSidebarWidget extends StatelessWidget {
       child: SingleChildScrollView(
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
-          children: const [
-            SizedBox(height: 30),
-            AdminSidebarItemWidget(
-              index: 0,
-              title: 'Dashboard',
-              svgAssetSelected: AssetPath.homeSelectedIc,
-              svgAssetNotSelected: AssetPath.homeUnSelectedIc,
+          children: [
+            const SizedBox(height: 30),
+            _buildSidebarItem(
+              context,
+              0,
+              'Dashboard',
+              currentIndex,
+              AssetPath.homeSelectedIc,
+              AssetPath.homeUnSelectedIc,
             ),
-            AdminSidebarItemWidget(
-              index: 1,
-              title: 'Category',
-              svgAssetSelected: AssetPath.categorySelectedIc,
-              svgAssetNotSelected: AssetPath.categoryUnSelectedIc,
+            _buildSidebarItem(
+              context,
+              1,
+              'Category',
+              currentIndex,
+              AssetPath.categorySelectedIc,
+              AssetPath.categoryUnSelectedIc,
             ),
-            AdminSidebarItemWidget(
-              index: 2,
-              title: 'Sub Category',
-              svgAssetSelected: AssetPath.subcategorySelectedIc,
-              svgAssetNotSelected: AssetPath.subcategoryUnSelectedIc,
+            _buildSidebarItem(
+              context,
+              2,
+              'Sub Category',
+              currentIndex,
+              AssetPath.subcategorySelectedIc,
+              AssetPath.subcategoryUnSelectedIc,
             ),
-            AdminSidebarItemWidget(
-              index: 3,
-              title: 'Subscriptions',
-              svgAssetSelected: AssetPath.subscriptionSelectedIc,
-              svgAssetNotSelected: AssetPath.subscriptionUnSelectedIc,
+            _buildSidebarItem(
+              context,
+              3,
+              'Subscriptions',
+              currentIndex,
+              AssetPath.subscriptionSelectedIc,
+              AssetPath.subscriptionUnSelectedIc,
             ),
-            AdminSidebarItemWidget(
-              index: 4,
-              title: 'Ad Banner',
-              svgAssetSelected: AssetPath.subscriptionSelectedIc,
-              svgAssetNotSelected: AssetPath.subscriptionUnSelectedIc,
+            _buildSidebarItem(
+              context,
+              4,
+              'Ad Banner',
+              currentIndex,
+              AssetPath.adBannerSelectedIc,
+              AssetPath.adBannerUnSelectedIc,
             ),
-            AdminSidebarItemWidget(
-              index: 5,
-              title: 'Offer Listing',
-              svgAssetSelected: AssetPath.subscriptionSelectedIc,
-              svgAssetNotSelected: AssetPath.subscriptionUnSelectedIc,
+            _buildSidebarItem(
+              context,
+              5,
+              'Offer Listing',
+              currentIndex,
+              AssetPath.offerListingSelectedIc,
+              AssetPath.offerListingUnSelectedIc,
             ),
-            AdminSidebarItemWidget(
-              index: 6,
-              title: 'User Management',
-              svgAssetSelected: AssetPath.subscriptionSelectedIc,
-              svgAssetNotSelected: AssetPath.subscriptionUnSelectedIc,
+            _buildSidebarItem(
+              context,
+              6,
+              'User Management',
+              currentIndex,
+              AssetPath.userManagementSelectedIc,
+              AssetPath.userManagementUnselectedIc,
             ),
-            AdminSidebarItemWidget(
-              index: 7,
-              title: 'Request Approval',
-              svgAssetSelected: AssetPath.subscriptionSelectedIc,
-              svgAssetNotSelected: AssetPath.subscriptionUnSelectedIc,
+            _buildSidebarItem(
+              context,
+              7,
+              'Request Approval',
+              currentIndex,
+              AssetPath.requestApprovalSelectedIc,
+              AssetPath.requestApprovalUnSelectedIc,
             ),
-            AdminSidebarItemWidget(
-              index: 8,
-              title: 'Payments',
-              svgAssetSelected: AssetPath.subscriptionSelectedIc,
-              svgAssetNotSelected: AssetPath.subscriptionUnSelectedIc,
+            _buildSidebarItem(
+              context,
+              8,
+              'Payments',
+              currentIndex,
+              AssetPath.paymentSelectedIc,
+              AssetPath.paymentUnSelectedIc,
             ),
-            AdminSidebarItemWidget(
-              index: 9,
-              title: 'Notifications',
-              svgAssetSelected: AssetPath.subscriptionSelectedIc,
-              svgAssetNotSelected: AssetPath.subscriptionUnSelectedIc,
+            // _buildSidebarItem(
+            //   context,
+            //   9,
+            //   'Notifications',
+            //   currentIndex,
+            //   AssetPath.subscriptionSelectedIc,
+            //   AssetPath.subscriptionUnSelectedIc,
+            // ),
+            _buildSidebarItem(
+              context,
+              9,
+              'Terms And Conditions',
+              currentIndex,
+              AssetPath.termsAndConditionsSelectedIc,
+              AssetPath.termsAndConditionsUnselectedIc,
             ),
-            AdminSidebarItemWidget(
-              index: 10,
-              title: 'Terms And Conditions',
-              svgAssetSelected: AssetPath.subscriptionSelectedIc,
-              svgAssetNotSelected: AssetPath.subscriptionUnSelectedIc,
-            ),
-            AdminSidebarItemWidget(
-              index: 11,
-              title: 'Settings',
-              svgAssetSelected: AssetPath.subscriptionSelectedIc,
-              svgAssetNotSelected: AssetPath.subscriptionUnSelectedIc,
+            _buildSidebarItem(
+              context,
+              10,
+              'Settings',
+              currentIndex,
+              AssetPath.settingsSelectedIc,
+              AssetPath.settingsUnSelectedIc,
             ),
           ],
         ),
       ),
+    );
+  }
+
+  Widget _buildSidebarItem(
+    BuildContext context, // Added context
+    int index,
+    String title,
+    int currentIndex, // Pass the current index
+    String selectedIc,
+    String unselectedIc,
+  ) {
+    final bool isSelected = currentIndex == index;
+
+    return AdminSidebarItemWidget(
+      index: index,
+      title: DynamicText(
+        title,
+        style: TextStyle(
+          // White if selected, Black if not
+          color: isSelected ? Colors.white : Colors.black,
+          fontSize: 16,
+          fontWeight: isSelected ? FontWeight.w600 : FontWeight.w400,
+        ),
+      ),
+      svgAssetSelected: selectedIc,
+      svgAssetNotSelected: unselectedIc,
     );
   }
 }

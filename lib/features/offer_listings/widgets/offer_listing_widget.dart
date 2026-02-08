@@ -1,4 +1,5 @@
 import 'package:_96sooq_admin/constants/themes.dart' show AppThemes;
+import 'package:_96sooq_admin/core/bloc/language/widgets/dynamic_text.dart';
 import 'package:flutter/material.dart';
 
 class OfferListingWidget extends StatelessWidget {
@@ -22,16 +23,20 @@ class OfferListingWidget extends StatelessWidget {
           SizedBox(width: 40),
           Expanded(
             flex: 2,
-            child: Text(offerTitle, style: AppThemes.f20w300, maxLines: 2),
+            child: DynamicText(
+              offerTitle,
+              style: AppThemes.f20w300,
+              maxLines: 2,
+            ),
           ),
           Expanded(
             flex: 2,
-            child: Center(child: Text(seller, style: AppThemes.f20w300)),
+            child: Center(child: DynamicText(seller, style: AppThemes.f20w300)),
           ),
           Expanded(
             flex: 2,
             child: Center(
-              child: Text(dateOfSubmission, style: AppThemes.f20w300),
+              child: DynamicText(dateOfSubmission, style: AppThemes.f20w300),
             ),
           ),
           Expanded(

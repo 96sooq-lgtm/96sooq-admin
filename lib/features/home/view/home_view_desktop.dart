@@ -1,9 +1,12 @@
 import 'package:_96sooq_admin/constants/colors.dart';
 import 'package:_96sooq_admin/constants/strings.dart';
 import 'package:_96sooq_admin/constants/themes.dart';
+import 'package:_96sooq_admin/core/bloc/language/widgets/dynamic_text.dart';
 import 'package:_96sooq_admin/features/home/widgets/icon_and_text_widget.dart';
 import 'package:_96sooq_admin/features/home/widgets/quick_actions_widget.dart';
+import 'package:_96sooq_admin/features/root/cubit/admin_navigation_cubit.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter_bloc/flutter_bloc.dart';
 
 class HomeViewDesktop extends StatefulWidget {
   const HomeViewDesktop({super.key});
@@ -14,12 +17,17 @@ class HomeViewDesktop extends StatefulWidget {
 
 class _HomeViewDesktopState extends State<HomeViewDesktop> {
   final dashboardItems = [
-    {'icon': AssetPath.totalUsersIc, 'title': 'Users'},
-    {'icon': AssetPath.storeIc, 'title': 'Store'},
-    {'icon': AssetPath.listingIc, 'title': 'Listings'},
-    {'icon': AssetPath.dealsIc, 'title': 'Deals'},
-    {'icon': AssetPath.pendingRequestIc, 'title': 'Pending Request'},
+    {'icon': AssetPath.totalUsersIc, 'title': 'Users', 'index': 6},
+    {'icon': AssetPath.storeIc, 'title': 'Store', 'index': 1},
+    {'icon': AssetPath.listingIc, 'title': 'Listings', 'index': 5},
+    {'icon': AssetPath.dealsIc, 'title': 'Deals', 'index': 3},
+    {
+      'icon': AssetPath.pendingRequestIc,
+      'title': 'Pending Request',
+      'index': 7,
+    },
   ];
+
   final quickActionItems = [
     {
       'icon': AssetPath.categoryUnSelectedIc,
@@ -52,9 +60,9 @@ class _HomeViewDesktopState extends State<HomeViewDesktop> {
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
-                    Text("Dashboard", style: AppThemes.f28w600),
+                    DynamicText("Dashboard", style: AppThemes.f28w600),
                     const SizedBox(height: 10),
-                    Text(
+                    DynamicText(
                       "Welcome to your marketplace admin panel",
                       style: AppThemes.f20w400,
                     ),
@@ -78,7 +86,12 @@ class _HomeViewDesktopState extends State<HomeViewDesktop> {
                     svgPath: item['icon'] as String,
                     count: 5,
                     title: item['title'] as String,
-                    onTap: () {},
+                    onTap: () {
+                      final targetIndex = item['index'] as int;
+                      context.read<AdminNavigationCubit>().changePage(
+                        targetIndex,
+                      );
+                    },
                   );
                 }, childCount: dashboardItems.length),
               ),
@@ -89,7 +102,7 @@ class _HomeViewDesktopState extends State<HomeViewDesktop> {
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
-                    Text("Quick Actions", style: AppThemes.f28w600),
+                    DynamicText("Quick Actions", style: AppThemes.f28w600),
                     const SizedBox(height: 24),
                   ],
                 ),

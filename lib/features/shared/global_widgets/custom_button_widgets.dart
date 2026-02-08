@@ -1,5 +1,6 @@
 import 'package:_96sooq_admin/constants/colors.dart';
 import 'package:_96sooq_admin/constants/themes.dart';
+import 'package:_96sooq_admin/core/bloc/language/widgets/dynamic_text.dart';
 import 'package:flutter/material.dart';
 
 class CustomButton extends StatelessWidget {
@@ -52,7 +53,7 @@ class CustomButton extends StatelessWidget {
                           ),
                         ),
                       )
-                    : Text(
+                    : DynamicText(
                         text,
                         style:
                             textStyle ??

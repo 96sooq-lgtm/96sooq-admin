@@ -1,7 +1,11 @@
 import 'package:_96sooq_admin/constants/colors.dart';
 import 'package:_96sooq_admin/constants/themes.dart';
+import 'package:_96sooq_admin/core/bloc/language/bloc/language_bloc.dart';
+import 'package:_96sooq_admin/core/bloc/language/bloc/language_event.dart';
+import 'package:_96sooq_admin/core/bloc/language/widgets/dynamic_text.dart';
 import 'package:_96sooq_admin/features/offer_listings/widgets/offer_listing_widget.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter_bloc/flutter_bloc.dart';
 
 class SettingsViewDesktop extends StatefulWidget {
   const SettingsViewDesktop({super.key});
@@ -25,9 +29,9 @@ class _SettingsViewDesktopState extends State<SettingsViewDesktop> {
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
                   const SizedBox(height: 36),
-                  Text("Admin Settings", style: AppThemes.f28w600),
+                  DynamicText("Admin Settings", style: AppThemes.f28w600),
                   const SizedBox(height: 10),
-                  Text(
+                  DynamicText(
                     "Manage your admin preferences",
                     style: AppThemes.f20w400,
                   ),
@@ -52,12 +56,12 @@ class _SettingsViewDesktopState extends State<SettingsViewDesktop> {
                               mainAxisAlignment: .start,
                               crossAxisAlignment: .start,
                               children: [
-                                Text(
+                                DynamicText(
                                   "General Settings",
                                   style: AppThemes.f24w500,
                                 ),
                                 SizedBox(height: 18),
-                                Text(
+                                DynamicText(
                                   "Language",
                                   style: AppThemes.f20w400.copyWith(
                                     color: Color(0xFF707070),
@@ -65,13 +69,22 @@ class _SettingsViewDesktopState extends State<SettingsViewDesktop> {
                                 ),
                                 SizedBox(height: 18),
                                 DropdownButtonFormField<String>(
-                                  initialValue: value,
-                                  onChanged: (value) {},
+                                  initialValue: context
+                                      .read<TranslationBloc>()
+                                      .state
+                                      .languageCode,
+                                  onChanged: (newValue) {
+                                    if (newValue != null) {
+                                      context.read<TranslationBloc>().add(
+                                        ChangeLanguage(newValue),
+                                      );
+                                    }
+                                  },
                                   borderRadius: BorderRadius.circular(14),
                                   icon: const Icon(Icons.keyboard_arrow_down),
                                   decoration: InputDecoration(
                                     filled: true,
-                                    fillColor:  Colors.white,
+                                    fillColor: Colors.white,
                                     contentPadding: const EdgeInsets.symmetric(
                                       horizontal: 16,
                                       vertical: 14,
@@ -98,111 +111,17 @@ class _SettingsViewDesktopState extends State<SettingsViewDesktop> {
                                   items: const [
                                     DropdownMenuItem(
                                       value: 'en',
-                                      child: Text('English'),
+                                      child: DynamicText('English'),
                                     ),
                                     DropdownMenuItem(
                                       value: 'ar',
-                                      child: Text('Arabic'),
+                                      child: DynamicText('Arabic'),
                                     ),
                                   ],
                                 ),
                               ],
                             ),
                           ),
-                        ),
-                      ],
-                    ),
-                  ),
-                  const SizedBox(height: 24),
-                  Container(
-                    decoration: BoxDecoration(
-                      color: Colors.white,
-                      borderRadius: BorderRadius.circular(18),
-                      border: Border.all(color: const Color(0xFFE1E1E1)),
-                    ),
-                    child: Column(
-                      children: [
-                        /// Top Bar
-                        Padding(
-                          padding: const EdgeInsets.symmetric(
-                            horizontal: 28,
-                            vertical: 25,
-                          ),
-                          child: SizedBox(
-                            width: double.infinity,
-                            child: Row(
-                              mainAxisAlignment: .start,
-                              crossAxisAlignment: .center,
-                              children: [
-                                Text(
-                                  "Reviewed Offers",
-                                  style: AppThemes.f24w500,
-                                ),
-                              ],
-                            ),
-                          ),
-                        ),
-                        Container(
-                          decoration: BoxDecoration(
-                            color: Color(0xFFF9FAFB),
-                            border: Border.all(color: Color(0xFFE1E1E1)),
-                          ),
-                          child: Padding(
-                            padding: const EdgeInsets.symmetric(vertical: 16),
-                            child: Row(
-                              children: const [
-                                SizedBox(width: 40),
-                                Expanded(
-                                  flex: 2,
-                                  child: Text(
-                                    'Offer Title',
-                                    style: AppThemes.f20w500,
-                                  ),
-                                ),
-                                Expanded(
-                                  flex: 2,
-                                  child: Center(
-                                    child: Text(
-                                      'Seller Name',
-                                      style: AppThemes.f20w500,
-                                    ),
-                                  ),
-                                ),
-                                Expanded(
-                                  flex: 2,
-                                  child: Center(
-                                    child: Text(
-                                      'Date submitted',
-                                      style: AppThemes.f20w500,
-                                    ),
-                                  ),
-                                ),
-                                Expanded(
-                                  flex: 2,
-                                  child: Center(
-                                    child: Text(
-                                      'Actions',
-                                      style: AppThemes.f20w500,
-                                      textAlign: TextAlign.right,
-                                    ),
-                                  ),
-                                ),
-                              ],
-                            ),
-                          ),
-                        ),
-                        ListView.builder(
-                          shrinkWrap: true,
-                          itemCount: 3,
-                          itemBuilder: (context, index) {
-                            return OfferListingWidget(
-                              offerTitle:
-                                  "Summer Sale - 50% OFF on Electronics",
-                              seller: 'Tech Store',
-                              dateOfSubmission: "2025-12-21",
-                              isReviewed: true,
-                            );
-                          },
                         ),
                       ],
                     ),

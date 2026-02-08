@@ -7,7 +7,7 @@ import 'package:flutter_svg/svg.dart';
 
 class AdminSidebarItemWidget extends StatelessWidget {
   final int index;
-  final String title;
+  final Widget title;
   final String svgAssetSelected;
   final String svgAssetNotSelected;
 
@@ -43,14 +43,7 @@ class AdminSidebarItemWidget extends StatelessWidget {
                   isSelected ? svgAssetSelected : svgAssetNotSelected,
                 ),
                 const SizedBox(width: 16),
-                Text(
-                  title,
-                  style: AppThemes.f20w500.copyWith(
-                    color: isSelected
-                        ? AppColors.whiteTextColor
-                        : AppColors.blackTextColor,
-                  ),
-                ),
+                title,
               ],
             ),
           ),

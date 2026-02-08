@@ -1,5 +1,6 @@
 import 'package:_96sooq_admin/constants/colors.dart';
 import 'package:_96sooq_admin/constants/themes.dart';
+import 'package:_96sooq_admin/core/bloc/language/widgets/dynamic_text.dart';
 import 'package:_96sooq_admin/features/category/widgets/category_list_widget.dart';
 import 'package:_96sooq_admin/features/payments/widgets/payments_listing_widget.dart';
 import 'package:flutter/material.dart';
@@ -27,9 +28,9 @@ class _PaymentsViewDesktopState extends State<PaymentsViewDesktop> {
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
                   const SizedBox(height: 36),
-                  Text("Transactions ", style: AppThemes.f28w600),
+                  DynamicText("Transactions ", style: AppThemes.f28w600),
                   const SizedBox(height: 10),
-                  Text(
+                  DynamicText(
                     "Track and manage all transaction",
                     style: AppThemes.f20w400,
                   ),
@@ -60,7 +61,7 @@ class _PaymentsViewDesktopState extends State<PaymentsViewDesktop> {
                                     controller: searchController,
                                     cursorColor: AppColors.primaryColor,
                                     decoration: InputDecoration(
-                                      label: Text(
+                                      label: DynamicText(
                                         "Search by user or transaction ID...",
                                         style: AppThemes.f20w400.copyWith(
                                           color: Color(0xFF99A1Af),
@@ -110,7 +111,7 @@ class _PaymentsViewDesktopState extends State<PaymentsViewDesktop> {
                                 SizedBox(width: 40),
                                 Expanded(
                                   flex: 1,
-                                  child: Text(
+                                  child: DynamicText(
                                     'T-ID',
                                     style: AppThemes.f20w500,
                                   ),
@@ -118,12 +119,15 @@ class _PaymentsViewDesktopState extends State<PaymentsViewDesktop> {
                                 SizedBox(width: 10),
                                 Expanded(
                                   flex: 2,
-                                  child: Text('Name', style: AppThemes.f20w500),
+                                  child: DynamicText(
+                                    'Name',
+                                    style: AppThemes.f20w500,
+                                  ),
                                 ),
                                 Expanded(
                                   flex: 1,
                                   child: Center(
-                                    child: Text(
+                                    child: DynamicText(
                                       'Category',
                                       style: AppThemes.f20w500,
                                     ),
@@ -132,7 +136,7 @@ class _PaymentsViewDesktopState extends State<PaymentsViewDesktop> {
                                 Expanded(
                                   flex: 1,
                                   child: Center(
-                                    child: Text(
+                                    child: DynamicText(
                                       'Amount',
                                       style: AppThemes.f20w500,
                                     ),
@@ -141,7 +145,7 @@ class _PaymentsViewDesktopState extends State<PaymentsViewDesktop> {
                                 Expanded(
                                   flex: 1,
                                   child: Center(
-                                    child: Text(
+                                    child: DynamicText(
                                       'Date',
                                       style: AppThemes.f20w500,
                                     ),
@@ -150,14 +154,14 @@ class _PaymentsViewDesktopState extends State<PaymentsViewDesktop> {
                                 Expanded(
                                   flex: 1,
                                   child: Center(
-                                    child: Text(
+                                    child: DynamicText(
                                       'Status',
                                       style: AppThemes.f20w500,
                                       textAlign: TextAlign.right,
                                     ),
                                   ),
                                 ),
-                                 SizedBox(width: 24,)
+                                SizedBox(width: 24),
                               ],
                             ),
                           ),

@@ -1,4 +1,6 @@
 import 'package:_96sooq_admin/constants/themes.dart';
+import 'package:_96sooq_admin/core/bloc/language/widgets/dynamic_text.dart';
+import 'package:_96sooq_admin/core/bloc/navigation/navigation_cubit.dart';
 import 'package:_96sooq_admin/features/ad_bannner/view/ad_banner_view.dart';
 import 'package:_96sooq_admin/features/category/view/category_view.dart';
 import 'package:_96sooq_admin/features/home/view/home_view.dart';
@@ -13,6 +15,8 @@ import 'package:_96sooq_admin/features/settings/view/settings_view.dart';
 import 'package:_96sooq_admin/features/subcategory/view/subcategory_view.dart';
 import 'package:_96sooq_admin/features/terms_and_conditions/view/terms_and_condition_view.dart';
 import 'package:_96sooq_admin/features/user_management/view/user_management_view.dart';
+import 'package:_96sooq_admin/features/auth/bloc/auth_bloc.dart';
+import 'package:_96sooq_admin/features/auth/bloc/auth_event.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 
@@ -34,10 +38,11 @@ class _AdminRootDesktopViewState extends State<AdminRootDesktopView> {
     const UserManagementView(),
     const RequestApprovalView(),
     const PaymentsView(),
-    const NotificationsView(),
+    // const NotificationsView(),
     const TermsAndConditionView(),
     const SettingsView(),
   ];
+
   @override
   Widget build(BuildContext context) {
     return BlocProvider(
@@ -49,21 +54,23 @@ class _AdminRootDesktopViewState extends State<AdminRootDesktopView> {
             Container(
               height: 98,
               decoration: BoxDecoration(
-                border: Border.all(color: Color(0xFFE1E1E1)),
+                border: Border.all(color: const Color(0xFFE1E1E1)),
               ),
               child: Padding(
                 padding: const EdgeInsets.symmetric(horizontal: 60),
                 child: Row(
-                  mainAxisAlignment: .center,
                   children: [
-                    Text('96 Sooq Admin', style: AppThemes.f24w400),
-                    Spacer(),
+                    DynamicText('96 Sooq Admin', style: AppThemes.f24w400),
+                    const Spacer(),
                     InkWell(
-                      onTap: () {},
+                      onTap: () {
+                        // The Bloc handles both storage and state change
+                        context.read<AuthBloc>().add(LogoutRequested());
+                      },
                       child: Row(
                         children: [
                           Icon(Icons.logout, color: Color(0xFF707070)),
-                          Text(
+                          DynamicText(
                             "Logout",
                             style: AppThemes.f24w500.copyWith(
                               color: Color(0xFF707070),
@@ -80,7 +87,6 @@ class _AdminRootDesktopViewState extends State<AdminRootDesktopView> {
               child: Row(
                 children: [
                   const AdminSidebarWidget(),
-                  // Main Content
                   Expanded(
                     child: BlocBuilder<AdminNavigationCubit, int>(
                       builder: (context, selectedIndex) {

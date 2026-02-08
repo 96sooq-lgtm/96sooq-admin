@@ -1,4 +1,5 @@
 import 'package:_96sooq_admin/constants/themes.dart';
+import 'package:_96sooq_admin/core/bloc/language/widgets/dynamic_text.dart';
 import 'package:_96sooq_admin/features/auth/widgets/custom_textformfield.dart';
 import 'package:_96sooq_admin/features/category/widgets/add_category_popup.dart';
 import 'package:flutter/material.dart';
@@ -34,7 +35,7 @@ class QuickActionsWidget extends StatelessWidget {
           children: [
             SvgPicture.asset(svgPath),
             const SizedBox(width: 8),
-            Text(
+            DynamicText(
               title,
               textAlign: TextAlign.left,
               // overflow: TextOverflow.ellipsis,
@@ -68,8 +69,8 @@ class QuickActionPopupContent {
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
-                  Text(
-                    'Category Name',
+                  DynamicText(
+                    'Category Name English',
                     style: AppThemes.f20w400.copyWith(color: Color(0xFF707070)),
                   ),
                   const SizedBox(height: 8),
@@ -78,7 +79,17 @@ class QuickActionPopupContent {
                     controller: categoryNameController,
                   ),
                   const SizedBox(height: 8),
-                  Text('Status'),
+                  DynamicText(
+                    'Category Name Arabic',
+                    style: AppThemes.f20w400.copyWith(color: Color(0xFF707070)),
+                  ),
+                  const SizedBox(height: 8),
+                  CustomTextFormField(
+                    labelText: "",
+                    controller: categoryNameController,
+                  ),
+                  const SizedBox(height: 8),
+                  DynamicText('Status'),
                   const SizedBox(height: 8),
                   DropdownButtonFormField<String>(
                     decoration: InputDecoration(
@@ -105,10 +116,13 @@ class QuickActionPopupContent {
                     borderRadius: BorderRadius.circular(14),
                     initialValue: status,
                     items: const [
-                      DropdownMenuItem(value: 'Active', child: Text('Active')),
+                      DropdownMenuItem(
+                        value: 'Active',
+                        child: DynamicText('Active'),
+                      ),
                       DropdownMenuItem(
                         value: 'Inactive',
-                        child: Text('Inactive'),
+                        child: DynamicText('Inactive'),
                       ),
                     ],
                     onChanged: (value) {
@@ -146,7 +160,7 @@ class QuickActionPopupContent {
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
-                  Text(
+                  DynamicText(
                     'Category Name',
                     style: AppThemes.f20w400.copyWith(color: Color(0xFF707070)),
                   ),
@@ -156,7 +170,7 @@ class QuickActionPopupContent {
                     controller: categoryNameController,
                   ),
                   const SizedBox(height: 8),
-                  Text(
+                  DynamicText(
                     'Sub Category Name',
                     style: AppThemes.f20w400.copyWith(color: Color(0xFF707070)),
                   ),
@@ -166,7 +180,7 @@ class QuickActionPopupContent {
                     controller: subCategoryNameController,
                   ),
                   const SizedBox(height: 8),
-                  Text('Status'),
+                  DynamicText('Status'),
                   const SizedBox(height: 8),
                   DropdownButtonFormField<String>(
                     decoration: InputDecoration(
@@ -196,7 +210,7 @@ class QuickActionPopupContent {
                       DropdownMenuItem(value: 'Active', child: Text('Active')),
                       DropdownMenuItem(
                         value: 'Inactive',
-                        child: Text('Inactive'),
+                        child: DynamicText('Inactive'),
                       ),
                     ],
                     onChanged: (value) {

@@ -1,4 +1,5 @@
 import 'package:_96sooq_admin/constants/themes.dart';
+import 'package:_96sooq_admin/core/bloc/language/widgets/dynamic_text.dart';
 import 'package:flutter/material.dart';
 
 class PromotionSlabListingWidget extends StatelessWidget {
@@ -18,9 +19,17 @@ class PromotionSlabListingWidget extends StatelessWidget {
       child: Row(
         children: [
           SizedBox(width: 40),
-          Expanded(flex: 2, child: Text(name, style: AppThemes.f20w300)),
-          Expanded(flex: 2, child: Center(child: Text(price, style: AppThemes.f20w300))),
-          Expanded(flex: 2, child: Center(child: Text(duration, style: AppThemes.f20w300))),
+          Expanded(flex: 2, child: DynamicText(name, style: AppThemes.f20w300)),
+          Expanded(
+            flex: 2,
+            child: Center(child: DynamicText(price, style: AppThemes.f20w300)),
+          ),
+          Expanded(
+            flex: 2,
+            child: Center(
+              child: DynamicText(duration, style: AppThemes.f20w300),
+            ),
+          ),
           Expanded(
             flex: 2,
             child: Row(

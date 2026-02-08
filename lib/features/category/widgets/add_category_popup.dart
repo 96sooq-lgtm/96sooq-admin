@@ -1,4 +1,5 @@
 import 'package:_96sooq_admin/constants/themes.dart';
+import 'package:_96sooq_admin/core/bloc/language/widgets/dynamic_text.dart';
 import 'package:_96sooq_admin/features/shared/global_widgets/custom_button_widgets.dart';
 import 'package:flutter/material.dart';
 
@@ -39,7 +40,7 @@ class AdminActionDialog extends StatelessWidget {
               padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 16),
               child: Row(
                 children: [
-                  Expanded(child: Text(title, style: AppThemes.f28w500)),
+                  Expanded(child: DynamicText(title, style: AppThemes.f28w500)),
                   InkWell(
                     onTap: () => Navigator.pop(context),
                     child: const Icon(
@@ -72,7 +73,7 @@ class AdminActionDialog extends StatelessWidget {
                           border: Border.all(color: Color(0xffe1e1e1)),
                           color: Colors.white,
                         ),
-                        child: Center(child: Text("Cancel")),
+                        child: Center(child: DynamicText("Cancel")),
                       ),
                     ),
                   ),

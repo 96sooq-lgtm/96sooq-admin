@@ -1,3 +1,4 @@
+import 'package:_96sooq_admin/core/bloc/language/widgets/dynamic_text.dart';
 import 'package:flutter/material.dart';
 
 class LoginViewMobile extends StatefulWidget {
@@ -11,7 +12,7 @@ class _LoginViewMobileState extends State<LoginViewMobile> {
   @override
   Widget build(BuildContext context) {
     return  Scaffold(
-      body: Center(child: Text("Mobile View"),),
+      body: Center(child: DynamicText("Mobile View"),),
     );
   }
 }

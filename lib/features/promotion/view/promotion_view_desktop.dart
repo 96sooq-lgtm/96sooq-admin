@@ -1,5 +1,6 @@
 import 'package:_96sooq_admin/constants/colors.dart';
 import 'package:_96sooq_admin/constants/themes.dart';
+import 'package:_96sooq_admin/core/bloc/language/widgets/dynamic_text.dart';
 import 'package:_96sooq_admin/features/promotion/widgets/promotion_slab_listing_widget.dart';
 import 'package:_96sooq_admin/features/shared/global_widgets/custom_button_widgets.dart';
 import 'package:_96sooq_admin/features/subcategory/widgets/subcategory_list_widget.dart';
@@ -26,9 +27,9 @@ class _PromotionViewDesktopState extends State<PromotionViewDesktop> {
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
                   const SizedBox(height: 36),
-                  Text("Promotion Slabs", style: AppThemes.f28w600),
+                  DynamicText("Promotion Slabs", style: AppThemes.f28w600),
                   const SizedBox(height: 10),
-                  Text(
+                  DynamicText(
                     "Manage promotion plan and pricing",
                     style: AppThemes.f20w400,
                   ),
@@ -77,7 +78,7 @@ class _PromotionViewDesktopState extends State<PromotionViewDesktop> {
                                 SizedBox(width: 40),
                                 Expanded(
                                   flex: 2,
-                                  child: Text(
+                                  child: DynamicText(
                                     'Plan Name',
                                     style: AppThemes.f20w500,
                                   ),
@@ -85,7 +86,7 @@ class _PromotionViewDesktopState extends State<PromotionViewDesktop> {
                                 Expanded(
                                   flex: 2,
                                   child: Center(
-                                    child: Text(
+                                    child: DynamicText(
                                       'Price',
                                       style: AppThemes.f20w500,
                                     ),
@@ -94,7 +95,7 @@ class _PromotionViewDesktopState extends State<PromotionViewDesktop> {
                                 Expanded(
                                   flex: 2,
                                   child: Center(
-                                    child: Text(
+                                    child: DynamicText(
                                       'Duration',
                                       style: AppThemes.f20w500,
                                     ),
@@ -103,7 +104,7 @@ class _PromotionViewDesktopState extends State<PromotionViewDesktop> {
                                 Expanded(
                                   flex: 2,
                                   child: Center(
-                                    child: Text(
+                                    child: DynamicText(
                                       'Actions',
                                       style: AppThemes.f20w500,
                                       textAlign: TextAlign.right,

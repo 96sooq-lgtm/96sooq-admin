@@ -1,4 +1,5 @@
 import 'package:_96sooq_admin/constants/themes.dart';
+import 'package:_96sooq_admin/core/bloc/language/widgets/dynamic_text.dart';
 import 'package:flutter/material.dart';
 
 class SubcategoryListWidget extends StatelessWidget {
@@ -23,11 +24,11 @@ class SubcategoryListWidget extends StatelessWidget {
           SizedBox(width: 40),
           Expanded(
             flex: 2,
-            child: Text(subCategoryName,style: AppThemes.f20w300),
+            child: DynamicText(subCategoryName, style: AppThemes.f20w300),
           ),
           Expanded(
             flex: 2,
-            child: Text(categoryName,style: AppThemes.f20w300),
+            child: DynamicText(categoryName, style: AppThemes.f20w300),
           ),
           Expanded(flex: 1, child: _StatusChip(isActive: isActive)),
           Expanded(
@@ -70,7 +71,7 @@ class _StatusChip extends StatelessWidget {
         borderRadius: BorderRadius.circular(25),
       ),
       child: Center(
-        child: Text(
+        child: DynamicText(
           isActive ? 'Active' : 'Inactive',
           style: AppThemes.f20w400.copyWith(
             color: isActive ? const Color(0xFF1E8E4E) : Color(0xFF2A2F3B),

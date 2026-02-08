@@ -1,5 +1,6 @@
 import 'package:_96sooq_admin/constants/colors.dart';
 import 'package:_96sooq_admin/constants/themes.dart';
+import 'package:_96sooq_admin/core/bloc/language/widgets/dynamic_text.dart';
 import 'package:_96sooq_admin/features/category/widgets/category_list_widget.dart';
 import 'package:_96sooq_admin/features/subcategory/widgets/subcategory_list_widget.dart';
 import 'package:_96sooq_admin/features/shared/global_widgets/custom_button_widgets.dart';
@@ -28,9 +29,9 @@ class _SubcategoryDesktopViewState extends State<SubcategoryDesktopView> {
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
                   const SizedBox(height: 36),
-                  Text("Sub Category", style: AppThemes.f28w600),
+                  DynamicText("Sub Category", style: AppThemes.f28w600),
                   const SizedBox(height: 10),
-                  Text(
+                  DynamicText(
                     "Manage sub categories for each category",
                     style: AppThemes.f20w400,
                   ),
@@ -61,7 +62,7 @@ class _SubcategoryDesktopViewState extends State<SubcategoryDesktopView> {
                                     controller: searchController,
                                     cursorColor: AppColors.primaryColor,
                                     decoration: InputDecoration(
-                                      label: Text(
+                                      label: DynamicText(
                                         "Search Sub Categories",
                                         style: AppThemes.f20w400.copyWith(
                                           color: Color(0xFF99A1Af),
@@ -116,18 +117,36 @@ class _SubcategoryDesktopViewState extends State<SubcategoryDesktopView> {
                             child: Row(
                               children: const [
                                 SizedBox(width: 40),
-                                Expanded(flex: 2, child: Text('Name',style: AppThemes.f20w500,)),
-                                SizedBox(width: 40),
-                                Expanded(flex: 2, child: Text('Category',style: AppThemes.f20w500,)),
                                 Expanded(
                                   flex: 2,
-                                  child: Center(child: Text('Status',style: AppThemes.f20w500,)),
+                                  child: DynamicText(
+                                    'Name',
+                                    style: AppThemes.f20w500,
+                                  ),
+                                ),
+                                SizedBox(width: 40),
+                                Expanded(
+                                  flex: 2,
+                                  child: DynamicText(
+                                    'Category',
+                                    style: AppThemes.f20w500,
+                                  ),
                                 ),
                                 Expanded(
                                   flex: 2,
                                   child: Center(
-                                    child: Text(
-                                      'Actions',style: AppThemes.f20w500,
+                                    child: DynamicText(
+                                      'Status',
+                                      style: AppThemes.f20w500,
+                                    ),
+                                  ),
+                                ),
+                                Expanded(
+                                  flex: 2,
+                                  child: Center(
+                                    child: DynamicText(
+                                      'Actions',
+                                      style: AppThemes.f20w500,
                                       textAlign: TextAlign.right,
                                     ),
                                   ),

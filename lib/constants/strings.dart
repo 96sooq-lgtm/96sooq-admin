@@ -22,4 +22,31 @@ class AssetPath {
       "assets/icons/subscription_selected.svg";
   static const String subscriptionUnSelectedIc =
       "assets/icons/subscription_unselected.svg";
+  static const String adBannerSelectedIc =
+      "assets/icons/ad_banner_selected.svg";
+  static const String adBannerUnSelectedIc =
+      "assets/icons/ad_banner_unselected.svg";
+  static const String offerListingSelectedIc =
+      "assets/icons/offer_listing_selected.svg";
+  static const String offerListingUnSelectedIc =
+      "assets/icons/offer_listing_unselected.svg";
+  static const String paymentSelectedIc = "assets/icons/payment_selected.svg";
+  static const String paymentUnSelectedIc =
+      "assets/icons/payment_unselected.svg";
+  static const String requestApprovalSelectedIc =
+      "assets/icons/request_approval_selected.svg";
+  static const String requestApprovalUnSelectedIc =
+      "assets/icons/request_approval_unselected.svg";
+  static const String settingsUnSelectedIc =
+      "assets/icons/settings_unselected.svg";
+  static const String settingsSelectedIc =
+      "assets/icons/request_approval_unselected.svg";
+  static const String termsAndConditionsSelectedIc =
+      "assets/icons/terms_and_condition_selected.svg";
+  static const String termsAndConditionsUnselectedIc =
+      "assets/icons/terms_and_condition_unselected.svg";
+  static const String userManagementSelectedIc =
+      "assets/icons/user_management_selected.svg";
+  static const String userManagementUnselectedIc =
+      "assets/icons/user_management_unselected.svg";
 }

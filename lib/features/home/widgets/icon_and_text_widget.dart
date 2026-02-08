@@ -1,4 +1,5 @@
 import 'package:_96sooq_admin/constants/themes.dart';
+import 'package:_96sooq_admin/core/bloc/language/widgets/dynamic_text.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_svg/svg.dart';
 
@@ -47,13 +48,13 @@ class IconAndTextWidget extends StatelessWidget {
                 mainAxisAlignment: .center,
                 crossAxisAlignment: .start,
                 children: [
-                  Text(
+                  DynamicText(
                     title,
                     textAlign: TextAlign.left,
                     // overflow: TextOverflow.ellipsis,
                     style: AppThemes.f20w500.copyWith(color: Color(0xFF8A8A8A)),
                   ),
-                  Text(
+                  DynamicText(
                     "$count",
                     textAlign: TextAlign.center,
                     style: AppThemes.f24w500,

@@ -1,5 +1,6 @@
 import 'package:_96sooq_admin/constants/strings.dart';
 import 'package:_96sooq_admin/constants/themes.dart';
+import 'package:_96sooq_admin/core/bloc/language/widgets/dynamic_text.dart';
 import 'package:flutter/material.dart';
 
 class AdBannerListingWidget extends StatelessWidget {
@@ -26,11 +27,11 @@ class AdBannerListingWidget extends StatelessWidget {
           SizedBox(width: 8),
           Expanded(
             flex: 2,
-            child: Center(child: Text(name, style: AppThemes.f20w300,maxLines: 2,)),
+            child: Center(child: DynamicText(name, style: AppThemes.f20w300,maxLines: 2,)),
           ),
           Expanded(
             flex: 2,
-            child: Center(child: Text(duration, style: AppThemes.f20w300)),
+            child: Center(child: DynamicText(duration, style: AppThemes.f20w300)),
           ),
           Expanded(
             flex: 2,

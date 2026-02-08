@@ -1,5 +1,6 @@
 import 'package:_96sooq_admin/constants/colors.dart';
 import 'package:_96sooq_admin/constants/themes.dart';
+import 'package:_96sooq_admin/core/bloc/language/widgets/dynamic_text.dart';
 import 'package:_96sooq_admin/features/shared/global_widgets/custom_button_widgets.dart';
 import 'package:_96sooq_admin/features/subcategory/widgets/subcategory_list_widget.dart';
 import 'package:_96sooq_admin/features/user_management/widgets/user_listing_widget.dart';
@@ -29,9 +30,9 @@ class _UserManagementViewDesktopState extends State<UserManagementViewDesktop> {
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
                   const SizedBox(height: 36),
-                  Text("User Management", style: AppThemes.f28w600),
+                  DynamicText("User Management", style: AppThemes.f28w600),
                   const SizedBox(height: 10),
-                  Text(
+                  DynamicText(
                     "Manage all users on your marketplace",
                     style: AppThemes.f20w400,
                   ),
@@ -62,7 +63,7 @@ class _UserManagementViewDesktopState extends State<UserManagementViewDesktop> {
                                     controller: searchController,
                                     cursorColor: AppColors.primaryColor,
                                     decoration: InputDecoration(
-                                      label: Text(
+                                      label: DynamicText(
                                         "Search name or email..",
                                         style: AppThemes.f20w400.copyWith(
                                           color: Color(0xFF99A1Af),
@@ -112,12 +113,12 @@ class _UserManagementViewDesktopState extends State<UserManagementViewDesktop> {
                                 SizedBox(width: 40),
                                 Expanded(
                                   flex: 2,
-                                  child: Text('Name', style: AppThemes.f20w500),
+                                  child: DynamicText('Name', style: AppThemes.f20w500),
                                 ),
                                 SizedBox(width: 40),
                                 Expanded(
                                   flex: 2,
-                                  child: Text(
+                                  child: DynamicText(
                                     'Email',
                                     style: AppThemes.f20w500,
                                   ),
@@ -125,7 +126,7 @@ class _UserManagementViewDesktopState extends State<UserManagementViewDesktop> {
                                 Expanded(
                                   flex: 2,
                                   child: Center(
-                                    child: Text(
+                                    child: DynamicText(
                                       'Status',
                                       style: AppThemes.f20w500,
                                     ),
@@ -134,7 +135,7 @@ class _UserManagementViewDesktopState extends State<UserManagementViewDesktop> {
                                 Expanded(
                                   flex: 2,
                                   child: Center(
-                                    child: Text(
+                                    child: DynamicText(
                                       'Actions',
                                       style: AppThemes.f20w500,
                                       textAlign: TextAlign.right,

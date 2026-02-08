@@ -1,5 +1,6 @@
 import 'package:_96sooq_admin/constants/colors.dart';
 import 'package:_96sooq_admin/constants/themes.dart';
+import 'package:_96sooq_admin/core/bloc/language/widgets/dynamic_text.dart';
 import 'package:_96sooq_admin/features/shared/global_widgets/custom_button_widgets.dart';
 import 'package:flutter/material.dart';
 
@@ -27,9 +28,9 @@ class _TermsAndConditionViewDesktopState
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
                   const SizedBox(height: 36),
-                  Text("Terms & Conditions", style: AppThemes.f28w600),
+                  DynamicText("Terms & Conditions", style: AppThemes.f28w600),
                   const SizedBox(height: 10),
-                  Text(
+                  DynamicText(
                     "Edit and manage your 96 sooq terms and conditions",
                     style: AppThemes.f20w400,
                   ),
@@ -56,7 +57,7 @@ class _TermsAndConditionViewDesktopState
                               children: [
                                 Expanded(
                                   flex: 1,
-                                  child: Text("Last updated : 21, 2025"),
+                                  child: DynamicText("Last updated : 21, 2025"),
                                 ),
                                 Spacer(),
                                 Expanded(

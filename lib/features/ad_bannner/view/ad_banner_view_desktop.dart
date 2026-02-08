@@ -1,6 +1,7 @@
 import 'package:_96sooq_admin/constants/colors.dart';
 import 'package:_96sooq_admin/constants/strings.dart';
 import 'package:_96sooq_admin/constants/themes.dart';
+import 'package:_96sooq_admin/core/bloc/language/widgets/dynamic_text.dart';
 import 'package:_96sooq_admin/features/ad_bannner/widgets/ad_banner_listing_widget.dart';
 import 'package:_96sooq_admin/features/promotion/widgets/promotion_slab_listing_widget.dart';
 import 'package:_96sooq_admin/features/shared/global_widgets/custom_button_widgets.dart';
@@ -27,9 +28,9 @@ class _AdBannerViewDesktopState extends State<AdBannerViewDesktop> {
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
                   const SizedBox(height: 36),
-                  Text("Ad Banner Management", style: AppThemes.f28w600),
+                  DynamicText("Ad Banner Management", style: AppThemes.f28w600),
                   const SizedBox(height: 10),
-                  Text(
+                  DynamicText(
                     "Manage promotion plan and pricing",
                     style: AppThemes.f20w400,
                   ),
@@ -78,7 +79,7 @@ class _AdBannerViewDesktopState extends State<AdBannerViewDesktop> {
                                 SizedBox(width: 40),
                                 Expanded(
                                   flex: 2,
-                                  child: Text(
+                                  child: DynamicText(
                                     'Banner Preview',
                                     style: AppThemes.f20w500,
                                   ),
@@ -86,7 +87,7 @@ class _AdBannerViewDesktopState extends State<AdBannerViewDesktop> {
                                 Expanded(
                                   flex: 2,
                                   child: Center(
-                                    child: Text(
+                                    child: DynamicText(
                                       'Banner Name',
                                       style: AppThemes.f20w500,
                                     ),
@@ -95,7 +96,7 @@ class _AdBannerViewDesktopState extends State<AdBannerViewDesktop> {
                                 Expanded(
                                   flex: 2,
                                   child: Center(
-                                    child: Text(
+                                    child: DynamicText(
                                       'Duration',
                                       style: AppThemes.f20w500,
                                     ),
@@ -104,10 +105,10 @@ class _AdBannerViewDesktopState extends State<AdBannerViewDesktop> {
                                 Expanded(
                                   flex: 2,
                                   child: Center(
-                                    child: Text(
+                                    child: DynamicText(
                                       'Actions',
                                       style: AppThemes.f20w500,
-                                      textAlign: TextAlign.right,
+                                      // textAlign: TextAlign.right,
                                     ),
                                   ),
                                 ),
