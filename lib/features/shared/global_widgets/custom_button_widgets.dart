@@ -27,8 +27,10 @@ class CustomButton extends StatelessWidget {
   Widget build(BuildContext context) {
     return LayoutBuilder(
       builder: (context, constraints) {
-        double buttonWidth = constraints.maxWidth;
-        double buttonHeight = 56;
+        final double buttonHeight = 56;
+        final bool hasBoundedWidth = constraints.hasBoundedWidth;
+        final double? buttonWidth =
+            hasBoundedWidth ? constraints.maxWidth : null;
 
         return MouseRegion(
           cursor: SystemMouseCursors.click,

@@ -12,6 +12,9 @@ class AdminActionDialog extends StatelessWidget {
     this.onCancel,
     this.submitText = 'Add',
     this.width = 420,
+    this.submitEnabled = true,
+    this.submitLoading = false,
+    this.submitColor,
   });
 
   final String title;
@@ -20,6 +23,9 @@ class AdminActionDialog extends StatelessWidget {
   final VoidCallback? onCancel;
   final String submitText;
   final double width;
+  final bool submitEnabled;
+  final bool submitLoading;
+  final Color? submitColor;
 
   @override
   Widget build(BuildContext context) {
@@ -79,7 +85,12 @@ class AdminActionDialog extends StatelessWidget {
                   ),
                   const SizedBox(width: 12),
                   Expanded(
-                    child: CustomButton(onPressed: onSubmit, text: submitText),
+                    child: CustomButton(
+                      onPressed: submitEnabled ? onSubmit : () {},
+                      text: submitText,
+                      isLoading: submitLoading,
+                      color: submitColor ?? Theme.of(context).primaryColor,
+                    ),
                   ),
                 ],
               ),

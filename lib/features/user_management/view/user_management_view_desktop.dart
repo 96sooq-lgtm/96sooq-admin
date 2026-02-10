@@ -1,6 +1,7 @@
 import 'package:_96sooq_admin/constants/colors.dart';
 import 'package:_96sooq_admin/constants/themes.dart';
 import 'package:_96sooq_admin/core/bloc/language/widgets/dynamic_text.dart';
+import 'package:_96sooq_admin/features/auth/widgets/custom_textformfield.dart';
 import 'package:_96sooq_admin/features/shared/global_widgets/custom_button_widgets.dart';
 import 'package:_96sooq_admin/features/subcategory/widgets/subcategory_list_widget.dart';
 import 'package:_96sooq_admin/features/user_management/widgets/user_listing_widget.dart';
@@ -59,40 +60,12 @@ class _UserManagementViewDesktopState extends State<UserManagementViewDesktop> {
                               children: [
                                 Expanded(
                                   flex: 3,
-                                  child: TextFormField(
+                                  child: CustomTextFormField(
                                     controller: searchController,
-                                    cursorColor: AppColors.primaryColor,
-                                    decoration: InputDecoration(
-                                      label: DynamicText(
-                                        "Search name or email..",
-                                        style: AppThemes.f20w400.copyWith(
-                                          color: Color(0xFF99A1Af),
-                                        ),
-                                      ),
-                                      border: OutlineInputBorder(
-                                        borderRadius: BorderRadius.circular(12),
-                                        borderSide: BorderSide(
-                                          color: Color(0xFFEFEFEF),
-                                        ),
-                                      ),
-                                      focusedBorder: OutlineInputBorder(
-                                        borderRadius: BorderRadius.circular(12),
-                                        borderSide: BorderSide(
-                                          color: Color(0xFFEFEFEF),
-                                        ),
-                                      ),
-                                      prefixIcon: Icon(
-                                        Icons.search,
-                                        color: Color(0xFF99A1Af),
-                                      ),
-                                      enabledBorder: OutlineInputBorder(
-                                        borderRadius: BorderRadius.all(
-                                          Radius.circular(14),
-                                        ),
-                                        borderSide: BorderSide(
-                                          color: Color(0xFFEFEFEF),
-                                        ),
-                                      ),
+                                    labelText: "Search name or email..",
+                                    prefixIcon: const Icon(
+                                      Icons.search,
+                                      color: Color(0xFF99A1Af),
                                     ),
                                   ),
                                 ),

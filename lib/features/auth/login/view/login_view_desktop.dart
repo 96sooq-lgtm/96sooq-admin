@@ -61,13 +61,16 @@ class _LoginViewDesktopState extends State<LoginViewDesktop> {
         }
       },
       builder: (context, state) {
-        return Scaffold(
-          backgroundColor: AppColors.scaffoldColor,
-          body: Center(
-            child: Padding(
-              padding: const EdgeInsets.symmetric(horizontal: 150, vertical: 80),
-              child: Row(
-                children: [
+        return Directionality(
+          textDirection: TextDirection.ltr,
+          child: Scaffold(
+            backgroundColor: AppColors.scaffoldColor,
+            body: Center(
+              child: Padding(
+                padding:
+                    const EdgeInsets.symmetric(horizontal: 150, vertical: 80),
+                child: Row(
+                  children: [
                   // --- Left Panel (Branding) ---
                   Expanded(
                     flex: 3,
@@ -204,6 +207,7 @@ class _LoginViewDesktopState extends State<LoginViewDesktop> {
                     ),
                   ),
                 ],
+                ),
               ),
             ),
           ),

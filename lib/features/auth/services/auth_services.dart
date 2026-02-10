@@ -23,11 +23,9 @@ class AuthService {
       }
 
       return token;
-    } // features/auth/services/auth_services.dart
-    on DioException catch (e) {
-      // Check if it's a 401 Unauthorized or 400 Bad Request
+    } on DioException catch (e) {
       if (e.response?.statusCode == 401 || e.response?.statusCode == 400) {
-        throw 'Invalid email or password'; // Throwing a clean string
+        throw 'Invalid email or password';
       }
       throw 'An unexpected error occurred. Please try again.';
     }

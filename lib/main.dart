@@ -1,12 +1,19 @@
 import 'package:_96sooq_admin/constants/colors.dart';
+import 'package:_96sooq_admin/core/bloc/language/bloc/language_bloc.dart';
+import 'package:_96sooq_admin/core/bloc/language/bloc/language_event.dart';
 import 'package:_96sooq_admin/core/bloc/language/bloc/language_state.dart';
 import 'package:_96sooq_admin/features/auth/bloc/auth_bloc.dart';
 import 'package:_96sooq_admin/features/auth/bloc/auth_event.dart';
+import 'package:_96sooq_admin/features/category/bloc/category_bloc.dart';
+import 'package:_96sooq_admin/features/category/bloc/category_event.dart';
+import 'package:_96sooq_admin/features/category/services/category_service.dart';
+import 'package:_96sooq_admin/core/bloc/s3_upload/s3_upload_bloc.dart';
+import 'package:_96sooq_admin/core/bloc/s3_upload/s3_upload_service.dart';
 import 'package:_96sooq_admin/features/root/cubit/admin_navigation_cubit.dart';
+import 'package:_96sooq_admin/features/shared/dio_setup/dio_services.dart';
 import 'package:_96sooq_admin/features/shared/router/app_router.dart';
-import 'package:_96sooq_admin/core/bloc/language/bloc/language_bloc.dart';
-import 'package:_96sooq_admin/core/bloc/language/bloc/language_event.dart'; // Import events
-import 'package:_96sooq_admin/core/bloc/navigation/navigation_cubit.dart';
+import 'package:_96sooq_admin/core/utils/image_picker_platform_stub.dart'
+    if (dart.library.html) 'package:_96sooq_admin/core/utils/image_picker_platform_web.dart';
 import 'package:device_preview/device_preview.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
@@ -15,15 +22,27 @@ import 'package:flutter_localizations/flutter_localizations.dart';
 
 final navKey = GlobalKey<NavigatorState>();
 
-// Changed main to async
-void main() async {
+Future<void> main() async {
   WidgetsFlutterBinding.ensureInitialized();
+  setImagePickerPlatform();
 
+  /// AUTH
   final authBloc = AuthBloc()..add(AppStarted());
 
-  // Initialize and load saved language immediately
+  /// LANGUAGE
   final translationBloc = TranslationBloc()..add(LoadSavedLanguage());
+
+  /// NAVIGATION
   final navigationCubit = AdminNavigationCubit();
+
+  /// DIO (shared instance)
+  final dio = BaseDio().dio;
+
+  /// CATEGORY
+  final categoryRepository = CategoryServices(dio);
+  final categoryBloc = CategoryBloc(categoryRepository);
+  final s3UploadService = S3UploadService(dio);
+  final s3UploadBloc = S3UploadBloc(s3UploadService);
 
   runApp(
     DevicePreview(
@@ -33,6 +52,8 @@ void main() async {
           BlocProvider.value(value: authBloc),
           BlocProvider.value(value: translationBloc),
           BlocProvider.value(value: navigationCubit),
+          BlocProvider.value(value: categoryBloc),
+          BlocProvider.value(value: s3UploadBloc),
         ],
         child: MyApp(authBloc: authBloc),
       ),
@@ -42,7 +63,7 @@ void main() async {
 
 class MyApp extends StatelessWidget {
   final AuthBloc authBloc;
-  const MyApp({required this.authBloc, super.key});
+  const MyApp({super.key, required this.authBloc});
 
   @override
   Widget build(BuildContext context) {
@@ -64,6 +85,11 @@ class MyApp extends StatelessWidget {
               seedColor: AppColors.primaryColor,
             ),
             fontFamily: "Poppins",
+            snackBarTheme: SnackBarThemeData(
+              behavior: SnackBarBehavior.floating,
+              backgroundColor: AppColors.primaryColor,
+              contentTextStyle: const TextStyle(color: Colors.white),
+            ),
           ),
           routerConfig: createRouter(authBloc),
         );

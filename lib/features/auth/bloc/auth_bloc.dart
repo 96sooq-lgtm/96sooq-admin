@@ -1,18 +1,16 @@
 import 'package:_96sooq_admin/constants/api_endpoints.dart';
 import 'package:_96sooq_admin/features/auth/services/auth_services.dart';
+import 'package:_96sooq_admin/features/shared/dio_setup/dio_services.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import '../storage/auth_storage.dart';
 import 'auth_event.dart';
 import 'auth_state.dart';
-import 'package:dio/dio.dart';
 
 class AuthBloc extends Bloc<AuthEvent, AuthState> {
   final AuthService _authService;
 
   AuthBloc()
-      : _authService = AuthService(
-          Dio(BaseOptions(baseUrl: ApiEndpoints.baseUrl)),
-        ),
+      : _authService = AuthService(BaseDio().dio),
         super(AuthInitial()) {
     on<AppStarted>(_onAppStarted);
     on<LoginRequested>(_onLoginRequested);
@@ -22,7 +20,16 @@ class AuthBloc extends Bloc<AuthEvent, AuthState> {
   Future<void> _onAppStarted(
       AppStarted event, Emitter<AuthState> emit) async {
     final isAuth = await AuthStorage.isAuthenticated();
-    emit(isAuth ? Authenticated() : Unauthenticated());
+    final token = await AuthStorage.getToken();
+    final hasToken = token != null && token.isNotEmpty;
+    if (isAuth && hasToken) {
+      emit(Authenticated());
+    } else {
+      if (isAuth && !hasToken) {
+        await AuthStorage.setAuthenticated(false);
+      }
+      emit(Unauthenticated());
+    }
   }
 
   Future<void> _onLoginRequested(

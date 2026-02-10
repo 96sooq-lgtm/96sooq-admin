@@ -1,7 +1,7 @@
 import 'package:_96sooq_admin/constants/colors.dart';
 import 'package:_96sooq_admin/constants/themes.dart';
 import 'package:_96sooq_admin/core/bloc/language/widgets/dynamic_text.dart';
-import 'package:_96sooq_admin/features/category/widgets/category_list_widget.dart';
+import 'package:_96sooq_admin/features/auth/widgets/custom_textformfield.dart';
 import 'package:_96sooq_admin/features/payments/widgets/payments_listing_widget.dart';
 import 'package:flutter/material.dart';
 
@@ -57,40 +57,13 @@ class _PaymentsViewDesktopState extends State<PaymentsViewDesktop> {
                               children: [
                                 Expanded(
                                   flex: 3,
-                                  child: TextFormField(
+                                  child: CustomTextFormField(
                                     controller: searchController,
-                                    cursorColor: AppColors.primaryColor,
-                                    decoration: InputDecoration(
-                                      label: DynamicText(
+                                    labelText:
                                         "Search by user or transaction ID...",
-                                        style: AppThemes.f20w400.copyWith(
-                                          color: Color(0xFF99A1Af),
-                                        ),
-                                      ),
-                                      border: OutlineInputBorder(
-                                        borderRadius: BorderRadius.circular(12),
-                                        borderSide: BorderSide(
-                                          color: Color(0xFFEFEFEF),
-                                        ),
-                                      ),
-                                      focusedBorder: OutlineInputBorder(
-                                        borderRadius: BorderRadius.circular(12),
-                                        borderSide: BorderSide(
-                                          color: Color(0xFFEFEFEF),
-                                        ),
-                                      ),
-                                      prefixIcon: Icon(
-                                        Icons.search,
-                                        color: Color(0xFF99A1Af),
-                                      ),
-                                      enabledBorder: OutlineInputBorder(
-                                        borderRadius: BorderRadius.all(
-                                          Radius.circular(14),
-                                        ),
-                                        borderSide: BorderSide(
-                                          color: Color(0xFFEFEFEF),
-                                        ),
-                                      ),
+                                    prefixIcon: const Icon(
+                                      Icons.search,
+                                      color: Color(0xFF99A1Af),
                                     ),
                                   ),
                                 ),

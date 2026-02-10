@@ -40,12 +40,14 @@ dependencies:
   flutter_svg: ^2.2.3
   device_preview: ^1.3.1
   dio: ^5.9.1
+  image_picker: ^1.1.2
   flutter_secure_storage: ^10.0.0
   go_router: ^17.0.1
   shared_preferences: ^2.5.4
   translator: ^1.0.4+1
   flutter_localizations:
     sdk: flutter
+  image_picker_for_web: ^3.1.1
 
 dev_dependencies:
   flutter_test:
