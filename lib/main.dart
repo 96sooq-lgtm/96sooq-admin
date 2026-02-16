@@ -53,21 +53,22 @@ Future<void> main() async {
   final subcategoryBloc = SubcategoryBloc(subcategoryService);
 
   runApp(
-    DevicePreview(
-      enabled: kDebugMode,
-      builder: (_) => MultiBlocProvider(
-        providers: [
-          BlocProvider.value(value: authBloc),
-          BlocProvider.value(value: translationBloc),
-          BlocProvider.value(value: navigationCubit),
-          BlocProvider.value(value: categoryBloc),
-          BlocProvider.value(value: s3UploadBloc),
-          BlocProvider.value(value: subscriptionBloc),
-          BlocProvider.value(value: subcategoryBloc),
-        ],
-        child: MyApp(authBloc: authBloc),
-      ),
+    // DevicePreview(
+    //   enabled: kDebugMode,
+    // builder: (_) =>
+    MultiBlocProvider(
+      providers: [
+        BlocProvider.value(value: authBloc),
+        BlocProvider.value(value: translationBloc),
+        BlocProvider.value(value: navigationCubit),
+        BlocProvider.value(value: categoryBloc),
+        BlocProvider.value(value: s3UploadBloc),
+        BlocProvider.value(value: subscriptionBloc),
+        BlocProvider.value(value: subcategoryBloc),
+      ],
+      child: MyApp(authBloc: authBloc),
     ),
+    // ),
   );
 }
 

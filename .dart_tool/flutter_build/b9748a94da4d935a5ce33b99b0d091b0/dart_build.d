@@ -1,0 +1,1 @@
+ /Users/umerahsan/Documents/GitHub/96sooq-admin/.dart_tool/flutter_build/b9748a94da4d935a5ce33b99b0d091b0/dart_build_result.json:  /Users/umerahsan/Documents/GitHub/96sooq-admin/.dart_tool/package_config.json /Users/umerahsan/Documents/GitHub/96sooq-admin/pubspec.yaml /opt/homebrew/Caskroom/flutter/3.32.4/flutter/bin/cache/dart-sdk/version
