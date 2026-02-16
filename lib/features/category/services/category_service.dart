@@ -8,8 +8,14 @@ class CategoryServices {
   CategoryServices(this.dio);
 
   /// GET CATEGORIES
-  Future<List<CategoryModel>> fetchCategories() async {
-    final response = await dio.get(ApiEndpoints.showAllCategory);
+  Future<List<CategoryModel>> fetchCategories({
+    int skip = 0,
+    int limit = 3,
+  }) async {
+    final response = await dio.get(
+      ApiEndpoints.showAllCategory,
+      queryParameters: {'skip': skip, 'limit': limit},
+    );
     final data = _extractCategoryList(response.data);
     return data.map((e) => CategoryModel.fromJson(e)).toList();
   }

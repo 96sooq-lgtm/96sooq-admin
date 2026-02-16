@@ -8,8 +8,14 @@ class CategoryLoading extends CategoryState {}
 
 class CategoryLoaded extends CategoryState {
   final List<CategoryModel> categories;
+  final bool hasMore;
+  final bool isLoadingMore;
 
-  CategoryLoaded(this.categories);
+  CategoryLoaded(
+    this.categories, {
+    required this.hasMore,
+    this.isLoadingMore = false,
+  });
 }
 
 class CategoryError extends CategoryState {

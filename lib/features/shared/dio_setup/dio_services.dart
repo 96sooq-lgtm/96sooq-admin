@@ -33,7 +33,7 @@ class BaseDio {
             options.headers['Authorization'] = 'Bearer $token';
           }
 
-          if (kDebugMode) {
+          if (true) {
             developer.log('''
 ${DioColors.green}▶▶▶ REQUEST
 METHOD : ${options.method}
@@ -47,7 +47,7 @@ BODY   : ${_prettyJson(options.data)}
           handler.next(options);
         },
         onResponse: (response, handler) {
-          if (kDebugMode) {
+          if (true) {
             developer.log('''
 ${DioColors.cyan}▶▶▶ RESPONSE
 STATUS : ${response.statusCode}
@@ -62,7 +62,7 @@ DATA   : ${_prettyJson(response.data)}
         onError: (error, handler) async {
           final statusCode = error.response?.statusCode;
 
-          if (kDebugMode) {
+          if (true) {
             developer.log('''
 ${DioColors.red}▶▶▶ ERROR
 STATUS : ${statusCode ?? 'NO STATUS'}

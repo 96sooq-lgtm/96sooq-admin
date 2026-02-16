@@ -9,6 +9,10 @@ import 'package:_96sooq_admin/features/category/bloc/category_event.dart';
 import 'package:_96sooq_admin/features/category/services/category_service.dart';
 import 'package:_96sooq_admin/core/bloc/s3_upload/s3_upload_bloc.dart';
 import 'package:_96sooq_admin/core/bloc/s3_upload/s3_upload_service.dart';
+import 'package:_96sooq_admin/features/promotion/bloc/subscription_bloc.dart';
+import 'package:_96sooq_admin/features/promotion/services/subscription_service.dart';
+import 'package:_96sooq_admin/features/subcategory/bloc/subcategory_bloc.dart';
+import 'package:_96sooq_admin/features/subcategory/services/subcategory_service.dart';
 import 'package:_96sooq_admin/features/root/cubit/admin_navigation_cubit.dart';
 import 'package:_96sooq_admin/features/shared/dio_setup/dio_services.dart';
 import 'package:_96sooq_admin/features/shared/router/app_router.dart';
@@ -43,6 +47,10 @@ Future<void> main() async {
   final categoryBloc = CategoryBloc(categoryRepository);
   final s3UploadService = S3UploadService(dio);
   final s3UploadBloc = S3UploadBloc(s3UploadService);
+  final subscriptionService = SubscriptionService(dio);
+  final subscriptionBloc = SubscriptionBloc(subscriptionService);
+  final subcategoryService = SubcategoryService(dio);
+  final subcategoryBloc = SubcategoryBloc(subcategoryService);
 
   runApp(
     DevicePreview(
@@ -54,6 +62,8 @@ Future<void> main() async {
           BlocProvider.value(value: navigationCubit),
           BlocProvider.value(value: categoryBloc),
           BlocProvider.value(value: s3UploadBloc),
+          BlocProvider.value(value: subscriptionBloc),
+          BlocProvider.value(value: subcategoryBloc),
         ],
         child: MyApp(authBloc: authBloc),
       ),

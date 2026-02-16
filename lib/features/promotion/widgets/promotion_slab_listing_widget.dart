@@ -8,10 +8,14 @@ class PromotionSlabListingWidget extends StatelessWidget {
     required this.name,
     required this.price,
     required this.duration,
+    required this.type,
+    required this.onDelete,
   });
   final String name;
   final String price;
   final String duration;
+  final String type;
+  final VoidCallback onDelete;
   @override
   Widget build(BuildContext context) {
     return Padding(
@@ -32,16 +36,18 @@ class PromotionSlabListingWidget extends StatelessWidget {
           ),
           Expanded(
             flex: 2,
+            child: Center(
+              child: DynamicText(type, style: AppThemes.f20w300),
+            ),
+          ),
+          Expanded(
+            flex: 2,
             child: Row(
               mainAxisAlignment: .center,
               crossAxisAlignment: .center,
               children: [
                 IconButton(
-                  onPressed: () {},
-                  icon: const Icon(Icons.edit_outlined),
-                ),
-                IconButton(
-                  onPressed: () {},
+                  onPressed: onDelete,
                   icon: const Icon(
                     Icons.delete_outline,
                     color: Color(0xFFF93939),

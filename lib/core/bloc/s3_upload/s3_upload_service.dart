@@ -18,7 +18,11 @@ class S3UploadService {
       'folder': folder,
     });
 
-    final response = await dio.post(ApiEndpoints.uploadToS3, data: formData);
+    final response = await dio.post(
+      ApiEndpoints.uploadToS3,
+      data: formData,
+      options: Options(sendTimeout: const Duration(seconds: 120)),
+    );
 
     if (response.data is Map<String, dynamic>) {
       return S3UploadResult.fromJson(response.data);

@@ -36,6 +36,7 @@ class _CategoryDesktopViewState extends State<CategoryDesktopView> {
   String? pendingActionMessage;
   bool hasLoadedCategories = false;
   bool isCreatingCategory = false;
+  final ScrollController _scrollController = ScrollController();
 
   @override
   void initState() {
@@ -45,12 +46,22 @@ class _CategoryDesktopViewState extends State<CategoryDesktopView> {
       hasLoadedCategories = true;
       context.read<CategoryBloc>().add(LoadCategories());
     }
+    _scrollController.addListener(_onScroll);
   }
 
   @override
   void dispose() {
     searchController.dispose();
+    _scrollController.dispose();
     super.dispose();
+  }
+
+  void _onScroll() {
+    if (!_scrollController.hasClients) return;
+    final position = _scrollController.position;
+    if (position.pixels >= position.maxScrollExtent - 200) {
+      context.read<CategoryBloc>().add(LoadMoreCategories());
+    }
   }
 
   void _createCategory({
@@ -60,15 +71,15 @@ class _CategoryDesktopViewState extends State<CategoryDesktopView> {
     required bool isActive,
   }) {
     context.read<CategoryBloc>().add(
-          CreateCategory(
-            CategoryModel(
-              id: '',
-              nameEn: nameEn,
-              nameAr: nameAr,
-              imageUrl: imageUrl,
-              parentId: null,
-              attributesSchema: const [],
-              isActive: isActive,
+      CreateCategory(
+        CategoryModel(
+          id: '',
+          nameEn: nameEn,
+          nameAr: nameAr,
+          imageUrl: imageUrl,
+          parentId: null,
+          attributesSchema: const [],
+          isActive: isActive,
           createdAt: null,
           updatedAt: null,
         ),
@@ -84,21 +95,21 @@ class _CategoryDesktopViewState extends State<CategoryDesktopView> {
     required bool isActive,
   }) {
     context.read<CategoryBloc>().add(
-          UpdateCategory(
-            id,
-            CategoryModel(
-              id: id,
-              nameEn: nameEn,
-              nameAr: nameAr,
-              imageUrl: imageUrl,
-              parentId: null,
-              attributesSchema: const [],
-              isActive: isActive,
-              createdAt: null,
-              updatedAt: null,
-            ),
-          ),
-        );
+      UpdateCategory(
+        id,
+        CategoryModel(
+          id: id,
+          nameEn: nameEn,
+          nameAr: nameAr,
+          imageUrl: imageUrl,
+          parentId: null,
+          attributesSchema: const [],
+          isActive: isActive,
+          createdAt: null,
+          updatedAt: null,
+        ),
+      ),
+    );
   }
 
   void _deleteCategory(String id) {
@@ -139,9 +150,9 @@ class _CategoryDesktopViewState extends State<CategoryDesktopView> {
                   setDialogState(() {
                     isUploading = false;
                   });
-                  ScaffoldMessenger.of(dialogContext).showSnackBar(
-                    SnackBar(content: Text(state.message)),
-                  );
+                  ScaffoldMessenger.of(
+                    dialogContext,
+                  ).showSnackBar(SnackBar(content: Text(state.message)));
                 }
               },
               child: AdminActionDialog(
@@ -161,8 +172,7 @@ class _CategoryDesktopViewState extends State<CategoryDesktopView> {
                     const SizedBox(height: 12),
                     CustomTextFormField(
                       controller: nameArController,
-                      labelText:
-                          _label(langState, "Name AR", "الاسم بالعربية"),
+                      labelText: _label(langState, "Name AR", "الاسم بالعربية"),
                       suffixIcon: const Icon(Icons.translate),
                       onSuffixTap: () async {
                         final nameEn = nameEnController.text.trim();
@@ -214,12 +224,8 @@ class _CategoryDesktopViewState extends State<CategoryDesktopView> {
                           ),
                         ),
                         const SizedBox(width: 12),
-                        CustomButton(
-                          text: _label(
-                            langState,
-                            "Choose Image",
-                            "اختر صورة",
-                          ),
+                        IconButton(
+                          icon: Icon(Icons.image),
                           onPressed: () async {
                             final picker = ImagePicker();
                             final file = await picker.pickImage(
@@ -246,9 +252,7 @@ class _CategoryDesktopViewState extends State<CategoryDesktopView> {
                           isActive = value;
                         });
                       },
-                      title: DynamicText(
-                        _label(langState, "Active", "نشط"),
-                      ),
+                      title: DynamicText(_label(langState, "Active", "نشط")),
                     ),
                     if (isUploading)
                       const Padding(
@@ -304,12 +308,12 @@ class _CategoryDesktopViewState extends State<CategoryDesktopView> {
                   });
 
                   context.read<S3UploadBloc>().add(
-                        UploadFile(
-                          bytes: selectedImageBytes!,
-                          filename: selectedImage!.name,
-                          folder: "Categories",
-                        ),
-                      );
+                    UploadFile(
+                      bytes: selectedImageBytes!,
+                      filename: selectedImage!.name,
+                      folder: "Categories",
+                    ),
+                  );
                 },
               ),
             );
@@ -339,7 +343,8 @@ class _CategoryDesktopViewState extends State<CategoryDesktopView> {
     void updateHasChanges() {
       final nameEn = nameEnController.text.trim();
       final nameAr = nameArController.text.trim();
-      final changed = nameEn != category.nameEn ||
+      final changed =
+          nameEn != category.nameEn ||
           nameAr != category.nameAr ||
           isActive != category.isActive ||
           selectedImageBytes != null;
@@ -378,195 +383,197 @@ class _CategoryDesktopViewState extends State<CategoryDesktopView> {
                     setDialogState(() {
                       isUploading = false;
                     });
-                    ScaffoldMessenger.of(dialogContext).showSnackBar(
-                      SnackBar(content: Text(state.message)),
-                    );
+                    ScaffoldMessenger.of(
+                      dialogContext,
+                    ).showSnackBar(SnackBar(content: Text(state.message)));
                   }
                 },
                 child: AdminActionDialog(
-                title: _label(langState, "Update Category", "تحديث التصنيف"),
-                submitText: _label(langState, "Update", "تحديث"),
-                submitEnabled: hasChanges && !isUploading,
-                submitLoading: isUploading,
-                submitColor:
-                    hasChanges ? AppColors.primaryColor : const Color(0xFFE5E7EB),
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    CustomTextFormField(
-                      controller: nameEnController,
-                      onChanged: (_) {
-                        setDialogState(updateHasChanges);
-                      },
-                      labelText: _label(
-                        langState,
-                        "Name EN",
-                        "الاسم بالإنجليزية",
+                  title: _label(langState, "Update Category", "تحديث التصنيف"),
+                  submitText: _label(langState, "Update", "تحديث"),
+                  submitEnabled: hasChanges && !isUploading,
+                  submitLoading: isUploading,
+                  submitColor: hasChanges
+                      ? AppColors.primaryColor
+                      : const Color(0xFFE5E7EB),
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      CustomTextFormField(
+                        controller: nameEnController,
+                        onChanged: (_) {
+                          setDialogState(updateHasChanges);
+                        },
+                        labelText: _label(
+                          langState,
+                          "Name EN",
+                          "الاسم بالإنجليزية",
+                        ),
                       ),
-                    ),
-                    const SizedBox(height: 12),
-                    CustomTextFormField(
-                      controller: nameArController,
-                      onChanged: (_) {
-                        setDialogState(updateHasChanges);
-                      },
-                      labelText:
-                          _label(langState, "Name AR", "الاسم بالعربية"),
-                      suffixIcon: const Icon(Icons.translate),
-                      onSuffixTap: () async {
-                        final nameEn = nameEnController.text.trim();
-                        if (nameEn.isEmpty) {
-                          ScaffoldMessenger.of(dialogContext).showSnackBar(
-                            SnackBar(
-                              content: Text(
-                                _label(
-                                  langState,
-                                  "Please enter English name first",
-                                  "يرجى إدخال الاسم بالإنجليزية أولاً",
+                      const SizedBox(height: 12),
+                      CustomTextFormField(
+                        controller: nameArController,
+                        onChanged: (_) {
+                          setDialogState(updateHasChanges);
+                        },
+                        labelText: _label(
+                          langState,
+                          "Name AR",
+                          "الاسم بالعربية",
+                        ),
+                        suffixIcon: const Icon(Icons.translate),
+                        onSuffixTap: () async {
+                          final nameEn = nameEnController.text.trim();
+                          if (nameEn.isEmpty) {
+                            ScaffoldMessenger.of(dialogContext).showSnackBar(
+                              SnackBar(
+                                content: Text(
+                                  _label(
+                                    langState,
+                                    "Please enter English name first",
+                                    "يرجى إدخال الاسم بالإنجليزية أولاً",
+                                  ),
                                 ),
                               ),
-                            ),
-                          );
-                          return;
-                        }
-                        final translated = await TranslationService.translate(
-                          nameEn,
-                          'ar',
-                        );
-                        nameArController.text = translated;
-                        setDialogState(updateHasChanges);
-                      },
-                    ),
-                    const SizedBox(height: 12),
-                    Row(
-                      children: [
-                        Expanded(
-                          child: Container(
-                            padding: const EdgeInsets.symmetric(
-                              horizontal: 12,
-                              vertical: 14,
-                            ),
-                            decoration: BoxDecoration(
-                              border: Border.all(
-                                color: const Color(0xFFE1E1E1),
-                              ),
-                              borderRadius: BorderRadius.circular(12),
-                            ),
-                            child: DynamicText(
-                              selectedImage?.name ??
-                                  (imageUrl.isNotEmpty
-                                      ? _label(
-                                          langState,
-                                          "Image selected",
-                                          "تم اختيار صورة",
-                                        )
-                                      : _label(
-                                          langState,
-                                          "No image selected",
-                                          "لم يتم اختيار صورة",
-                                        )),
-                              style: AppThemes.f16w400,
-                            ),
-                          ),
-                        ),
-                        const SizedBox(width: 12),
-                        CustomButton(
-                          text: _label(
-                            langState,
-                            "Choose Image",
-                            "اختر صورة",
-                          ),
-                          onPressed: () async {
-                            final picker = ImagePicker();
-                            final file = await picker.pickImage(
-                              source: ImageSource.gallery,
                             );
-                            if (file == null) {
-                              return;
-                            }
-
-                            final bytes = await file.readAsBytes();
-                            setDialogState(() {
-                              selectedImage = file;
-                              selectedImageBytes = bytes;
-                              updateHasChanges();
-                            });
-                          },
-                        ),
-                      ],
-                    ),
-                    const SizedBox(height: 12),
-                    SwitchListTile(
-                      value: isActive,
-                      onChanged: (value) {
-                        setDialogState(() {
-                          isActive = value;
-                          updateHasChanges();
-                        });
-                      },
-                      title: DynamicText(
-                        _label(langState, "Active", "نشط"),
+                            return;
+                          }
+                          final translated = await TranslationService.translate(
+                            nameEn,
+                            'ar',
+                          );
+                          nameArController.text = translated;
+                          setDialogState(updateHasChanges);
+                        },
                       ),
-                    ),
-                  ],
-                ),
-                onSubmit: () async {
-                  final nameEn = nameEnController.text.trim();
-                  final nameAr = nameArController.text.trim();
-                  if (!hasChanges || isUploading) {
-                    return;
-                  }
-                  if (nameEn.isEmpty && nameAr.isEmpty) {
-                    ScaffoldMessenger.of(dialogContext).showSnackBar(
-                      SnackBar(
-                        content: Text(
-                          _label(
-                            langState,
-                            "Please enter a name",
-                            "يرجى إدخال اسم",
+                      const SizedBox(height: 12),
+                      Row(
+                        children: [
+                          Expanded(
+                            child: Container(
+                              padding: const EdgeInsets.symmetric(
+                                horizontal: 12,
+                                vertical: 14,
+                              ),
+                              decoration: BoxDecoration(
+                                border: Border.all(
+                                  color: const Color(0xFFE1E1E1),
+                                ),
+                                borderRadius: BorderRadius.circular(12),
+                              ),
+                              child: DynamicText(
+                                selectedImage?.name ??
+                                    (imageUrl.isNotEmpty
+                                        ? _label(
+                                            langState,
+                                            "Image selected",
+                                            "تم اختيار صورة",
+                                          )
+                                        : _label(
+                                            langState,
+                                            "No image selected",
+                                            "لم يتم اختيار صورة",
+                                          )),
+                                style: AppThemes.f16w400,
+                              ),
+                            ),
+                          ),
+                          const SizedBox(width: 12),
+                          CustomButton(
+                            text: _label(
+                              langState,
+                              "Choose Image",
+                              "اختر صورة",
+                            ),
+                            onPressed: () async {
+                              final picker = ImagePicker();
+                              final file = await picker.pickImage(
+                                source: ImageSource.gallery,
+                              );
+                              if (file == null) {
+                                return;
+                              }
+
+                              final bytes = await file.readAsBytes();
+                              setDialogState(() {
+                                selectedImage = file;
+                                selectedImageBytes = bytes;
+                                updateHasChanges();
+                              });
+                            },
+                          ),
+                        ],
+                      ),
+                      const SizedBox(height: 12),
+                      SwitchListTile(
+                        value: isActive,
+                        onChanged: (value) {
+                          setDialogState(() {
+                            isActive = value;
+                            updateHasChanges();
+                          });
+                        },
+                        title: DynamicText(_label(langState, "Active", "نشط")),
+                      ),
+                    ],
+                  ),
+                  onSubmit: () async {
+                    final nameEn = nameEnController.text.trim();
+                    final nameAr = nameArController.text.trim();
+                    if (!hasChanges || isUploading) {
+                      return;
+                    }
+                    if (nameEn.isEmpty && nameAr.isEmpty) {
+                      ScaffoldMessenger.of(dialogContext).showSnackBar(
+                        SnackBar(
+                          content: Text(
+                            _label(
+                              langState,
+                              "Please enter a name",
+                              "يرجى إدخال اسم",
+                            ),
                           ),
                         ),
-                      ),
+                      );
+                      return;
+                    }
+
+                    pendingActionMessage = _label(
+                      langState,
+                      "Category updated successfully",
+                      "تم تحديث التصنيف بنجاح",
                     );
-                    return;
-                  }
 
-                  pendingActionMessage = _label(
-                    langState,
-                    "Category updated successfully",
-                    "تم تحديث التصنيف بنجاح",
-                  );
+                    if (selectedImageBytes == null) {
+                      isSubmittingCategory = true;
+                      setDialogState(() {
+                        isUploading = true;
+                      });
+                      awaitingUpdatePop = true;
+                      _updateCategory(
+                        id: category.id,
+                        nameEn: nameEnController.text.trim(),
+                        nameAr: nameArController.text.trim(),
+                        imageUrl: imageUrl,
+                        isActive: isActive,
+                      );
+                      return;
+                    }
 
-                  if (selectedImageBytes == null) {
                     isSubmittingCategory = true;
                     setDialogState(() {
                       isUploading = true;
                     });
-                    awaitingUpdatePop = true;
-                    _updateCategory(
-                      id: category.id,
-                      nameEn: nameEnController.text.trim(),
-                      nameAr: nameArController.text.trim(),
-                      imageUrl: imageUrl,
-                      isActive: isActive,
+
+                    context.read<S3UploadBloc>().add(
+                      UploadFile(
+                        bytes: selectedImageBytes!,
+                        filename: selectedImage!.name,
+                        folder: "Categories",
+                      ),
                     );
-                    return;
-                  }
-
-                  isSubmittingCategory = true;
-                  setDialogState(() {
-                    isUploading = true;
-                  });
-
-                  context.read<S3UploadBloc>().add(
-                        UploadFile(
-                          bytes: selectedImageBytes!,
-                          filename: selectedImage!.name,
-                          folder: "Categories",
-                        ),
-                      );
-                },
-              ),
+                  },
+                ),
               ),
             );
           },
@@ -625,271 +632,305 @@ class _CategoryDesktopViewState extends State<CategoryDesktopView> {
             listener: (context, state) {
               if (!isSubmittingCategory) return;
 
-            if (state is CategoryLoaded) {
-              isSubmittingCategory = false;
-              if (isCreatingCategory) {
-                setState(() {
-                  isCreatingCategory = false;
-                });
-              }
-              if (pendingActionMessage != null) {
-                ScaffoldMessenger.of(context).showSnackBar(
-                  SnackBar(content: Text(pendingActionMessage!)),
-                );
-                pendingActionMessage = null;
-              }
+              if (state is CategoryLoaded) {
+                isSubmittingCategory = false;
+                if (isCreatingCategory) {
+                  setState(() {
+                    isCreatingCategory = false;
+                  });
+                }
+                if (pendingActionMessage != null) {
+                  ScaffoldMessenger.of(context).showSnackBar(
+                    SnackBar(content: Text(pendingActionMessage!)),
+                  );
+                  pendingActionMessage = null;
+                }
               }
 
-            if (state is CategoryError) {
-              isSubmittingCategory = false;
-              if (isCreatingCategory) {
-                setState(() {
-                  isCreatingCategory = false;
-                });
+              if (state is CategoryError) {
+                isSubmittingCategory = false;
+                if (isCreatingCategory) {
+                  setState(() {
+                    isCreatingCategory = false;
+                  });
+                }
+                pendingActionMessage = null;
+                ScaffoldMessenger.of(
+                  context,
+                ).showSnackBar(SnackBar(content: Text(state.message)));
               }
-              pendingActionMessage = null;
-              ScaffoldMessenger.of(
-                context,
-              ).showSnackBar(SnackBar(content: Text(state.message)));
-            }
             },
             child: Scaffold(
-            backgroundColor: AppColors.scaffoldColor,
-            body: CustomScrollView(
-              slivers: [
-                SliverPadding(
-                  padding: const EdgeInsets.symmetric(horizontal: 20),
-                  sliver: SliverToBoxAdapter(
-                    child: Column(
-                      crossAxisAlignment: CrossAxisAlignment.start,
-                      children: [
-                        const SizedBox(height: 36),
-                        DynamicText(
-                          _label(langState, "Category", "التصنيفات"),
-                          style: AppThemes.f28w600,
-                        ),
-                        const SizedBox(height: 10),
-                        DynamicText(
-                          _label(
-                            langState,
-                            "Manage your marketplace categories",
-                            "إدارة تصنيفات السوق",
+              backgroundColor: AppColors.scaffoldColor,
+              body: CustomScrollView(
+                controller: _scrollController,
+                slivers: [
+                  SliverPadding(
+                    padding: const EdgeInsets.symmetric(horizontal: 20),
+                    sliver: SliverToBoxAdapter(
+                      child: Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          const SizedBox(height: 36),
+                          DynamicText(
+                            _label(langState, "Category", "التصنيفات"),
+                            style: AppThemes.f28w600,
                           ),
-                          style: AppThemes.f20w400,
-                        ),
-                        const SizedBox(height: 24),
-                        Container(
-                          decoration: BoxDecoration(
-                            color: Colors.white,
-                            borderRadius: BorderRadius.circular(18),
-                            border: Border.all(color: const Color(0xFFE1E1E1)),
+                          const SizedBox(height: 10),
+                          DynamicText(
+                            _label(
+                              langState,
+                              "Manage your marketplace categories",
+                              "إدارة تصنيفات السوق",
+                            ),
+                            style: AppThemes.f20w400,
                           ),
-                          child: Column(
-                            children: [
-                              /// Top Bar
-                              Padding(
-                                padding: const EdgeInsets.symmetric(
-                                  horizontal: 55,
-                                  vertical: 55,
-                                ),
-                                child: SizedBox(
-                                  width: double.infinity,
-                                  child: Row(
-                                    mainAxisAlignment: .center,
-                                    crossAxisAlignment: .center,
-                                    children: [
-                                      Expanded(
-                                        flex: 3,
-                                        child: CustomTextFormField(
-                                          controller: searchController,
-                                          labelText: _label(
-                                            langState,
-                                            "Search Categories",
-                                            "ابحث في التصنيفات",
-                                          ),
-                                          prefixIcon: const Icon(
-                                            Icons.search,
-                                            color: Color(0xFF99A1Af),
-                                          ),
-                                        ),
-                                      ),
-                                      Spacer(flex: 1),
-                                      Expanded(
-                                        flex: 1,
-                                        child: CustomButton(
-                                          text: _label(
-                                            langState,
-                                            "+ Category",
-                                            "+ إضافة تصنيف",
-                                          ),
-                                          onPressed: () {
-                                            _openAddCategoryDialog(langState);
-                                          },
-                                        ),
-                                      ),
-                                    ],
-                                  ),
-                                ),
+                          const SizedBox(height: 24),
+                          Container(
+                            decoration: BoxDecoration(
+                              color: Colors.white,
+                              borderRadius: BorderRadius.circular(18),
+                              border: Border.all(
+                                color: const Color(0xFFE1E1E1),
                               ),
-                              Container(
-                                decoration: BoxDecoration(
-                                  color: Color(0xFFF9FAFB),
-                                  border: Border.all(color: Color(0xFFE1E1E1)),
-                                ),
-                                child: Padding(
+                            ),
+                            child: Column(
+                              children: [
+                                /// Top Bar
+                                Padding(
                                   padding: const EdgeInsets.symmetric(
-                                    vertical: 16,
+                                    horizontal: 55,
+                                    vertical: 55,
                                   ),
-                                  child: Row(
-                                    children: [
-                                      const SizedBox(width: 40),
-                                      Expanded(
-                                        flex: 1,
-                                        child: DynamicText(
-                                          _label(
-                                            langState,
-                                            'Image',
-                                            'الصورة',
-                                          ),
-                                          style: AppThemes.f20w500,
-                                        ),
-                                      ),
-                                      const SizedBox(width: 8),
-                                      Expanded(
-                                        flex: 3,
-                                        child: DynamicText(
-                                          _label(
-                                            langState,
-                                            'Category Name',
-                                            'اسم التصنيف',
-                                          ),
-                                          style: AppThemes.f20w500,
-                                        ),
-                                      ),
-                                      Expanded(
-                                        flex: 2,
-                                        child: Center(
-                                          child: DynamicText(
-                                            _label(
+                                  child: SizedBox(
+                                    width: double.infinity,
+                                    child: Row(
+                                      mainAxisAlignment: .center,
+                                      crossAxisAlignment: .center,
+                                      children: [
+                                        Expanded(
+                                          flex: 3,
+                                          child: CustomTextFormField(
+                                            controller: searchController,
+                                            labelText: _label(
                                               langState,
-                                              'Status',
-                                              'الحالة',
+                                              "Search Categories",
+                                              "ابحث في التصنيفات",
                                             ),
-                                            style: AppThemes.f20w500,
+                                            prefixIcon: const Icon(
+                                              Icons.search,
+                                              color: Color(0xFF99A1Af),
+                                            ),
                                           ),
                                         ),
-                                      ),
-                                      Expanded(
-                                        flex: 2,
-                                        child: Center(
-                                          child: DynamicText(
-                                            _label(
+                                        Spacer(flex: 1),
+                                        Expanded(
+                                          flex: 1,
+                                          child: CustomButton(
+                                            text: _label(
                                               langState,
-                                              'Actions',
-                                              'الإجراءات',
+                                              "+ Category",
+                                              "+ إضافة تصنيف",
                                             ),
-                                            style: AppThemes.f20w500,
-                                            textAlign: TextAlign.right,
+                                            onPressed: () {
+                                              _openAddCategoryDialog(langState);
+                                            },
                                           ),
                                         ),
-                                      ),
-                                    ],
+                                      ],
+                                    ),
                                   ),
                                 ),
-                              ),
-                              BlocBuilder<CategoryBloc, CategoryState>(
-                                builder: (context, state) {
-                                  if (state is CategoryLoading) {
-                                    return Padding(
-                                      padding: const EdgeInsets.all(24),
-                                      child: Column(
-                                        children: List.generate(
-                                          8,
-                                          (index) => Padding(
-                                            padding: EdgeInsets.only(
-                                              bottom: index == 7 ? 0 : 20,
+                                Container(
+                                  decoration: BoxDecoration(
+                                    color: Color(0xFFF9FAFB),
+                                    border: Border.all(
+                                      color: Color(0xFFE1E1E1),
+                                    ),
+                                  ),
+                                  child: Padding(
+                                    padding: const EdgeInsets.symmetric(
+                                      vertical: 16,
+                                    ),
+                                    child: Row(
+                                      children: [
+                                        const SizedBox(width: 40),
+                                        Expanded(
+                                          flex: 1,
+                                          child: DynamicText(
+                                            _label(
+                                              langState,
+                                              'Image',
+                                              'الصورة',
                                             ),
-                                            child: const _CategoryShimmerRow(),
+                                            style: AppThemes.f20w500,
                                           ),
                                         ),
-                                      ),
-                                    );
-                                  }
-
-                                  if (state is CategoryLoaded) {
-                                    return ListView.builder(
-                                      shrinkWrap: true,
-                                      itemCount: state.categories.length +
-                                          (isCreatingCategory ? 1 : 0),
-                                      itemBuilder: (context, index) {
-                                        if (isCreatingCategory && index == 0) {
-                                          return const Padding(
-                                            padding: EdgeInsets.symmetric(
-                                              vertical: 18,
+                                        const SizedBox(width: 8),
+                                        Expanded(
+                                          flex: 3,
+                                          child: DynamicText(
+                                            _label(
+                                              langState,
+                                              'Category Name',
+                                              'اسم التصنيف',
                                             ),
-                                            child: _CategoryShimmerRow(),
-                                          );
-                                        }
-
-                                        final itemIndex = isCreatingCategory
-                                            ? index - 1
-                                            : index;
-                                        final category =
-                                            state.categories[itemIndex];
-                                        final isCategoryActive =
-                                            category.isActive;
-                                        final statusLabel = isCategoryActive
-                                            ? _label(langState, "Active", "نشط")
-                                            : _label(
+                                            style: AppThemes.f20w500,
+                                          ),
+                                        ),
+                                        Expanded(
+                                          flex: 2,
+                                          child: Center(
+                                            child: DynamicText(
+                                              _label(
                                                 langState,
-                                                "Inactive",
-                                                "غير نشط",
-                                              );
-
-                                        final isArabic = langState.isRTL;
-                                        final displayName = isArabic
-                                            ? category.nameAr
-                                            : category.nameEn;
-                                        return CategoryListWidget(
-                                          imageUrl: category.imageUrl,
-                                          name: displayName,
-                                          isActive: isCategoryActive,
-                                          statusLabel: statusLabel,
-                                          onEdit: () =>
-                                              _openEditCategoryDialog(
-                                            langState,
-                                            category,
+                                                'Status',
+                                                'الحالة',
+                                              ),
+                                              style: AppThemes.f20w500,
+                                            ),
                                           ),
-                                          onDelete:
-                                              () => _openDeleteCategoryDialog(
-                                            langState,
-                                            category,
+                                        ),
+                                        Expanded(
+                                          flex: 2,
+                                          child: Center(
+                                            child: DynamicText(
+                                              _label(
+                                                langState,
+                                                'Actions',
+                                                'الإجراءات',
+                                              ),
+                                              style: AppThemes.f20w500,
+                                              textAlign: TextAlign.right,
+                                            ),
                                           ),
-                                        );
-                                      },
-                                    );
-                                  }
+                                        ),
+                                      ],
+                                    ),
+                                  ),
+                                ),
+                                BlocBuilder<CategoryBloc, CategoryState>(
+                                  builder: (context, state) {
+                                    if (state is CategoryLoading) {
+                                      return Padding(
+                                        padding: const EdgeInsets.all(24),
+                                        child: Column(
+                                          children: List.generate(
+                                            8,
+                                            (index) => Padding(
+                                              padding: EdgeInsets.only(
+                                                bottom: index == 7 ? 0 : 20,
+                                              ),
+                                              child:
+                                                  const _CategoryShimmerRow(),
+                                            ),
+                                          ),
+                                        ),
+                                      );
+                                    }
 
-                                  if (state is CategoryError) {
-                                    return Padding(
-                                      padding: const EdgeInsets.all(20),
-                                      child: DynamicText(state.message),
-                                    );
-                                  }
+                                    if (state is CategoryLoaded) {
+                                      return ListView.builder(
+                                        shrinkWrap: true,
+                                        physics:
+                                            const NeverScrollableScrollPhysics(),
+                                        itemCount:
+                                            state.categories.length +
+                                            (state.isLoadingMore ? 1 : 0) +
+                                            (isCreatingCategory ? 1 : 0),
+                                        itemBuilder: (context, index) {
+                                          if (isCreatingCategory &&
+                                              index == 0) {
+                                            return const Padding(
+                                              padding: EdgeInsets.symmetric(
+                                                vertical: 18,
+                                              ),
+                                              child: _CategoryShimmerRow(),
+                                            );
+                                          }
 
-                                  return const SizedBox();
-                                },
-                              ),
-                            ],
+                                          final itemIndex = isCreatingCategory
+                                              ? index - 1
+                                              : index;
+                                          if (state.isLoadingMore &&
+                                              itemIndex ==
+                                                  state.categories.length) {
+                                            return const Padding(
+                                              padding: EdgeInsets.symmetric(
+                                                vertical: 16,
+                                              ),
+                                              child: SizedBox(
+                                                height: 48,
+                                                child: Center(
+                                                  child:
+                                                      CircularProgressIndicator(
+                                                        color: AppColors
+                                                            .primaryColor,
+                                                      ),
+                                                ),
+                                              ),
+                                            );
+                                          }
+                                          final category =
+                                              state.categories[itemIndex];
+                                          final isCategoryActive =
+                                              category.isActive;
+                                          final statusLabel = isCategoryActive
+                                              ? _label(
+                                                  langState,
+                                                  "Active",
+                                                  "نشط",
+                                                )
+                                              : _label(
+                                                  langState,
+                                                  "Inactive",
+                                                  "غير نشط",
+                                                );
+
+                                          final isArabic = langState.isRTL;
+                                          final displayName = isArabic
+                                              ? category.nameAr
+                                              : category.nameEn;
+                                          return CategoryListWidget(
+                                            imageUrl: category.imageUrl,
+                                            name: displayName,
+                                            isActive: isCategoryActive,
+                                            statusLabel: statusLabel,
+                                            onEdit: () =>
+                                                _openEditCategoryDialog(
+                                                  langState,
+                                                  category,
+                                                ),
+                                            onDelete: () =>
+                                                _openDeleteCategoryDialog(
+                                                  langState,
+                                                  category,
+                                                ),
+                                          );
+                                        },
+                                      );
+                                    }
+
+                                    if (state is CategoryError) {
+                                      return Padding(
+                                        padding: const EdgeInsets.all(20),
+                                        child: DynamicText(state.message),
+                                      );
+                                    }
+
+                                    return const SizedBox();
+                                  },
+                                ),
+                              ],
+                            ),
                           ),
-                        ),
-                        const SizedBox(height: 40),
-                      ],
+                          const SizedBox(height: 40),
+                        ],
+                      ),
                     ),
                   ),
-                ),
-              ],
-            ),
+                ],
+              ),
             ),
           ),
         );

@@ -5,9 +5,11 @@ import 'category_state.dart';
 
 class CategoryBloc extends Bloc<CategoryEvent, CategoryState> {
   final CategoryServices repository;
+  static const int _pageSize = 10;
 
   CategoryBloc(this.repository) : super(CategoryInitial()) {
     on<LoadCategories>(_loadCategories);
+    on<LoadMoreCategories>(_loadMoreCategories);
     on<CreateCategory>(_createCategory);
     on<UpdateCategory>(_updateCategory);
     on<DeleteCategory>(_deleteCategory);
@@ -19,8 +21,39 @@ class CategoryBloc extends Bloc<CategoryEvent, CategoryState> {
   ) async {
     emit(CategoryLoading());
     try {
-      final categories = await repository.fetchCategories();
-      emit(CategoryLoaded(categories));
+      final categories = await repository.fetchCategories(
+        skip: 0,
+        limit: _pageSize,
+      );
+      emit(CategoryLoaded(categories, hasMore: categories.length == _pageSize));
+    } catch (e) {
+      emit(CategoryError(e.toString()));
+    }
+  }
+
+  Future<void> _loadMoreCategories(
+    LoadMoreCategories event,
+    Emitter<CategoryState> emit,
+  ) async {
+    final currentState = state;
+    if (currentState is! CategoryLoaded) return;
+    if (currentState.isLoadingMore || !currentState.hasMore) return;
+
+    emit(
+      CategoryLoaded(
+        currentState.categories,
+        hasMore: currentState.hasMore,
+        isLoadingMore: true,
+      ),
+    );
+
+    try {
+      final next = await repository.fetchCategories(
+        skip: currentState.categories.length,
+        limit: _pageSize,
+      );
+      final combined = [...currentState.categories, ...next];
+      emit(CategoryLoaded(combined, hasMore: next.length == _pageSize));
     } catch (e) {
       emit(CategoryError(e.toString()));
     }
@@ -32,12 +65,7 @@ class CategoryBloc extends Bloc<CategoryEvent, CategoryState> {
   ) async {
     try {
       await repository.createCategory(event.category);
-      final currentState = state;
-      if (currentState is CategoryLoaded) {
-        emit(CategoryLoaded([event.category, ...currentState.categories]));
-      } else {
-        emit(CategoryLoaded([event.category]));
-      }
+      add(LoadCategories());
     } catch (e) {
       emit(CategoryError(e.toString()));
     }
@@ -49,13 +77,7 @@ class CategoryBloc extends Bloc<CategoryEvent, CategoryState> {
   ) async {
     try {
       await repository.updateCategory(event.id, event.category);
-      final currentState = state;
-      if (currentState is CategoryLoaded) {
-        final updated = currentState.categories
-            .map((c) => c.id == event.id ? event.category : c)
-            .toList();
-        emit(CategoryLoaded(updated));
-      }
+      add(LoadCategories());
     } catch (e) {
       emit(CategoryError(e.toString()));
     }
@@ -67,13 +89,7 @@ class CategoryBloc extends Bloc<CategoryEvent, CategoryState> {
   ) async {
     try {
       await repository.deleteCategory(event.id);
-      final currentState = state;
-      if (currentState is CategoryLoaded) {
-        final updated = currentState.categories
-            .where((c) => c.id != event.id)
-            .toList();
-        emit(CategoryLoaded(updated));
-      }
+      add(LoadCategories());
     } catch (e) {
       emit(CategoryError(e.toString()));
     }

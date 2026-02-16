@@ -1,11 +1,28 @@
 import 'package:_96sooq_admin/constants/colors.dart';
 import 'package:_96sooq_admin/constants/themes.dart';
+import 'dart:typed_data';
+import 'package:_96sooq_admin/core/bloc/language/translation_service.dart';
+import 'package:_96sooq_admin/core/bloc/language/bloc/language_bloc.dart';
+import 'package:_96sooq_admin/core/bloc/language/bloc/language_state.dart';
 import 'package:_96sooq_admin/core/bloc/language/widgets/dynamic_text.dart';
 import 'package:_96sooq_admin/features/auth/widgets/custom_textformfield.dart';
-import 'package:_96sooq_admin/features/category/widgets/category_list_widget.dart';
+import 'package:_96sooq_admin/features/category/bloc/category_bloc.dart';
+import 'package:_96sooq_admin/features/category/bloc/category_event.dart';
+import 'package:_96sooq_admin/features/category/bloc/category_state.dart';
+import 'package:_96sooq_admin/features/category/model/category_model.dart';
 import 'package:_96sooq_admin/features/subcategory/widgets/subcategory_list_widget.dart';
+import 'package:_96sooq_admin/features/subcategory/bloc/subcategory_bloc.dart';
+import 'package:_96sooq_admin/features/subcategory/bloc/subcategory_event.dart';
+import 'package:_96sooq_admin/features/subcategory/bloc/subcategory_state.dart';
+import 'package:_96sooq_admin/features/subcategory/model/subcategory_model.dart';
+import 'package:_96sooq_admin/features/category/widgets/add_category_popup.dart';
+import 'package:_96sooq_admin/core/bloc/s3_upload/s3_upload_bloc.dart';
+import 'package:_96sooq_admin/core/bloc/s3_upload/s3_upload_event.dart';
+import 'package:_96sooq_admin/core/bloc/s3_upload/s3_upload_state.dart';
 import 'package:_96sooq_admin/features/shared/global_widgets/custom_button_widgets.dart';
+import 'package:image_picker/image_picker.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter_bloc/flutter_bloc.dart';
 
 class SubcategoryDesktopView extends StatefulWidget {
   const SubcategoryDesktopView({super.key});
@@ -16,6 +33,545 @@ class SubcategoryDesktopView extends StatefulWidget {
 
 class _SubcategoryDesktopViewState extends State<SubcategoryDesktopView> {
   final TextEditingController searchController = TextEditingController();
+
+  @override
+  void initState() {
+    super.initState();
+    context.read<CategoryBloc>().add(LoadCategories());
+    context.read<SubcategoryBloc>().add(LoadSubcategories());
+  }
+
+  void _openAddSubcategoryDialog() {
+    final nameEnController = TextEditingController();
+    final nameArController = TextEditingController();
+    CategoryModel? selectedCategory;
+    XFile? selectedImage;
+    Uint8List? selectedImageBytes;
+    bool isActive = true;
+    bool isUploading = false;
+    bool isSubmitting = false;
+    bool disposed = false;
+
+    showDialog(
+      context: context,
+      builder: (dialogContext) {
+        return StatefulBuilder(
+          builder: (context, setDialogState) {
+            return BlocListener<S3UploadBloc, S3UploadState>(
+              listener: (context, state) {
+                if (state is S3UploadSuccess) {
+                  final model = SubcategoryModel(
+                    id: '',
+                    nameEn: nameEnController.text.trim(),
+                    nameAr: nameArController.text.trim(),
+                    parentId: selectedCategory?.id ?? '',
+                    imageUrl: state.result.url,
+                    isActive: isActive,
+                    attributesSchema: null,
+                  );
+                  context.read<SubcategoryBloc>().add(
+                        CreateSubcategory(model),
+                      );
+                  setDialogState(() {
+                    isSubmitting = true;
+                  });
+                }
+                if (state is S3UploadFailure) {
+                  setDialogState(() {
+                    isUploading = false;
+                    isSubmitting = false;
+                  });
+                  ScaffoldMessenger.of(dialogContext).showSnackBar(
+                    SnackBar(content: Text(state.message)),
+                  );
+                }
+              },
+              child: BlocListener<SubcategoryBloc, SubcategoryState>(
+                listener: (context, state) {
+                  if (!isSubmitting) return;
+                  if (state is SubcategorySuccess ||
+                      state is SubcategoryError) {
+                    Navigator.pop(dialogContext);
+                  }
+                },
+                child: AdminActionDialog(
+                  title: "Add Sub Category",
+                  submitText: "Create",
+                  submitLoading: isSubmitting || isUploading,
+                  submitEnabled: !(isSubmitting || isUploading),
+                  submitColor: Colors.black,
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      CustomTextFormField(
+                        controller: nameEnController,
+                        labelText: "Name EN",
+                      ),
+                      const SizedBox(height: 12),
+                      CustomTextFormField(
+                        controller: nameArController,
+                        labelText: "Name AR",
+                        suffixIcon: const Icon(Icons.translate),
+                        onSuffixTap: () async {
+                          final nameEn = nameEnController.text.trim();
+                          if (nameEn.isEmpty) {
+                            ScaffoldMessenger.of(dialogContext).showSnackBar(
+                              const SnackBar(
+                                content:
+                                    Text("Please enter English name first"),
+                              ),
+                            );
+                            return;
+                          }
+                        final translated =
+                            await TranslationService.translate(nameEn, 'ar');
+                        if (disposed) return;
+                        nameArController.text = translated;
+                        },
+                      ),
+                      const SizedBox(height: 12),
+                      BlocBuilder<CategoryBloc, CategoryState>(
+                        builder: (context, state) {
+                          final categories = state is CategoryLoaded
+                              ? state.categories
+                              : <CategoryModel>[];
+                          return DropdownButtonFormField<CategoryModel>(
+                            value: selectedCategory,
+                            decoration: InputDecoration(
+                              filled: true,
+                              fillColor: const Color(0xFFEFEFEF),
+                              border: OutlineInputBorder(
+                                borderRadius: BorderRadius.circular(14),
+                                borderSide: const BorderSide(
+                                  color: Color(0xFFEFEFEF),
+                                ),
+                              ),
+                              enabledBorder: OutlineInputBorder(
+                                borderRadius: BorderRadius.circular(14),
+                                borderSide: const BorderSide(
+                                  color: Color(0xFFEFEFEF),
+                                ),
+                              ),
+                              focusedBorder: OutlineInputBorder(
+                                borderRadius: BorderRadius.circular(14),
+                                borderSide: const BorderSide(
+                                  color: Color(0xFFEFEFEF),
+                                ),
+                              ),
+                              contentPadding: const EdgeInsets.symmetric(
+                                vertical: 18,
+                                horizontal: 18,
+                              ),
+                            ),
+                            hint: const DynamicText("Select category"),
+                            items: categories
+                                .map(
+                                  (c) => DropdownMenuItem(
+                                    value: c,
+                                    child: Text(c.nameEn),
+                                  ),
+                                )
+                                .toList(),
+                            onChanged: (value) {
+                              setDialogState(() {
+                                selectedCategory = value;
+                              });
+                            },
+                          );
+                        },
+                      ),
+                      const SizedBox(height: 12),
+                      Row(
+                        children: [
+                          Expanded(
+                            child: Container(
+                              padding: const EdgeInsets.symmetric(
+                                horizontal: 12,
+                                vertical: 14,
+                              ),
+                              decoration: BoxDecoration(
+                                border: Border.all(
+                                  color: const Color(0xFFE1E1E1),
+                                ),
+                                borderRadius: BorderRadius.circular(12),
+                              ),
+                              child: DynamicText(
+                                selectedImage?.name ?? "No image selected",
+                                style: AppThemes.f16w400,
+                              ),
+                            ),
+                          ),
+                          const SizedBox(width: 12),
+                          IconButton(
+                            icon: const Icon(Icons.image_outlined),
+                            onPressed: () async {
+                              final picker = ImagePicker();
+                              final file = await picker.pickImage(
+                                source: ImageSource.gallery,
+                              );
+                              if (file == null) return;
+                              final bytes = await file.readAsBytes();
+                              setDialogState(() {
+                                selectedImage = file;
+                                selectedImageBytes = bytes;
+                              });
+                            },
+                          ),
+                        ],
+                      ),
+                      const SizedBox(height: 12),
+                      SwitchListTile(
+                        value: isActive,
+                        onChanged: (value) {
+                          setDialogState(() {
+                            isActive = value;
+                          });
+                        },
+                        title: DynamicText("Active"),
+                      ),
+                    ],
+                  ),
+                  onSubmit: () {
+                    if (nameEnController.text.trim().isEmpty &&
+                        nameArController.text.trim().isEmpty) {
+                      ScaffoldMessenger.of(dialogContext).showSnackBar(
+                        const SnackBar(content: Text("Please enter a name")),
+                      );
+                      return;
+                    }
+                    if (selectedCategory == null) {
+                      ScaffoldMessenger.of(dialogContext).showSnackBar(
+                        const SnackBar(
+                          content: Text("Please select a category"),
+                        ),
+                      );
+                      return;
+                    }
+                    if (selectedImageBytes == null) {
+                      ScaffoldMessenger.of(dialogContext).showSnackBar(
+                        const SnackBar(
+                          content: Text("Please choose an image"),
+                        ),
+                      );
+                      return;
+                    }
+                    setDialogState(() {
+                      isUploading = true;
+                    });
+                    context.read<S3UploadBloc>().add(
+                          UploadFile(
+                            bytes: selectedImageBytes!,
+                            filename: selectedImage!.name,
+                            folder: "Categories",
+                          ),
+                        );
+                  },
+                ),
+              ),
+            );
+          },
+        );
+      },
+    ).then((_) {
+      nameEnController.dispose();
+      nameArController.dispose();
+    });
+  }
+
+  void _openEditSubcategoryDialog(SubcategoryModel subcategory) {
+    final nameEnController =
+        TextEditingController(text: subcategory.nameEn);
+    final nameArController =
+        TextEditingController(text: subcategory.nameAr);
+    CategoryModel? selectedCategory;
+    XFile? selectedImage;
+    Uint8List? selectedImageBytes;
+    bool isActive = subcategory.isActive;
+    bool isUploading = false;
+    bool isSubmitting = false;
+    String imageUrl = subcategory.imageUrl;
+    bool disposed = false;
+
+    showDialog(
+      context: context,
+      builder: (dialogContext) {
+        return StatefulBuilder(
+          builder: (context, setDialogState) {
+            return BlocListener<S3UploadBloc, S3UploadState>(
+              listener: (context, state) {
+                if (state is S3UploadSuccess) {
+                  imageUrl = state.result.url;
+                  final model = SubcategoryModel(
+                    id: subcategory.id,
+                    nameEn: nameEnController.text.trim(),
+                    nameAr: nameArController.text.trim(),
+                    parentId: selectedCategory?.id ?? subcategory.parentId,
+                    imageUrl: imageUrl,
+                    isActive: isActive,
+                    attributesSchema: subcategory.attributesSchema,
+                  );
+                  context.read<SubcategoryBloc>().add(
+                        UpdateSubcategory(subcategory.id, model),
+                      );
+                  setDialogState(() {
+                    isSubmitting = true;
+                  });
+                }
+                if (state is S3UploadFailure) {
+                  setDialogState(() {
+                    isUploading = false;
+                    isSubmitting = false;
+                  });
+                  ScaffoldMessenger.of(dialogContext).showSnackBar(
+                    SnackBar(content: Text(state.message)),
+                  );
+                }
+              },
+              child: BlocListener<SubcategoryBloc, SubcategoryState>(
+                listener: (context, state) {
+                  if (!isSubmitting) return;
+                  if (state is SubcategorySuccess ||
+                      state is SubcategoryError) {
+                    disposed = true;
+                    Navigator.pop(dialogContext);
+                  }
+                },
+                child: AdminActionDialog(
+                  title: "Update Sub Category",
+                  submitText: "Update",
+                  submitLoading: isSubmitting || isUploading,
+                  submitEnabled: !(isSubmitting || isUploading),
+                  submitColor: Colors.black,
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      CustomTextFormField(
+                        controller: nameEnController,
+                        labelText: "Name EN",
+                      ),
+                      const SizedBox(height: 12),
+                      CustomTextFormField(
+                        controller: nameArController,
+                        labelText: "Name AR",
+                        suffixIcon: const Icon(Icons.translate),
+                        onSuffixTap: () async {
+                          final nameEn = nameEnController.text.trim();
+                          if (nameEn.isEmpty) {
+                            ScaffoldMessenger.of(dialogContext).showSnackBar(
+                              const SnackBar(
+                                content:
+                                    Text("Please enter English name first"),
+                              ),
+                            );
+                            return;
+                          }
+                          final translated =
+                              await TranslationService.translate(nameEn, 'ar');
+                          if (disposed) return;
+                          nameArController.text = translated;
+                        },
+                      ),
+                      const SizedBox(height: 12),
+                      BlocBuilder<CategoryBloc, CategoryState>(
+                        builder: (context, state) {
+                          final categories = state is CategoryLoaded
+                              ? state.categories
+                              : <CategoryModel>[];
+                          if (selectedCategory == null) {
+                            for (final c in categories) {
+                              if (c.id == subcategory.parentId) {
+                                selectedCategory = c;
+                                break;
+                              }
+                            }
+                          }
+                          return DropdownButtonFormField<CategoryModel>(
+                            value: selectedCategory,
+                            decoration: InputDecoration(
+                              filled: true,
+                              fillColor: const Color(0xFFEFEFEF),
+                              border: OutlineInputBorder(
+                                borderRadius: BorderRadius.circular(14),
+                                borderSide: const BorderSide(
+                                  color: Color(0xFFEFEFEF),
+                                ),
+                              ),
+                              enabledBorder: OutlineInputBorder(
+                                borderRadius: BorderRadius.circular(14),
+                                borderSide: const BorderSide(
+                                  color: Color(0xFFEFEFEF),
+                                ),
+                              ),
+                              focusedBorder: OutlineInputBorder(
+                                borderRadius: BorderRadius.circular(14),
+                                borderSide: const BorderSide(
+                                  color: Color(0xFFEFEFEF),
+                                ),
+                              ),
+                              contentPadding: const EdgeInsets.symmetric(
+                                vertical: 18,
+                                horizontal: 18,
+                              ),
+                            ),
+                            hint: const DynamicText("Select category"),
+                            items: categories
+                                .map(
+                                  (c) => DropdownMenuItem(
+                                    value: c,
+                                    child: Text(c.nameEn),
+                                  ),
+                                )
+                                .toList(),
+                            onChanged: (value) {
+                              setDialogState(() {
+                                selectedCategory = value;
+                              });
+                            },
+                          );
+                        },
+                      ),
+                      const SizedBox(height: 12),
+                      Row(
+                        children: [
+                          Expanded(
+                            child: Container(
+                              padding: const EdgeInsets.symmetric(
+                                horizontal: 12,
+                                vertical: 14,
+                              ),
+                              decoration: BoxDecoration(
+                                border: Border.all(
+                                  color: const Color(0xFFE1E1E1),
+                                ),
+                                borderRadius: BorderRadius.circular(12),
+                              ),
+                              child: DynamicText(
+                                selectedImage?.name ??
+                                    (imageUrl.isNotEmpty
+                                        ? "Image selected"
+                                        : "No image selected"),
+                                style: AppThemes.f16w400,
+                              ),
+                            ),
+                          ),
+                          const SizedBox(width: 12),
+                          IconButton(
+                            icon: const Icon(Icons.image_outlined),
+                            onPressed: () async {
+                              final picker = ImagePicker();
+                              final file = await picker.pickImage(
+                                source: ImageSource.gallery,
+                              );
+                              if (file == null) return;
+                              final bytes = await file.readAsBytes();
+                              setDialogState(() {
+                                selectedImage = file;
+                                selectedImageBytes = bytes;
+                              });
+                            },
+                          ),
+                        ],
+                      ),
+                      const SizedBox(height: 12),
+                      SwitchListTile(
+                        value: isActive,
+                        onChanged: (value) {
+                          setDialogState(() {
+                            isActive = value;
+                          });
+                        },
+                        title: DynamicText("Active"),
+                      ),
+                    ],
+                  ),
+                  onSubmit: () {
+                    if (nameEnController.text.trim().isEmpty &&
+                        nameArController.text.trim().isEmpty) {
+                      ScaffoldMessenger.of(dialogContext).showSnackBar(
+                        const SnackBar(content: Text("Please enter a name")),
+                      );
+                      return;
+                    }
+                    setDialogState(() {
+                      isUploading = selectedImageBytes != null;
+                      isSubmitting = true;
+                    });
+                    if (selectedImageBytes != null) {
+                      context.read<S3UploadBloc>().add(
+                            UploadFile(
+                              bytes: selectedImageBytes!,
+                              filename: selectedImage!.name,
+                              folder: "Categories",
+                            ),
+                          );
+                      return;
+                    }
+                    final model = SubcategoryModel(
+                      id: subcategory.id,
+                      nameEn: nameEnController.text.trim(),
+                      nameAr: nameArController.text.trim(),
+                      parentId: selectedCategory?.id ?? subcategory.parentId,
+                      imageUrl: imageUrl,
+                      isActive: isActive,
+                      attributesSchema: subcategory.attributesSchema,
+                    );
+                    context.read<SubcategoryBloc>().add(
+                          UpdateSubcategory(subcategory.id, model),
+                        );
+                  },
+                ),
+              ),
+            );
+          },
+        );
+      },
+    ).then((_) {
+      disposed = true;
+      nameEnController.dispose();
+      nameArController.dispose();
+    });
+  }
+
+  void _openDeleteSubcategoryDialog(String id) {
+    bool isDeleting = false;
+    showDialog(
+      context: context,
+      builder: (dialogContext) {
+        return StatefulBuilder(
+          builder: (context, setDialogState) {
+            return BlocListener<SubcategoryBloc, SubcategoryState>(
+              listener: (context, state) {
+                if (!isDeleting) return;
+                if (state is SubcategorySuccess ||
+                    state is SubcategoryError) {
+                  Navigator.pop(dialogContext);
+                }
+              },
+              child: AdminActionDialog(
+                title: "Delete Sub Category",
+                submitText: "Delete",
+                submitLoading: isDeleting,
+                submitEnabled: !isDeleting,
+                submitColor: Colors.black,
+                child: DynamicText(
+                  "Are you sure you want to delete this sub category?",
+                  style: AppThemes.f18w400,
+                ),
+                onSubmit: () {
+                  setDialogState(() {
+                    isDeleting = true;
+                  });
+                  context.read<SubcategoryBloc>().add(
+                        DeleteSubcategory(id),
+                      );
+                },
+              ),
+            );
+          },
+        );
+      },
+    );
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -73,7 +629,7 @@ class _SubcategoryDesktopViewState extends State<SubcategoryDesktopView> {
                                   flex: 1,
                                   child: CustomButton(
                                     text: "+ Sub Category",
-                                    onPressed: () {},
+                                    onPressed: _openAddSubcategoryDialog,
                                   ),
                                 ),
                               ],
@@ -87,13 +643,21 @@ class _SubcategoryDesktopViewState extends State<SubcategoryDesktopView> {
                           ),
                           child: Padding(
                             padding: const EdgeInsets.symmetric(vertical: 16),
-                            child: Row(
-                              children: const [
-                                SizedBox(width: 40),
-                                Expanded(
-                                  flex: 2,
-                                  child: DynamicText(
-                                    'Name',
+                                    child: Row(
+                                      children: const [
+                                        SizedBox(width: 40),
+                                        Expanded(
+                                          flex: 1,
+                                          child: DynamicText(
+                                            'Image',
+                                            style: AppThemes.f20w500,
+                                          ),
+                                        ),
+                                        SizedBox(width: 8),
+                                        Expanded(
+                                          flex: 2,
+                                          child: DynamicText(
+                                            'Name',
                                     style: AppThemes.f20w500,
                                   ),
                                 ),
@@ -128,15 +692,76 @@ class _SubcategoryDesktopViewState extends State<SubcategoryDesktopView> {
                             ),
                           ),
                         ),
-                        ListView.builder(
-                          shrinkWrap: true,
-                          itemCount: 10,
-                          itemBuilder: (context, index) {
-                            return SubcategoryListWidget(
-                              subCategoryName: "Mobiles",
-                              categoryName: "Electronics",
-                              status: "Active",
-                            );
+                        BlocBuilder<SubcategoryBloc, SubcategoryState>(
+                          builder: (context, state) {
+                            if (state is SubcategoryLoading) {
+                              return const Padding(
+                                padding: EdgeInsets.all(20),
+                                child: Center(
+                                  child: CircularProgressIndicator(),
+                                ),
+                              );
+                            }
+                            if (state is SubcategoryLoaded) {
+                              if (state.subcategories.isEmpty) {
+                                return const Padding(
+                                  padding: EdgeInsets.all(20),
+                                  child: DynamicText(
+                                    "No subcategories present",
+                                  ),
+                                );
+                              }
+                              final isArabic = context
+                                  .watch<TranslationBloc>()
+                                  .state
+                                  .isRTL;
+                              return ListView.builder(
+                                shrinkWrap: true,
+                                itemCount: state.subcategories.length,
+                                itemBuilder: (context, index) {
+                                  final item = state.subcategories[index];
+                                  final categoryState =
+                                      context.read<CategoryBloc>().state;
+                                  String categoryName = item.parentId;
+                                  if (categoryState is CategoryLoaded) {
+                                    CategoryModel? match;
+                                    for (final c
+                                        in categoryState.categories) {
+                                      if (c.id == item.parentId) {
+                                        match = c;
+                                        break;
+                                      }
+                                    }
+                                    if (match != null) {
+                                      categoryName = isArabic
+                                          ? match.nameAr
+                                          : match.nameEn;
+                                    }
+                                  }
+                                  return SubcategoryListWidget(
+                                    imageUrl: item.imageUrl,
+                                    subCategoryName: isArabic
+                                        ? item.nameAr
+                                        : item.nameEn,
+                                    categoryName: categoryName,
+                                    status: item.isActive
+                                        ? "Active"
+                                        : "Inactive",
+                                    onEdit: () =>
+                                        _openEditSubcategoryDialog(item),
+                                    onDelete: () =>
+                                        _openDeleteSubcategoryDialog(item.id),
+                                  );
+                                },
+                              );
+                            }
+                            if (state is SubcategoryError) {
+                              return Padding(
+                                padding: const EdgeInsets.all(20),
+                                child: DynamicText(state.message),
+                              );
+                            }
+                            return const SizedBox();
                           },
                         ),
                       ],
