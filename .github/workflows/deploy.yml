@@ -28,3 +28,7 @@ jobs:
           publish_dir: ./build/web
           publish_branch: 96_production  # Your target production branch
           force_push: true
+
+      # ADD THE NEW STEP HERE
+      - name: Trigger Render Deploy
+        run: curl -X POST ${{ secrets.RENDER_DEPLOY_HOOK }}
