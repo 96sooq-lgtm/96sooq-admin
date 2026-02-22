@@ -1,4 +1,5 @@
 import 'package:bloc/bloc.dart';
+import 'package:dio/dio.dart';
 import 'package:equatable/equatable.dart';
 import 'package:_96sooq_admin/features/promotion/model/subscription_model.dart';
 import 'package:_96sooq_admin/features/promotion/services/subscription_service.dart';
@@ -12,6 +13,7 @@ class SubscriptionBloc extends Bloc<SubscriptionEvent, SubscriptionState> {
   SubscriptionBloc(this.service) : super(SubscriptionInitial()) {
     on<LoadSubscriptions>(_load);
     on<CreateSubscription>(_create);
+    on<UpdateSubscription>(_update);
     on<DeleteSubscription>(_delete);
   }
 
@@ -46,6 +48,22 @@ class SubscriptionBloc extends Bloc<SubscriptionEvent, SubscriptionState> {
   ) async {
     try {
       await service.delete(event.id);
+      add(LoadSubscriptions());
+    } catch (e) {
+      if (e is DioException && e.response?.statusCode == 409) {
+        emit(const SubscriptionError("This plan is in use"));
+        return;
+      }
+      emit(SubscriptionError(e.toString()));
+    }
+  }
+
+  Future<void> _update(
+    UpdateSubscription event,
+    Emitter<SubscriptionState> emit,
+  ) async {
+    try {
+      await service.update(event.id, event.subscription);
       add(LoadSubscriptions());
     } catch (e) {
       emit(SubscriptionError(e.toString()));

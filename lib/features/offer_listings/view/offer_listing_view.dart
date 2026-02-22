@@ -3,14 +3,14 @@ import 'package:_96sooq_admin/features/offer_listings/view/offer_listing_view_mo
 import 'package:flutter/material.dart';
 import 'package:responsive_builder/responsive_builder.dart';
 
-class OfferListingView extends StatelessWidget {
-  const OfferListingView({super.key});
+class StoreListingScreen extends StatelessWidget {
+  const StoreListingScreen({super.key});
 
   @override
   Widget build(BuildContext context) {
     return ScreenTypeLayout.builder(
-      mobile: (context) => OfferListingViewMobile(),
-      desktop: (context) => OfferListingViewDesktop(),
+      mobile: (context) => const OfferListingViewMobile(),
+      desktop: (context) => const OfferListingViewDesktop(),
     );
   }
 }

@@ -7,9 +7,12 @@ class SubscriptionModel {
   final SubscriptionType type;
   final double price;
   final int durationDays;
+  final int quota;
   final String description;
   final Map<String, dynamic>? features;
+  final String? targetAudience;
   final bool isActive;
+  final bool isBestValue;
   final DateTime? createdAt;
 
   SubscriptionModel({
@@ -19,9 +22,12 @@ class SubscriptionModel {
     required this.type,
     required this.price,
     required this.durationDays,
+    required this.quota,
     required this.description,
     required this.features,
+    required this.targetAudience,
     required this.isActive,
+    required this.isBestValue,
     required this.createdAt,
   });
 
@@ -33,11 +39,14 @@ class SubscriptionModel {
       type: _parseType(json['type']),
       price: (json['price'] ?? 0).toDouble(),
       durationDays: json['duration_days'] ?? 0,
+      quota: _parseInt(json['quota'], fallback: 0),
       description: json['description'] ?? '',
       features: json['features'] is Map<String, dynamic>
           ? Map<String, dynamic>.from(json['features'])
           : null,
+      targetAudience: json['target_audience']?.toString(),
       isActive: json['is_active'] ?? false,
+      isBestValue: json['is_best_value'] ?? json['isBestValue'] ?? false,
       createdAt: _parseDateTime(json['created_at']),
     );
   }
@@ -49,8 +58,33 @@ class SubscriptionModel {
       "type": type.apiValue,
       "price": price,
       "duration_days": durationDays,
+      "quota": quota,
       "description": description,
       "is_active": isActive,
+      "isBestValue": isBestValue,
+      if (type == SubscriptionType.productListing &&
+          targetAudience != null &&
+          targetAudience!.isNotEmpty)
+        "target_audience": targetAudience,
+      if (features != null) "features": features,
+    };
+  }
+
+  Map<String, dynamic> toUpdateJson() {
+    return {
+      "name_en": nameEn,
+      "name_ar": nameAr,
+      "type": type.apiValue,
+      "price": price,
+      "duration_days": durationDays,
+      "quota": quota,
+      "description": description,
+      "is_active": isActive,
+      "is_best_value": isBestValue,
+      if (type == SubscriptionType.productListing &&
+          targetAudience != null &&
+          targetAudience!.isNotEmpty)
+        "target_audience": targetAudience,
       if (features != null) "features": features,
     };
   }
@@ -74,4 +108,11 @@ SubscriptionType _parseType(dynamic value) {
     default:
       return SubscriptionType.productListing;
   }
+}
+
+int _parseInt(dynamic value, {int fallback = 0}) {
+  if (value is int) return value;
+  if (value is num) return value.toInt();
+  if (value is String) return int.tryParse(value) ?? fallback;
+  return fallback;
 }

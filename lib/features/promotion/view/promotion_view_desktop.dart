@@ -11,8 +11,9 @@ import 'package:_96sooq_admin/features/category/widgets/add_category_popup.dart'
 import 'package:_96sooq_admin/features/promotion/bloc/subscription_bloc.dart';
 import 'package:_96sooq_admin/features/promotion/model/subscription_model.dart';
 import 'package:_96sooq_admin/features/shared/global_widgets/custom_button_widgets.dart';
-import 'package:_96sooq_admin/features/subcategory/widgets/subcategory_list_widget.dart';
+import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 
 class PromotionViewDesktop extends StatefulWidget {
@@ -24,6 +25,7 @@ class PromotionViewDesktop extends StatefulWidget {
 
 class _PromotionViewDesktopState extends State<PromotionViewDesktop> {
   bool _hasLoaded = false;
+  static final RegExp _descriptionPointPrefix = RegExp(r'^\d+\.\s');
 
   @override
   void initState() {
@@ -32,6 +34,188 @@ class _PromotionViewDesktopState extends State<PromotionViewDesktop> {
       _hasLoaded = true;
       context.read<SubscriptionBloc>().add(LoadSubscriptions());
     }
+  }
+
+  String _targetAudienceLabel(String? value) {
+    switch (value) {
+      case 'individual':
+        return 'Individual';
+      case 'store':
+        return 'Store';
+      case 'everyone':
+        return 'Everyone';
+      default:
+        return '-';
+    }
+  }
+
+  List<String> _extractPointLines(
+    String raw, {
+    bool keepEmpty = true,
+    int maxLines = 5,
+  }) {
+    final lines = raw.split('\n');
+    final result = <String>[];
+    for (final line in lines) {
+      final cleaned = line.replaceFirst(_descriptionPointPrefix, '');
+      if (!keepEmpty && cleaned.trim().isEmpty) {
+        continue;
+      }
+      result.add(cleaned);
+      if (result.length >= maxLines) {
+        break;
+      }
+    }
+    if (result.isEmpty) {
+      result.add('');
+    }
+    return result;
+  }
+
+  String _toNumberedLines(List<String> lines) {
+    return List.generate(
+      lines.length,
+      (index) => '${index + 1}. ${lines[index]}',
+    ).join('\n');
+  }
+
+  String _normalizeNumberedDescription(String raw, {int maxLines = 5}) {
+    final lines = _extractPointLines(raw, keepEmpty: true, maxLines: maxLines);
+    return _toNumberedLines(lines);
+  }
+
+  int _descriptionPrefixLength(String line) {
+    final match = _descriptionPointPrefix.firstMatch(line);
+    return match?.group(0)?.length ?? 0;
+  }
+
+  ({int line, int column}) _descriptionLineColumnFromOffset(
+    String text,
+    int offset,
+  ) {
+    final lines = text.split('\n');
+    int consumed = 0;
+    for (int i = 0; i < lines.length; i++) {
+      final lineLength = lines[i].length;
+      final lineEnd = consumed + lineLength;
+      if (offset <= lineEnd) {
+        return (line: i, column: (offset - consumed).clamp(0, lineLength));
+      }
+      consumed = lineEnd + 1;
+    }
+    final lastLine = lines.isEmpty ? 0 : lines.length - 1;
+    final lastColumn = lines.isEmpty ? 0 : lines[lastLine].length;
+    return (line: lastLine, column: lastColumn);
+  }
+
+  int _descriptionOffsetFromLineAndColumn(
+    List<String> contentLines,
+    int targetLine,
+    int targetColumn,
+  ) {
+    int offset = 0;
+    for (int i = 0; i < targetLine; i++) {
+      final numberedLine = '${i + 1}. ${contentLines[i]}';
+      offset += numberedLine.length + 1;
+    }
+    final prefixLength = '${targetLine + 1}. '.length;
+    final safeColumn = targetColumn.clamp(0, contentLines[targetLine].length);
+    offset += prefixLength + safeColumn;
+    return offset;
+  }
+
+  TextEditingValue _applyDescriptionEdit(
+    TextEditingValue oldValue,
+    TextEditingValue newValue, {
+    int maxLines = 5,
+  }) {
+    if (oldValue == newValue) {
+      return newValue;
+    }
+    final displayLines = newValue.text.split('\n');
+    final selectionOffset = newValue.selection.baseOffset < 0
+        ? newValue.text.length
+        : newValue.selection.baseOffset;
+    final cursor = _descriptionLineColumnFromOffset(
+      newValue.text,
+      selectionOffset,
+    );
+    final safeDisplayLine = cursor.line.clamp(0, displayLines.length - 1);
+    final safeDisplayColumn = cursor.column.clamp(
+      0,
+      displayLines[safeDisplayLine].length,
+    );
+    final currentPrefixLength = _descriptionPrefixLength(
+      displayLines[safeDisplayLine],
+    );
+    final logicalColumn = (safeDisplayColumn - currentPrefixLength).clamp(
+      0,
+      displayLines[safeDisplayLine].length,
+    );
+
+    final contentLines = displayLines
+        .map((line) => line.replaceFirst(_descriptionPointPrefix, ''))
+        .toList();
+    final limitedContentLines = contentLines.take(maxLines).toList();
+    if (limitedContentLines.isEmpty) {
+      limitedContentLines.add('');
+    }
+
+    int? forcedTargetLine;
+    int? forcedTargetColumn;
+    final isBackspaceDeletion =
+        oldValue.selection.isCollapsed &&
+        newValue.selection.isCollapsed &&
+        oldValue.text.length == newValue.text.length + 1 &&
+        oldValue.selection.baseOffset == newValue.selection.baseOffset + 1;
+    if (isBackspaceDeletion) {
+      final oldOffset = oldValue.selection.baseOffset;
+      final oldCursor = _descriptionLineColumnFromOffset(
+        oldValue.text,
+        oldOffset,
+      );
+      final oldLines = oldValue.text.split('\n');
+      if (oldCursor.line >= 0 && oldCursor.line < oldLines.length) {
+        final oldLine = oldLines[oldCursor.line];
+        final oldContent = oldLine.replaceFirst(_descriptionPointPrefix, '');
+        final oldPrefixLength = _descriptionPrefixLength(oldLine);
+        final deletingPrefixOnEmptyPoint =
+            oldContent.isEmpty && oldCursor.column <= oldPrefixLength;
+        if (deletingPrefixOnEmptyPoint && limitedContentLines.length > 1) {
+          final removeAt = oldCursor.line.clamp(
+            0,
+            limitedContentLines.length - 1,
+          );
+          limitedContentLines.removeAt(removeAt);
+          if (limitedContentLines.isEmpty) {
+            limitedContentLines.add('');
+          }
+          forcedTargetLine = (removeAt - 1).clamp(
+            0,
+            limitedContentLines.length - 1,
+          );
+          forcedTargetColumn = limitedContentLines[forcedTargetLine].length;
+        }
+      }
+    }
+
+    final targetLine =
+        forcedTargetLine ??
+        safeDisplayLine.clamp(0, limitedContentLines.length - 1);
+    final targetColumn =
+        forcedTargetColumn ??
+        logicalColumn.clamp(0, limitedContentLines[targetLine].length);
+    final normalizedText = _toNumberedLines(limitedContentLines);
+    final mappedOffset = _descriptionOffsetFromLineAndColumn(
+      limitedContentLines,
+      targetLine,
+      targetColumn,
+    );
+
+    return TextEditingValue(
+      text: normalizedText,
+      selection: TextSelection.collapsed(offset: mappedOffset),
+    );
   }
 
   void _openDeleteSubscriptionDialog(String id) {
@@ -44,6 +228,14 @@ class _PromotionViewDesktopState extends State<PromotionViewDesktop> {
             return BlocListener<SubscriptionBloc, SubscriptionState>(
               listener: (context, state) {
                 if (!isDeleting) return;
+                if (state is SubscriptionError) {
+                  ScaffoldMessenger.of(
+                    this.context,
+                  ).showSnackBar(SnackBar(content: Text(state.message)));
+                  this.context.read<SubscriptionBloc>().add(
+                    LoadSubscriptions(),
+                  );
+                }
                 if (state is SubscriptionLoaded || state is SubscriptionError) {
                   isDeleting = false;
                   Navigator.pop(dialogContext);
@@ -73,15 +265,60 @@ class _PromotionViewDesktopState extends State<PromotionViewDesktop> {
     );
   }
 
-  void _openCreatePlanDialog() {
-    final nameEnController = TextEditingController();
-    final nameArController = TextEditingController();
-    final priceController = TextEditingController();
-    final durationController = TextEditingController();
-    SubscriptionType planTypeValue = SubscriptionType.productListing;
-    String statusValue = "Active";
-    final descriptionController = TextEditingController();
-    bool isCreating = false;
+  void _openSubscriptionDialog({SubscriptionModel? existing}) {
+    final isEditMode = existing != null;
+    final nameEnController = TextEditingController(
+      text: existing?.nameEn ?? '',
+    );
+    final nameArController = TextEditingController(
+      text: existing?.nameAr ?? '',
+    );
+    final priceController = TextEditingController(
+      text: existing == null ? '' : existing.price.toInt().toString(),
+    );
+    final durationController = TextEditingController(
+      text: existing == null ? '' : existing.durationDays.toString(),
+    );
+    final quotaController = TextEditingController(
+      text: existing == null ? '0' : existing.quota.toString(),
+    );
+    SubscriptionType planTypeValue =
+        existing?.type ?? SubscriptionType.productListing;
+    String statusValue = (existing?.isActive ?? true) ? "Active" : "Inactive";
+    final descriptionController = TextEditingController(
+      text: _normalizeNumberedDescription(existing?.description ?? '1. '),
+    );
+    String? targetAudienceValue =
+        planTypeValue == SubscriptionType.productListing
+        ? (existing?.targetAudience ?? 'individual')
+        : null;
+    bool isBestValue = existing?.isBestValue ?? false;
+    bool isSaving = false;
+    bool isNormalizingDescription = false;
+    TextEditingValue previousDescriptionValue = descriptionController.value;
+
+    void normalizeDescriptionListener() {
+      if (isNormalizingDescription) {
+        return;
+      }
+      final currentValue = descriptionController.value;
+      final normalizedValue = _applyDescriptionEdit(
+        previousDescriptionValue,
+        currentValue,
+      );
+      if (normalizedValue.text == currentValue.text &&
+          normalizedValue.selection.baseOffset ==
+              currentValue.selection.baseOffset) {
+        previousDescriptionValue = currentValue;
+        return;
+      }
+      isNormalizingDescription = true;
+      descriptionController.value = normalizedValue;
+      isNormalizingDescription = false;
+      previousDescriptionValue = descriptionController.value;
+    }
+
+    descriptionController.addListener(normalizeDescriptionListener);
 
     showDialog(
       context: context,
@@ -90,171 +327,361 @@ class _PromotionViewDesktopState extends State<PromotionViewDesktop> {
           builder: (context, setDialogState) {
             return BlocListener<SubscriptionBloc, SubscriptionState>(
               listener: (context, state) {
-                if (!isCreating) return;
+                if (!isSaving) return;
                 if (state is SubscriptionLoaded || state is SubscriptionError) {
-                  isCreating = false;
+                  isSaving = false;
                   Navigator.pop(dialogContext);
                 }
               },
               child: AdminActionDialog(
-                title: "Create Promotion Plan",
-                submitText: "Create",
-                submitColor: Colors.black,
-                submitLoading: isCreating,
-                submitEnabled: !isCreating,
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    CustomTextFormField(
-                      controller: nameEnController,
-                      labelText: "Plan Name (EN)",
-                    ),
-                    const SizedBox(height: 12),
-                    CustomTextFormField(
-                      controller: nameArController,
-                      labelText: "Plan Name (AR)",
-                      suffixIcon: const Icon(Icons.translate),
-                      onSuffixTap: () async {
-                        final nameEn = nameEnController.text.trim();
-                        if (nameEn.isEmpty) {
-                          ScaffoldMessenger.of(dialogContext).showSnackBar(
-                            const SnackBar(
-                              content: Text(
-                                "Please enter English name first",
+                title: isEditMode
+                    ? "Edit Promotion Plan"
+                    : "Create Promotion Plan",
+                submitText: isEditMode ? "Update" : "Create",
+                submitColor: AppColors.primaryColor,
+                submitLoading: isSaving,
+                submitEnabled: !isSaving,
+                child: ConstrainedBox(
+                  constraints: BoxConstraints(
+                    maxHeight: MediaQuery.of(dialogContext).size.height * 0.65,
+                  ),
+                  child: SingleChildScrollView(
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        DynamicText("Plan Name (EN)", style: AppThemes.f16w500),
+                        const SizedBox(height: 8),
+                        CustomTextFormField(
+                          controller: nameEnController,
+                          labelText: "Plan Name (EN)",
+                        ),
+                        const SizedBox(height: 12),
+                        DynamicText("Plan Name (AR)", style: AppThemes.f16w500),
+                        const SizedBox(height: 8),
+                        CustomTextFormField(
+                          controller: nameArController,
+                          labelText: "Plan Name (AR)",
+                          suffixIcon: const Icon(Icons.translate),
+                          onSuffixTap: () async {
+                            final nameEn = nameEnController.text.trim();
+                            if (nameEn.isEmpty) {
+                              ScaffoldMessenger.of(dialogContext).showSnackBar(
+                                const SnackBar(
+                                  content: Text(
+                                    "Please enter English name first",
+                                  ),
+                                ),
+                              );
+                              return;
+                            }
+                            final translated =
+                                await TranslationService.translate(
+                                  nameEn,
+                                  'ar',
+                                );
+                            nameArController.text = translated;
+                          },
+                        ),
+                        const SizedBox(height: 12),
+                        DynamicText("Price", style: AppThemes.f16w500),
+                        const SizedBox(height: 8),
+                        CustomTextFormField(
+                          controller: priceController,
+                          labelText: "Price",
+                          keyboardType: TextInputType.number,
+                          inputFormatters: [
+                            FilteringTextInputFormatter.digitsOnly,
+                          ],
+                        ),
+                        const SizedBox(height: 12),
+                        DynamicText("Duration", style: AppThemes.f16w500),
+                        const SizedBox(height: 8),
+                        CustomTextFormField(
+                          controller: durationController,
+                          labelText: "Duration",
+                          keyboardType: TextInputType.number,
+                          inputFormatters: [
+                            FilteringTextInputFormatter.digitsOnly,
+                          ],
+                        ),
+                        const SizedBox(height: 12),
+                        DynamicText(
+                          "Number of listings available",
+                          style: AppThemes.f16w500,
+                        ),
+                        const SizedBox(height: 8),
+                        CustomTextFormField(
+                          controller: quotaController,
+                          labelText: "Number of listings available",
+                          keyboardType: TextInputType.number,
+                          inputFormatters: [
+                            FilteringTextInputFormatter.allow(
+                              RegExp(r'^-?\d*$'),
+                            ),
+                          ],
+                        ),
+                        const SizedBox(height: 12),
+                        DynamicText("Description", style: AppThemes.f16w500),
+                        const SizedBox(height: 8),
+                        CustomTextFormField(
+                          controller: descriptionController,
+                          labelText: "Description",
+                          minLines: 1,
+                          maxLines: 5,
+                        ),
+                        const SizedBox(height: 12),
+                        Row(
+                          mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                          children: [
+                            DynamicText("Best Value", style: AppThemes.f16w500),
+                            CupertinoSwitch(
+                              value: isBestValue,
+                              activeTrackColor: AppColors.primaryColor,
+                              onChanged: (value) {
+                                setDialogState(() {
+                                  isBestValue = value;
+                                });
+                              },
+                            ),
+                          ],
+                        ),
+                        const SizedBox(height: 12),
+                        DynamicText("Type", style: AppThemes.f16w500),
+                        const SizedBox(height: 8),
+                        DropdownButtonFormField<SubscriptionType>(
+                          value: planTypeValue,
+                          decoration: InputDecoration(
+                            filled: true,
+                            fillColor: const Color(0xFFEFEFEF),
+                            border: OutlineInputBorder(
+                              borderRadius: BorderRadius.circular(14),
+                              borderSide: const BorderSide(
+                                color: Color(0xFFEFEFEF),
                               ),
                             ),
-                          );
-                          return;
-                        }
-                        final translated =
-                            await TranslationService.translate(nameEn, 'ar');
-                        nameArController.text = translated;
-                      },
-                    ),
-                    const SizedBox(height: 12),
-                    CustomTextFormField(
-                      controller: priceController,
-                      labelText: "Price",
-                      keyboardType: TextInputType.number,
-                    ),
-                    const SizedBox(height: 12),
-                    CustomTextFormField(
-                      controller: durationController,
-                      labelText: "Duration",
-                      keyboardType: TextInputType.number,
-                    ),
-                    const SizedBox(height: 12),
-                    CustomTextFormField(
-                      controller: descriptionController,
-                      labelText: "Description",
-                      maxLines: 3,
-                    ),
-                    const SizedBox(height: 12),
-                    DropdownButtonFormField<SubscriptionType>(
-                      value: planTypeValue,
-                      decoration: InputDecoration(
-                        filled: true,
-                        fillColor: const Color(0xFFEFEFEF),
-                        border: OutlineInputBorder(
-                          borderRadius: BorderRadius.circular(14),
-                          borderSide:
-                              const BorderSide(color: Color(0xFFEFEFEF)),
-                        ),
-                        enabledBorder: OutlineInputBorder(
-                          borderRadius: BorderRadius.circular(14),
-                          borderSide:
-                              const BorderSide(color: Color(0xFFEFEFEF)),
-                        ),
-                        focusedBorder: OutlineInputBorder(
-                          borderRadius: BorderRadius.circular(14),
-                          borderSide:
-                              const BorderSide(color: Color(0xFFEFEFEF)),
-                        ),
-                        contentPadding: const EdgeInsets.symmetric(
-                          vertical: 18,
-                          horizontal: 18,
-                        ),
-                      ),
-                      items: SubscriptionType.values
-                          .map(
-                            (type) => DropdownMenuItem(
-                              value: type,
-                              child: Text(type.label),
+                            enabledBorder: OutlineInputBorder(
+                              borderRadius: BorderRadius.circular(14),
+                              borderSide: const BorderSide(
+                                color: Color(0xFFEFEFEF),
+                              ),
                             ),
-                          )
-                          .toList(),
-                      onChanged: (value) {
-                        if (value == null) return;
-                        setDialogState(() {
-                          planTypeValue = value;
-                        });
-                      },
-                    ),
-                    const SizedBox(height: 12),
-                    DropdownButtonFormField<String>(
-                      value: statusValue,
-                      decoration: InputDecoration(
-                        filled: true,
-                        fillColor: const Color(0xFFEFEFEF),
-                        border: OutlineInputBorder(
-                          borderRadius: BorderRadius.circular(14),
-                          borderSide:
-                              const BorderSide(color: Color(0xFFEFEFEF)),
+                            focusedBorder: OutlineInputBorder(
+                              borderRadius: BorderRadius.circular(14),
+                              borderSide: const BorderSide(
+                                color: Color(0xFFEFEFEF),
+                              ),
+                            ),
+                            contentPadding: const EdgeInsets.symmetric(
+                              vertical: 18,
+                              horizontal: 18,
+                            ),
+                          ),
+                          items: SubscriptionType.values
+                              .map(
+                                (type) => DropdownMenuItem(
+                                  value: type,
+                                  child: Text(type.label),
+                                ),
+                              )
+                              .toList(),
+                          onChanged: (value) {
+                            if (value == null) return;
+                            setDialogState(() {
+                              planTypeValue = value;
+                              if (planTypeValue ==
+                                  SubscriptionType.productListing) {
+                                targetAudienceValue ??= 'individual';
+                              } else {
+                                targetAudienceValue = null;
+                              }
+                            });
+                          },
                         ),
-                        enabledBorder: OutlineInputBorder(
-                          borderRadius: BorderRadius.circular(14),
-                          borderSide:
-                              const BorderSide(color: Color(0xFFEFEFEF)),
-                        ),
-                        focusedBorder: OutlineInputBorder(
-                          borderRadius: BorderRadius.circular(14),
-                          borderSide:
-                              const BorderSide(color: Color(0xFFEFEFEF)),
-                        ),
-                        contentPadding: const EdgeInsets.symmetric(
-                          vertical: 18,
-                          horizontal: 18,
-                        ),
-                      ),
-                      items: const [
-                        DropdownMenuItem(value: "Active", child: Text("Active")),
-                        DropdownMenuItem(
-                          value: "Inactive",
-                          child: Text("Inactive"),
+                        if (planTypeValue ==
+                            SubscriptionType.productListing) ...[
+                          const SizedBox(height: 12),
+                          DynamicText(
+                            "Target Audience",
+                            style: AppThemes.f16w500,
+                          ),
+                          const SizedBox(height: 8),
+                          DropdownButtonFormField<String>(
+                            value: targetAudienceValue,
+                            decoration: InputDecoration(
+                              filled: true,
+                              fillColor: const Color(0xFFEFEFEF),
+                              border: OutlineInputBorder(
+                                borderRadius: BorderRadius.circular(14),
+                                borderSide: const BorderSide(
+                                  color: Color(0xFFEFEFEF),
+                                ),
+                              ),
+                              enabledBorder: OutlineInputBorder(
+                                borderRadius: BorderRadius.circular(14),
+                                borderSide: const BorderSide(
+                                  color: Color(0xFFEFEFEF),
+                                ),
+                              ),
+                              focusedBorder: OutlineInputBorder(
+                                borderRadius: BorderRadius.circular(14),
+                                borderSide: const BorderSide(
+                                  color: Color(0xFFEFEFEF),
+                                ),
+                              ),
+                              contentPadding: const EdgeInsets.symmetric(
+                                vertical: 18,
+                                horizontal: 18,
+                              ),
+                            ),
+                            items: const [
+                              DropdownMenuItem(
+                                value: 'individual',
+                                child: Text('Individual'),
+                              ),
+                              DropdownMenuItem(
+                                value: 'store',
+                                child: Text('Store'),
+                              ),
+                              DropdownMenuItem(
+                                value: 'everyone',
+                                child: Text('Everyone'),
+                              ),
+                            ],
+                            onChanged: (value) {
+                              setDialogState(() {
+                                targetAudienceValue = value;
+                              });
+                            },
+                            hint: const Text('Target Audience'),
+                          ),
+                        ],
+                        const SizedBox(height: 12),
+                        DynamicText("Status", style: AppThemes.f16w500),
+                        const SizedBox(height: 8),
+                        DropdownButtonFormField<String>(
+                          value: statusValue,
+                          decoration: InputDecoration(
+                            filled: true,
+                            fillColor: const Color(0xFFEFEFEF),
+                            border: OutlineInputBorder(
+                              borderRadius: BorderRadius.circular(14),
+                              borderSide: const BorderSide(
+                                color: Color(0xFFEFEFEF),
+                              ),
+                            ),
+                            enabledBorder: OutlineInputBorder(
+                              borderRadius: BorderRadius.circular(14),
+                              borderSide: const BorderSide(
+                                color: Color(0xFFEFEFEF),
+                              ),
+                            ),
+                            focusedBorder: OutlineInputBorder(
+                              borderRadius: BorderRadius.circular(14),
+                              borderSide: const BorderSide(
+                                color: Color(0xFFEFEFEF),
+                              ),
+                            ),
+                            contentPadding: const EdgeInsets.symmetric(
+                              vertical: 18,
+                              horizontal: 18,
+                            ),
+                          ),
+                          items: const [
+                            DropdownMenuItem(
+                              value: "Active",
+                              child: Text("Active"),
+                            ),
+                            DropdownMenuItem(
+                              value: "Inactive",
+                              child: Text("Inactive"),
+                            ),
+                          ],
+                          onChanged: (value) {
+                            if (value == null) return;
+                            setDialogState(() {
+                              statusValue = value;
+                            });
+                          },
                         ),
                       ],
-                      onChanged: (value) {
-                        if (value == null) return;
-                        setDialogState(() {
-                          statusValue = value;
-                        });
-                      },
                     ),
-                  ],
+                  ),
                 ),
                 onSubmit: () {
-                  final price =
-                      double.tryParse(priceController.text.trim()) ?? 0;
+                  final normalizedDescription = _normalizeNumberedDescription(
+                    descriptionController.text,
+                  );
+                  final hasAtLeastOnePoint = _extractPointLines(
+                    normalizedDescription,
+                    keepEmpty: false,
+                  ).isNotEmpty;
+                  if (!hasAtLeastOnePoint) {
+                    ScaffoldMessenger.of(dialogContext).showSnackBar(
+                      const SnackBar(
+                        content: Text(
+                          "At least one description point is required",
+                        ),
+                      ),
+                    );
+                    return;
+                  }
+                  if (planTypeValue == SubscriptionType.productListing &&
+                      (targetAudienceValue == null ||
+                          targetAudienceValue!.isEmpty)) {
+                    ScaffoldMessenger.of(dialogContext).showSnackBar(
+                      const SnackBar(
+                        content: Text(
+                          "Target Audience is required for Product Listing",
+                        ),
+                      ),
+                    );
+                    return;
+                  }
+                  final price = (int.tryParse(priceController.text.trim()) ?? 0)
+                      .toDouble();
                   final durationDays =
                       int.tryParse(durationController.text.trim()) ?? 0;
+                  final parsedQuota = int.tryParse(quotaController.text.trim());
+                  if (parsedQuota == null || parsedQuota < -1) {
+                    ScaffoldMessenger.of(dialogContext).showSnackBar(
+                      const SnackBar(
+                        content: Text(
+                          "Quota must be -1 or a non-negative integer",
+                        ),
+                      ),
+                    );
+                    return;
+                  }
                   final subscription = SubscriptionModel(
-                    id: '',
+                    id: existing?.id ?? '',
                     nameEn: nameEnController.text.trim(),
                     nameAr: nameArController.text.trim(),
                     type: planTypeValue,
                     price: price,
                     durationDays: durationDays,
-                    description: descriptionController.text.trim(),
+                    quota: parsedQuota,
+                    description: normalizedDescription,
                     features: null,
+                    targetAudience: targetAudienceValue,
                     isActive: statusValue == "Active",
+                    isBestValue: isBestValue,
                     createdAt: null,
                   );
                   setDialogState(() {
-                    isCreating = true;
+                    isSaving = true;
                   });
-                  context.read<SubscriptionBloc>().add(
-                        CreateSubscription(subscription),
-                      );
+                  if (isEditMode) {
+                    context.read<SubscriptionBloc>().add(
+                      UpdateSubscription(
+                        id: existing.id,
+                        subscription: subscription,
+                      ),
+                    );
+                  } else {
+                    context.read<SubscriptionBloc>().add(
+                      CreateSubscription(subscription),
+                    );
+                  }
                 },
               ),
             );
@@ -262,10 +689,12 @@ class _PromotionViewDesktopState extends State<PromotionViewDesktop> {
         );
       },
     ).then((_) {
+      descriptionController.removeListener(normalizeDescriptionListener);
       nameEnController.dispose();
       nameArController.dispose();
       priceController.dispose();
       durationController.dispose();
+      quotaController.dispose();
       descriptionController.dispose();
     });
   }
@@ -315,7 +744,7 @@ class _PromotionViewDesktopState extends State<PromotionViewDesktop> {
                                   flex: 1,
                                   child: CustomButton(
                                     text: "+ Create plan",
-                                    onPressed: _openCreatePlanDialog,
+                                    onPressed: () => _openSubscriptionDialog(),
                                   ),
                                 ),
                               ],
@@ -333,7 +762,7 @@ class _PromotionViewDesktopState extends State<PromotionViewDesktop> {
                               children: const [
                                 SizedBox(width: 40),
                                 Expanded(
-                                  flex: 2,
+                                  flex: 3,
                                   child: DynamicText(
                                     'Plan Name',
                                     style: AppThemes.f20w500,
@@ -370,12 +799,12 @@ class _PromotionViewDesktopState extends State<PromotionViewDesktop> {
                                   flex: 2,
                                   child: Center(
                                     child: DynamicText(
-                                      'Actions',
+                                      'Target Audience',
                                       style: AppThemes.f20w500,
-                                      textAlign: TextAlign.right,
                                     ),
                                   ),
                                 ),
+                                SizedBox(width: 44),
                               ],
                             ),
                           ),
@@ -418,10 +847,19 @@ class _PromotionViewDesktopState extends State<PromotionViewDesktop> {
                                         price: item.price.toString(),
                                         duration: "${item.durationDays} Days",
                                         type: item.type.label,
-                                        onDelete: () =>
-                                            _openDeleteSubscriptionDialog(
-                                          item.id,
+                                        isBestValue: item.isBestValue,
+                                        onEdit: () => _openSubscriptionDialog(
+                                          existing: item,
                                         ),
+                                        targetAudienceDisplay:
+                                            _targetAudienceLabel(
+                                              item.targetAudience,
+                                            ),
+                                        onDelete: () {
+                                          _openDeleteSubscriptionDialog(
+                                            item.id,
+                                          );
+                                        },
                                       );
                                     },
                                   );
@@ -469,30 +907,26 @@ class _SubscriptionShimmerRow extends StatelessWidget {
             children: const [
               SizedBox(width: 40),
               Expanded(
-                flex: 2,
+                flex: 3,
                 child: _ShimmerBox(width: double.infinity, height: 18),
               ),
-              SizedBox(width: 12),
               Expanded(
                 flex: 2,
                 child: _ShimmerBox(width: double.infinity, height: 18),
               ),
-              SizedBox(width: 12),
               Expanded(
                 flex: 2,
                 child: _ShimmerBox(width: double.infinity, height: 18),
               ),
-              SizedBox(width: 12),
               Expanded(
                 flex: 2,
                 child: _ShimmerBox(width: double.infinity, height: 18),
               ),
-              SizedBox(width: 12),
               Expanded(
                 flex: 2,
                 child: _ShimmerBox(width: double.infinity, height: 18),
               ),
-              SizedBox(width: 40),
+              SizedBox(width: 44),
             ],
           ),
         );

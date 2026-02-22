@@ -18,7 +18,7 @@ class HomeViewDesktop extends StatefulWidget {
 class _HomeViewDesktopState extends State<HomeViewDesktop> {
   final dashboardItems = [
     {'icon': AssetPath.totalUsersIc, 'title': 'Users', 'index': 6},
-    {'icon': AssetPath.storeIc, 'title': 'Store', 'index': 1},
+    {'icon': AssetPath.storeIc, 'title': 'Stores', 'index': 5},
     {'icon': AssetPath.listingIc, 'title': 'Listings', 'index': 5},
     {'icon': AssetPath.dealsIc, 'title': 'Deals', 'index': 3},
     {

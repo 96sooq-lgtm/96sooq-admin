@@ -4,8 +4,9 @@ import 'package:_96sooq_admin/core/bloc/language/bloc/language_event.dart';
 import 'package:_96sooq_admin/core/bloc/language/bloc/language_state.dart';
 import 'package:_96sooq_admin/features/auth/bloc/auth_bloc.dart';
 import 'package:_96sooq_admin/features/auth/bloc/auth_event.dart';
+import 'package:_96sooq_admin/features/ad_bannner/bloc/ad_banner_bloc.dart';
+import 'package:_96sooq_admin/features/ad_bannner/services/ad_banner_service.dart';
 import 'package:_96sooq_admin/features/category/bloc/category_bloc.dart';
-import 'package:_96sooq_admin/features/category/bloc/category_event.dart';
 import 'package:_96sooq_admin/features/category/services/category_service.dart';
 import 'package:_96sooq_admin/core/bloc/s3_upload/s3_upload_bloc.dart';
 import 'package:_96sooq_admin/core/bloc/s3_upload/s3_upload_service.dart';
@@ -51,24 +52,26 @@ Future<void> main() async {
   final subscriptionBloc = SubscriptionBloc(subscriptionService);
   final subcategoryService = SubcategoryService(dio);
   final subcategoryBloc = SubcategoryBloc(subcategoryService);
+  final adBannerService = AdBannerService(dio);
+  final adBannerBloc = AdBannerBloc(adBannerService);
 
   runApp(
-    // DevicePreview(
-    //   enabled: kDebugMode,
-    // builder: (_) =>
-    MultiBlocProvider(
-      providers: [
-        BlocProvider.value(value: authBloc),
-        BlocProvider.value(value: translationBloc),
-        BlocProvider.value(value: navigationCubit),
-        BlocProvider.value(value: categoryBloc),
-        BlocProvider.value(value: s3UploadBloc),
-        BlocProvider.value(value: subscriptionBloc),
-        BlocProvider.value(value: subcategoryBloc),
-      ],
-      child: MyApp(authBloc: authBloc),
+    DevicePreview(
+      enabled: kDebugMode,
+      builder: (_) => MultiBlocProvider(
+        providers: [
+          BlocProvider.value(value: authBloc),
+          BlocProvider.value(value: translationBloc),
+          BlocProvider.value(value: navigationCubit),
+          BlocProvider.value(value: categoryBloc),
+          BlocProvider.value(value: s3UploadBloc),
+          BlocProvider.value(value: subscriptionBloc),
+          BlocProvider.value(value: subcategoryBloc),
+          BlocProvider.value(value: adBannerBloc),
+        ],
+        child: MyApp(authBloc: authBloc),
+      ),
     ),
-    // ),
   );
 }
 

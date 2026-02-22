@@ -158,6 +158,7 @@ class _CategoryDesktopViewState extends State<CategoryDesktopView> {
               child: AdminActionDialog(
                 title: _label(langState, "Add Category", "إضافة تصنيف"),
                 submitText: _label(langState, "Create", "إنشاء"),
+                submitColor: AppColors.primaryColor,
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
@@ -393,9 +394,7 @@ class _CategoryDesktopViewState extends State<CategoryDesktopView> {
                   submitText: _label(langState, "Update", "تحديث"),
                   submitEnabled: hasChanges && !isUploading,
                   submitLoading: isUploading,
-                  submitColor: hasChanges
-                      ? AppColors.primaryColor
-                      : const Color(0xFFE5E7EB),
+                  submitColor: AppColors.primaryColor,
                   child: Column(
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
@@ -712,6 +711,9 @@ class _CategoryDesktopViewState extends State<CategoryDesktopView> {
                                           flex: 3,
                                           child: CustomTextFormField(
                                             controller: searchController,
+                                            onChanged: (_) {
+                                              setState(() {});
+                                            },
                                             labelText: _label(
                                               langState,
                                               "Search Categories",
@@ -830,13 +832,32 @@ class _CategoryDesktopViewState extends State<CategoryDesktopView> {
                                     }
 
                                     if (state is CategoryLoaded) {
+                                      final query = searchController.text
+                                          .trim()
+                                          .toLowerCase();
+                                      final filteredCategories = state
+                                          .categories
+                                          .where((cat) {
+                                            if (query.isEmpty) return true;
+                                            return cat.nameEn
+                                                    .toLowerCase()
+                                                    .contains(query) ||
+                                                cat.nameAr
+                                                    .toLowerCase()
+                                                    .contains(query);
+                                          })
+                                          .toList();
+
                                       return ListView.builder(
                                         shrinkWrap: true,
                                         physics:
                                             const NeverScrollableScrollPhysics(),
                                         itemCount:
-                                            state.categories.length +
-                                            (state.isLoadingMore ? 1 : 0) +
+                                            filteredCategories.length +
+                                            (state.isLoadingMore &&
+                                                    query.isEmpty
+                                                ? 1
+                                                : 0) +
                                             (isCreatingCategory ? 1 : 0),
                                         itemBuilder: (context, index) {
                                           if (isCreatingCategory &&
@@ -853,8 +874,9 @@ class _CategoryDesktopViewState extends State<CategoryDesktopView> {
                                               ? index - 1
                                               : index;
                                           if (state.isLoadingMore &&
+                                              query.isEmpty &&
                                               itemIndex ==
-                                                  state.categories.length) {
+                                                  filteredCategories.length) {
                                             return const Padding(
                                               padding: EdgeInsets.symmetric(
                                                 vertical: 16,
@@ -872,7 +894,7 @@ class _CategoryDesktopViewState extends State<CategoryDesktopView> {
                                             );
                                           }
                                           final category =
-                                              state.categories[itemIndex];
+                                              filteredCategories[itemIndex];
                                           final isCategoryActive =
                                               category.isActive;
                                           final statusLabel = isCategoryActive

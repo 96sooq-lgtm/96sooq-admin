@@ -18,6 +18,16 @@ class CreateSubscription extends SubscriptionEvent {
   List<Object> get props => [subscription];
 }
 
+class UpdateSubscription extends SubscriptionEvent {
+  final String id;
+  final SubscriptionModel subscription;
+
+  const UpdateSubscription({required this.id, required this.subscription});
+
+  @override
+  List<Object> get props => [id, subscription];
+}
+
 class DeleteSubscription extends SubscriptionEvent {
   final String id;
 

@@ -70,7 +70,7 @@ class AdminSidebarWidget extends StatelessWidget {
             _buildSidebarItem(
               context,
               5,
-              'Offer Listing',
+              'Stores',
               currentIndex,
               AssetPath.offerListingSelectedIc,
               AssetPath.offerListingUnSelectedIc,

@@ -17,20 +17,44 @@ class SubcategoryService {
   }
 
   Future<void> createSubcategory(SubcategoryModel model) async {
-    await dio.post(
-      ApiEndpoints.addCategory,
-      data: model.toCreateJson(),
-    );
+    await dio.post(ApiEndpoints.addCategory, data: model.toCreateJson());
   }
 
   Future<void> updateSubcategory(String id, SubcategoryModel model) async {
-    await dio.put(
-      ApiEndpoints.updateCategory(id),
-      data: model.toCreateJson(),
-    );
+    await dio.put(ApiEndpoints.updateCategory(id), data: model.toCreateJson());
   }
 
   Future<void> deleteSubcategory(String id) async {
     await dio.delete(ApiEndpoints.deleteCategory(id));
+  }
+
+  Future<void> deleteAttribute(
+    String subcategoryId,
+    String attributeName,
+  ) async {
+    await dio.delete(
+      ApiEndpoints.deleteSubcategoryAttribute(subcategoryId, attributeName),
+    );
+  }
+
+  Future<void> createAttribute(
+    String subcategoryId,
+    Map<String, dynamic> payload,
+  ) async {
+    await dio.post(
+      ApiEndpoints.createSubcategoryAttribute(subcategoryId),
+      data: payload,
+    );
+  }
+
+  Future<void> updateAttribute(
+    String subcategoryId,
+    String attributeName,
+    Map<String, dynamic> payload,
+  ) async {
+    await dio.patch(
+      ApiEndpoints.updateSubcategoryAttribute(subcategoryId, attributeName),
+      data: payload,
+    );
   }
 }

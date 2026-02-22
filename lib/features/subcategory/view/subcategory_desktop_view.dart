@@ -3,7 +3,6 @@ import 'package:_96sooq_admin/constants/themes.dart';
 import 'dart:typed_data';
 import 'package:_96sooq_admin/core/bloc/language/translation_service.dart';
 import 'package:_96sooq_admin/core/bloc/language/bloc/language_bloc.dart';
-import 'package:_96sooq_admin/core/bloc/language/bloc/language_state.dart';
 import 'package:_96sooq_admin/core/bloc/language/widgets/dynamic_text.dart';
 import 'package:_96sooq_admin/features/auth/widgets/custom_textformfield.dart';
 import 'package:_96sooq_admin/features/category/bloc/category_bloc.dart';
@@ -11,6 +10,7 @@ import 'package:_96sooq_admin/features/category/bloc/category_event.dart';
 import 'package:_96sooq_admin/features/category/bloc/category_state.dart';
 import 'package:_96sooq_admin/features/category/model/category_model.dart';
 import 'package:_96sooq_admin/features/subcategory/widgets/subcategory_list_widget.dart';
+import 'package:_96sooq_admin/features/subcategory/view/attribute/attribute_view.dart';
 import 'package:_96sooq_admin/features/subcategory/bloc/subcategory_bloc.dart';
 import 'package:_96sooq_admin/features/subcategory/bloc/subcategory_event.dart';
 import 'package:_96sooq_admin/features/subcategory/bloc/subcategory_state.dart';
@@ -69,9 +69,7 @@ class _SubcategoryDesktopViewState extends State<SubcategoryDesktopView> {
                     isActive: isActive,
                     attributesSchema: null,
                   );
-                  context.read<SubcategoryBloc>().add(
-                        CreateSubcategory(model),
-                      );
+                  context.read<SubcategoryBloc>().add(CreateSubcategory(model));
                   setDialogState(() {
                     isSubmitting = true;
                   });
@@ -81,9 +79,9 @@ class _SubcategoryDesktopViewState extends State<SubcategoryDesktopView> {
                     isUploading = false;
                     isSubmitting = false;
                   });
-                  ScaffoldMessenger.of(dialogContext).showSnackBar(
-                    SnackBar(content: Text(state.message)),
-                  );
+                  ScaffoldMessenger.of(
+                    dialogContext,
+                  ).showSnackBar(SnackBar(content: Text(state.message)));
                 }
               },
               child: BlocListener<SubcategoryBloc, SubcategoryState>(
@@ -99,7 +97,7 @@ class _SubcategoryDesktopViewState extends State<SubcategoryDesktopView> {
                   submitText: "Create",
                   submitLoading: isSubmitting || isUploading,
                   submitEnabled: !(isSubmitting || isUploading),
-                  submitColor: Colors.black,
+                  submitColor: AppColors.primaryColor,
                   child: Column(
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
@@ -117,16 +115,19 @@ class _SubcategoryDesktopViewState extends State<SubcategoryDesktopView> {
                           if (nameEn.isEmpty) {
                             ScaffoldMessenger.of(dialogContext).showSnackBar(
                               const SnackBar(
-                                content:
-                                    Text("Please enter English name first"),
+                                content: Text(
+                                  "Please enter English name first",
+                                ),
                               ),
                             );
                             return;
                           }
-                        final translated =
-                            await TranslationService.translate(nameEn, 'ar');
-                        if (disposed) return;
-                        nameArController.text = translated;
+                          final translated = await TranslationService.translate(
+                            nameEn,
+                            'ar',
+                          );
+                          if (disposed) return;
+                          nameArController.text = translated;
                         },
                       ),
                       const SizedBox(height: 12),
@@ -249,9 +250,7 @@ class _SubcategoryDesktopViewState extends State<SubcategoryDesktopView> {
                     }
                     if (selectedImageBytes == null) {
                       ScaffoldMessenger.of(dialogContext).showSnackBar(
-                        const SnackBar(
-                          content: Text("Please choose an image"),
-                        ),
+                        const SnackBar(content: Text("Please choose an image")),
                       );
                       return;
                     }
@@ -259,12 +258,12 @@ class _SubcategoryDesktopViewState extends State<SubcategoryDesktopView> {
                       isUploading = true;
                     });
                     context.read<S3UploadBloc>().add(
-                          UploadFile(
-                            bytes: selectedImageBytes!,
-                            filename: selectedImage!.name,
-                            folder: "Categories",
-                          ),
-                        );
+                      UploadFile(
+                        bytes: selectedImageBytes!,
+                        filename: selectedImage!.name,
+                        folder: "Categories",
+                      ),
+                    );
                   },
                 ),
               ),
@@ -279,10 +278,8 @@ class _SubcategoryDesktopViewState extends State<SubcategoryDesktopView> {
   }
 
   void _openEditSubcategoryDialog(SubcategoryModel subcategory) {
-    final nameEnController =
-        TextEditingController(text: subcategory.nameEn);
-    final nameArController =
-        TextEditingController(text: subcategory.nameAr);
+    final nameEnController = TextEditingController(text: subcategory.nameEn);
+    final nameArController = TextEditingController(text: subcategory.nameAr);
     CategoryModel? selectedCategory;
     XFile? selectedImage;
     Uint8List? selectedImageBytes;
@@ -311,8 +308,8 @@ class _SubcategoryDesktopViewState extends State<SubcategoryDesktopView> {
                     attributesSchema: subcategory.attributesSchema,
                   );
                   context.read<SubcategoryBloc>().add(
-                        UpdateSubcategory(subcategory.id, model),
-                      );
+                    UpdateSubcategory(subcategory.id, model),
+                  );
                   setDialogState(() {
                     isSubmitting = true;
                   });
@@ -322,9 +319,9 @@ class _SubcategoryDesktopViewState extends State<SubcategoryDesktopView> {
                     isUploading = false;
                     isSubmitting = false;
                   });
-                  ScaffoldMessenger.of(dialogContext).showSnackBar(
-                    SnackBar(content: Text(state.message)),
-                  );
+                  ScaffoldMessenger.of(
+                    dialogContext,
+                  ).showSnackBar(SnackBar(content: Text(state.message)));
                 }
               },
               child: BlocListener<SubcategoryBloc, SubcategoryState>(
@@ -341,7 +338,7 @@ class _SubcategoryDesktopViewState extends State<SubcategoryDesktopView> {
                   submitText: "Update",
                   submitLoading: isSubmitting || isUploading,
                   submitEnabled: !(isSubmitting || isUploading),
-                  submitColor: Colors.black,
+                  submitColor: AppColors.primaryColor,
                   child: Column(
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
@@ -359,14 +356,17 @@ class _SubcategoryDesktopViewState extends State<SubcategoryDesktopView> {
                           if (nameEn.isEmpty) {
                             ScaffoldMessenger.of(dialogContext).showSnackBar(
                               const SnackBar(
-                                content:
-                                    Text("Please enter English name first"),
+                                content: Text(
+                                  "Please enter English name first",
+                                ),
                               ),
                             );
                             return;
                           }
-                          final translated =
-                              await TranslationService.translate(nameEn, 'ar');
+                          final translated = await TranslationService.translate(
+                            nameEn,
+                            'ar',
+                          );
                           if (disposed) return;
                           nameArController.text = translated;
                         },
@@ -374,9 +374,9 @@ class _SubcategoryDesktopViewState extends State<SubcategoryDesktopView> {
                       const SizedBox(height: 12),
                       BlocBuilder<CategoryBloc, CategoryState>(
                         builder: (context, state) {
-                          final categories = state is CategoryLoaded
-                              ? state.categories
-                              : <CategoryModel>[];
+                          final categories = List<CategoryModel>.from(
+                            state is CategoryLoaded ? state.categories : [],
+                          );
                           if (selectedCategory == null) {
                             for (final c in categories) {
                               if (c.id == subcategory.parentId) {
@@ -384,6 +384,28 @@ class _SubcategoryDesktopViewState extends State<SubcategoryDesktopView> {
                                 break;
                               }
                             }
+                            // Fallback to the API's parent names if the full list doesn't have it yet
+                            if (selectedCategory == null &&
+                                subcategory.parentNameEn != null &&
+                                subcategory.parentNameEn!.isNotEmpty) {
+                              selectedCategory = CategoryModel(
+                                id: subcategory.parentId,
+                                nameEn: subcategory.parentNameEn!,
+                                nameAr: subcategory.parentNameAr ?? '',
+                                imageUrl: '',
+                                parentId: null,
+                                isActive: true,
+                                attributesSchema: const [],
+                                createdAt: null,
+                                updatedAt: null,
+                              );
+                            }
+                          }
+                          if (selectedCategory != null &&
+                              !categories.any(
+                                (c) => c.id == selectedCategory!.id,
+                              )) {
+                            categories.add(selectedCategory!);
                           }
                           return DropdownButtonFormField<CategoryModel>(
                             value: selectedCategory,
@@ -498,12 +520,12 @@ class _SubcategoryDesktopViewState extends State<SubcategoryDesktopView> {
                     });
                     if (selectedImageBytes != null) {
                       context.read<S3UploadBloc>().add(
-                            UploadFile(
-                              bytes: selectedImageBytes!,
-                              filename: selectedImage!.name,
-                              folder: "Categories",
-                            ),
-                          );
+                        UploadFile(
+                          bytes: selectedImageBytes!,
+                          filename: selectedImage!.name,
+                          folder: "Categories",
+                        ),
+                      );
                       return;
                     }
                     final model = SubcategoryModel(
@@ -516,8 +538,8 @@ class _SubcategoryDesktopViewState extends State<SubcategoryDesktopView> {
                       attributesSchema: subcategory.attributesSchema,
                     );
                     context.read<SubcategoryBloc>().add(
-                          UpdateSubcategory(subcategory.id, model),
-                        );
+                      UpdateSubcategory(subcategory.id, model),
+                    );
                   },
                 ),
               ),
@@ -542,8 +564,7 @@ class _SubcategoryDesktopViewState extends State<SubcategoryDesktopView> {
             return BlocListener<SubcategoryBloc, SubcategoryState>(
               listener: (context, state) {
                 if (!isDeleting) return;
-                if (state is SubcategorySuccess ||
-                    state is SubcategoryError) {
+                if (state is SubcategorySuccess || state is SubcategoryError) {
                   Navigator.pop(dialogContext);
                 }
               },
@@ -561,9 +582,7 @@ class _SubcategoryDesktopViewState extends State<SubcategoryDesktopView> {
                   setDialogState(() {
                     isDeleting = true;
                   });
-                  context.read<SubcategoryBloc>().add(
-                        DeleteSubcategory(id),
-                      );
+                  context.read<SubcategoryBloc>().add(DeleteSubcategory(id));
                 },
               ),
             );
@@ -617,6 +636,9 @@ class _SubcategoryDesktopViewState extends State<SubcategoryDesktopView> {
                                   flex: 3,
                                   child: CustomTextFormField(
                                     controller: searchController,
+                                    onChanged: (_) {
+                                      setState(() {});
+                                    },
                                     labelText: "Search Sub Categories",
                                     prefixIcon: const Icon(
                                       Icons.search,
@@ -643,21 +665,21 @@ class _SubcategoryDesktopViewState extends State<SubcategoryDesktopView> {
                           ),
                           child: Padding(
                             padding: const EdgeInsets.symmetric(vertical: 16),
-                                    child: Row(
-                                      children: const [
-                                        SizedBox(width: 40),
-                                        Expanded(
-                                          flex: 1,
-                                          child: DynamicText(
-                                            'Image',
-                                            style: AppThemes.f20w500,
-                                          ),
-                                        ),
-                                        SizedBox(width: 8),
-                                        Expanded(
-                                          flex: 2,
-                                          child: DynamicText(
-                                            'Name',
+                            child: Row(
+                              children: const [
+                                SizedBox(width: 40),
+                                Expanded(
+                                  flex: 1,
+                                  child: DynamicText(
+                                    'Image',
+                                    style: AppThemes.f20w500,
+                                  ),
+                                ),
+                                SizedBox(width: 8),
+                                Expanded(
+                                  flex: 2,
+                                  child: DynamicText(
+                                    'Name',
                                     style: AppThemes.f20w500,
                                   ),
                                 ),
@@ -695,15 +717,38 @@ class _SubcategoryDesktopViewState extends State<SubcategoryDesktopView> {
                         BlocBuilder<SubcategoryBloc, SubcategoryState>(
                           builder: (context, state) {
                             if (state is SubcategoryLoading) {
-                              return const Padding(
-                                padding: EdgeInsets.all(20),
-                                child: Center(
-                                  child: CircularProgressIndicator(),
+                              return Padding(
+                                padding: const EdgeInsets.all(24),
+                                child: Column(
+                                  children: List.generate(
+                                    8,
+                                    (index) => Padding(
+                                      padding: EdgeInsets.only(
+                                        bottom: index == 7 ? 0 : 20,
+                                      ),
+                                      child: const _SubcategoryShimmerRow(),
+                                    ),
+                                  ),
                                 ),
                               );
                             }
                             if (state is SubcategoryLoaded) {
-                              if (state.subcategories.isEmpty) {
+                              final query = searchController.text
+                                  .trim()
+                                  .toLowerCase();
+                              final filteredSubcategories = state.subcategories
+                                  .where((sub) {
+                                    if (query.isEmpty) return true;
+                                    return sub.nameEn.toLowerCase().contains(
+                                          query,
+                                        ) ||
+                                        sub.nameAr.toLowerCase().contains(
+                                          query,
+                                        );
+                                  })
+                                  .toList();
+
+                              if (filteredSubcategories.isEmpty) {
                                 return const Padding(
                                   padding: EdgeInsets.all(20),
                                   child: DynamicText(
@@ -717,16 +762,25 @@ class _SubcategoryDesktopViewState extends State<SubcategoryDesktopView> {
                                   .isRTL;
                               return ListView.builder(
                                 shrinkWrap: true,
-                                itemCount: state.subcategories.length,
+                                itemCount: filteredSubcategories.length,
                                 itemBuilder: (context, index) {
-                                  final item = state.subcategories[index];
-                                  final categoryState =
-                                      context.read<CategoryBloc>().state;
-                                  String categoryName = item.parentId;
-                                  if (categoryState is CategoryLoaded) {
+                                  final item = filteredSubcategories[index];
+                                  final preferredParentName = isArabic
+                                      ? item.parentNameAr
+                                      : item.parentNameEn;
+                                  final categoryState = context
+                                      .read<CategoryBloc>()
+                                      .state;
+                                  String categoryName =
+                                      (preferredParentName != null &&
+                                          preferredParentName.trim().isNotEmpty)
+                                      ? preferredParentName
+                                      : item.parentId;
+                                  if ((preferredParentName == null ||
+                                          preferredParentName.trim().isEmpty) &&
+                                      categoryState is CategoryLoaded) {
                                     CategoryModel? match;
-                                    for (final c
-                                        in categoryState.categories) {
+                                    for (final c in categoryState.categories) {
                                       if (c.id == item.parentId) {
                                         match = c;
                                         break;
@@ -751,6 +805,20 @@ class _SubcategoryDesktopViewState extends State<SubcategoryDesktopView> {
                                         _openEditSubcategoryDialog(item),
                                     onDelete: () =>
                                         _openDeleteSubcategoryDialog(item.id),
+                                    onTap: () {
+                                      final subBloc = context
+                                          .read<SubcategoryBloc>();
+                                      Navigator.of(context).push(
+                                        MaterialPageRoute(
+                                          builder: (_) => BlocProvider.value(
+                                            value: subBloc,
+                                            child: AttributeView(
+                                              subcategory: item,
+                                            ),
+                                          ),
+                                        ),
+                                      );
+                                    },
                                   );
                                 },
                               );
@@ -773,6 +841,84 @@ class _SubcategoryDesktopViewState extends State<SubcategoryDesktopView> {
             ),
           ),
         ],
+      ),
+    );
+  }
+}
+
+class _SubcategoryShimmerRow extends StatelessWidget {
+  const _SubcategoryShimmerRow();
+
+  @override
+  Widget build(BuildContext context) {
+    return TweenAnimationBuilder<double>(
+      tween: Tween(begin: 0.35, end: 0.85),
+      duration: const Duration(milliseconds: 900),
+      curve: Curves.easeInOut,
+      builder: (context, value, child) {
+        return Opacity(
+          opacity: value,
+          child: Row(
+            children: [
+              const SizedBox(width: 40),
+              Expanded(
+                flex: 1,
+                child: Align(
+                  alignment: Alignment.centerLeft,
+                  child: const _ShimmerBox(width: 50, height: 50, radius: 12),
+                ),
+              ),
+              const SizedBox(width: 8),
+              const Expanded(
+                flex: 2,
+                child: _ShimmerBox(width: double.infinity, height: 18),
+              ),
+              const SizedBox(width: 40),
+              const Expanded(
+                flex: 2,
+                child: _ShimmerBox(width: double.infinity, height: 18),
+              ),
+              const Expanded(
+                flex: 2,
+                child: Padding(
+                  padding: EdgeInsets.symmetric(horizontal: 20),
+                  child: _ShimmerBox(width: double.infinity, height: 18),
+                ),
+              ),
+              const Expanded(
+                flex: 2,
+                child: Padding(
+                  padding: EdgeInsets.symmetric(horizontal: 20),
+                  child: _ShimmerBox(width: double.infinity, height: 18),
+                ),
+              ),
+            ],
+          ),
+        );
+      },
+    );
+  }
+}
+
+class _ShimmerBox extends StatelessWidget {
+  final double width;
+  final double height;
+  final double radius;
+
+  const _ShimmerBox({
+    required this.width,
+    required this.height,
+    this.radius = 10,
+  });
+
+  @override
+  Widget build(BuildContext context) {
+    return Container(
+      width: width,
+      height: height,
+      decoration: BoxDecoration(
+        color: const Color(0xFFE5E7EB),
+        borderRadius: BorderRadius.circular(radius),
       ),
     );
   }

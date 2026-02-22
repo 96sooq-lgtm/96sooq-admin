@@ -2,13 +2,14 @@ import 'package:_96sooq_admin/constants/themes.dart';
 import 'package:_96sooq_admin/core/bloc/language/widgets/dynamic_text.dart';
 import 'package:flutter/material.dart';
 
-class SubcategoryListWidget extends StatelessWidget {
+class SubcategoryListWidget extends StatefulWidget {
   final String imageUrl;
   final String categoryName;
   final String subCategoryName;
   final String status;
   final VoidCallback onEdit;
   final VoidCallback onDelete;
+  final VoidCallback? onTap;
   const SubcategoryListWidget({
     super.key,
     required this.imageUrl,
@@ -17,52 +18,79 @@ class SubcategoryListWidget extends StatelessWidget {
     required this.subCategoryName,
     required this.onEdit,
     required this.onDelete,
+    this.onTap,
   });
 
   @override
-  Widget build(BuildContext context) {
-    final isActive = status == 'Active';
+  State<SubcategoryListWidget> createState() => _SubcategoryListWidgetState();
+}
 
-    return Padding(
-      padding: const EdgeInsets.symmetric(vertical: 18),
-      child: Row(
-        children: [
-          SizedBox(width: 40),
-          Expanded(
-            flex: 1,
-            child: _SubcategoryImage(imageUrl: imageUrl),
-          ),
-          SizedBox(width: 8),
-          Expanded(
-            flex: 2,
-            child: DynamicText(subCategoryName, style: AppThemes.f20w300),
-          ),
-          Expanded(
-            flex: 2,
-            child: DynamicText(categoryName, style: AppThemes.f20w300),
-          ),
-          Expanded(flex: 1, child: _StatusChip(isActive: isActive)),
-          Expanded(
-            flex: 2,
+class _SubcategoryListWidgetState extends State<SubcategoryListWidget> {
+  bool _isHovered = false;
+
+  @override
+  Widget build(BuildContext context) {
+    final isActive = widget.status == 'Active';
+
+    return MouseRegion(
+      cursor: widget.onTap != null
+          ? SystemMouseCursors.click
+          : MouseCursor.defer,
+      onEnter: (_) => setState(() => _isHovered = true),
+      onExit: (_) => setState(() => _isHovered = false),
+      child: Material(
+        color: _isHovered ? const Color(0xFFF9FAFB) : Colors.white,
+        child: InkWell(
+          onTap: widget.onTap,
+          child: Padding(
+            padding: const EdgeInsets.symmetric(vertical: 18),
             child: Row(
-              mainAxisAlignment: .center,
-              crossAxisAlignment: .center,
               children: [
-                IconButton(
-                  onPressed: onEdit,
-                  icon: const Icon(Icons.edit_outlined),
+                const SizedBox(width: 40),
+                Expanded(
+                  flex: 1,
+                  child: _SubcategoryImage(imageUrl: widget.imageUrl),
                 ),
-                IconButton(
-                  onPressed: onDelete,
-                  icon: const Icon(
-                    Icons.delete_outline,
-                    color: Color(0xFFF93939),
+                const SizedBox(width: 8),
+                Expanded(
+                  flex: 2,
+                  child: DynamicText(
+                    widget.subCategoryName,
+                    style: AppThemes.f20w300,
+                  ),
+                ),
+                Expanded(
+                  flex: 2,
+                  child: DynamicText(
+                    widget.categoryName,
+                    style: AppThemes.f20w300,
+                  ),
+                ),
+                Expanded(flex: 1, child: _StatusChip(isActive: isActive)),
+                Expanded(
+                  flex: 2,
+                  child: Row(
+                    mainAxisAlignment: .center,
+                    crossAxisAlignment: .center,
+                    children: [
+                      IconButton(
+                        onPressed: widget.onEdit,
+                        icon: const Icon(Icons.edit_outlined),
+                      ),
+                      IconButton(
+                        onPressed: widget.onDelete,
+                        icon: const Icon(
+                          Icons.delete_outline,
+                          color: Color(0xFFF93939),
+                        ),
+                      ),
+                    ],
                   ),
                 ),
               ],
             ),
           ),
-        ],
+        ),
       ),
     );
   }

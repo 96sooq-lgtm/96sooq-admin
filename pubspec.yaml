@@ -45,9 +45,11 @@ dependencies:
   go_router: ^17.0.1
   shared_preferences: ^2.5.4
   translator: ^1.0.4+1
+  url_launcher: ^6.3.1
   flutter_localizations:
     sdk: flutter
   image_picker_for_web: ^3.1.1
+  shimmer: ^3.0.0
 
 dev_dependencies:
   flutter_test:

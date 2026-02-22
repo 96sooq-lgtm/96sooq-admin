@@ -27,6 +27,17 @@ class SubscriptionService {
     throw Exception('Unexpected subscription create response format');
   }
 
+  Future<SubscriptionModel> update(String id, SubscriptionModel input) async {
+    final response = await dio.patch(
+      ApiEndpoints.updateSubscription(id),
+      data: input.toUpdateJson(),
+    );
+    if (response.data is Map<String, dynamic>) {
+      return SubscriptionModel.fromJson(response.data);
+    }
+    throw Exception('Unexpected subscription update response format');
+  }
+
   Future<void> delete(String id) async {
     await dio.delete(ApiEndpoints.deleteSubscription(id));
   }

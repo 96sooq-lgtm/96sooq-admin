@@ -1,10 +1,8 @@
 import 'package:_96sooq_admin/constants/themes.dart';
 import 'package:_96sooq_admin/core/bloc/language/widgets/dynamic_text.dart';
-import 'package:_96sooq_admin/core/bloc/navigation/navigation_cubit.dart';
 import 'package:_96sooq_admin/features/ad_bannner/view/ad_banner_view.dart';
 import 'package:_96sooq_admin/features/category/view/category_view.dart';
 import 'package:_96sooq_admin/features/home/view/home_view.dart';
-import 'package:_96sooq_admin/features/notifications/view/notifications_view.dart';
 import 'package:_96sooq_admin/features/offer_listings/view/offer_listing_view.dart';
 import 'package:_96sooq_admin/features/payments/view/payments_view.dart';
 import 'package:_96sooq_admin/features/promotion/view/promotion_view.dart';
@@ -34,7 +32,7 @@ class _AdminRootDesktopViewState extends State<AdminRootDesktopView> {
     const SubcategoryView(),
     const PromotionView(),
     const AdBannerView(),
-    const OfferListingView(),
+    const StoreListingScreen(),
     const UserManagementView(),
     const RequestApprovalView(),
     const PaymentsView(),

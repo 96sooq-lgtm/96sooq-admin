@@ -22,3 +22,29 @@ class DeleteSubcategory extends SubcategoryEvent {
 
   DeleteSubcategory(this.id);
 }
+
+class DeleteSubcategoryAttribute extends SubcategoryEvent {
+  final String subcategoryId;
+  final String attributeName;
+
+  DeleteSubcategoryAttribute(this.subcategoryId, this.attributeName);
+}
+
+class CreateSubcategoryAttribute extends SubcategoryEvent {
+  final String subcategoryId;
+  final Map<String, dynamic> payload;
+
+  CreateSubcategoryAttribute(this.subcategoryId, this.payload);
+}
+
+class UpdateSubcategoryAttribute extends SubcategoryEvent {
+  final String subcategoryId;
+  final String attributeName;
+  final Map<String, dynamic> payload;
+
+  UpdateSubcategoryAttribute(
+    this.subcategoryId,
+    this.attributeName,
+    this.payload,
+  );
+}

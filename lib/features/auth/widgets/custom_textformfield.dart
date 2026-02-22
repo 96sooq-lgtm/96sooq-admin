@@ -1,6 +1,7 @@
 import 'package:_96sooq_admin/constants/colors.dart';
 import 'package:_96sooq_admin/constants/themes.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 
 class CustomTextFormField extends StatefulWidget {
   const CustomTextFormField({
@@ -14,6 +15,7 @@ class CustomTextFormField extends StatefulWidget {
     this.autovalidateMode = AutovalidateMode.onUserInteraction,
     this.suffixIcon,
     this.maxLines = 1,
+    this.minLines,
     this.validator,
     this.keyboardType,
     this.textCapitalization = TextCapitalization.sentences,
@@ -22,6 +24,7 @@ class CustomTextFormField extends StatefulWidget {
     this.onTap,
     this.prefixIcon,
     this.onSuffixTap,
+    this.inputFormatters,
   });
 
   final String labelText;
@@ -31,6 +34,7 @@ class CustomTextFormField extends StatefulWidget {
   final bool isPassword;
   final bool readOnly;
   final int maxLines;
+  final int? minLines;
   final bool enabled;
 
   final TextStyle? hintStyle;
@@ -44,6 +48,7 @@ class CustomTextFormField extends StatefulWidget {
   final void Function(String)? onChanged;
   final VoidCallback? onTap;
   final VoidCallback? onSuffixTap;
+  final List<TextInputFormatter>? inputFormatters;
 
   @override
   State<CustomTextFormField> createState() => _CustomTextFormFieldState();
@@ -64,8 +69,10 @@ class _CustomTextFormFieldState extends State<CustomTextFormField> {
       controller: widget.controller,
       readOnly: widget.readOnly,
       maxLines: widget.maxLines,
+      minLines: widget.minLines,
       textCapitalization: widget.textCapitalization,
       keyboardType: widget.keyboardType,
+      inputFormatters: widget.inputFormatters,
       onTap: widget.onTap,
       autovalidateMode: widget.autovalidateMode,
       cursorColor: AppColors.primaryColor,
@@ -78,10 +85,9 @@ class _CustomTextFormFieldState extends State<CustomTextFormField> {
         filled: true,
         fillColor: const Color(0xFFEFEFEF),
         hintText: widget.labelText,
-        hintStyle: widget.hintStyle ??
-            AppThemes.f14w400.copyWith(
-              color: Colors.black.withOpacity(0.3),
-            ),
+        hintStyle:
+            widget.hintStyle ??
+            AppThemes.f14w400.copyWith(color: Colors.black.withOpacity(0.3)),
         prefixIcon: widget.prefixIcon,
         suffixIcon: _buildSuffixIcon(),
         border: _border(),
@@ -90,8 +96,10 @@ class _CustomTextFormFieldState extends State<CustomTextFormField> {
         errorBorder: _errorBorder(),
         focusedErrorBorder: _errorBorder(),
         helperText: '',
-        contentPadding:
-            const EdgeInsets.symmetric(vertical: 18, horizontal: 18),
+        contentPadding: const EdgeInsets.symmetric(
+          vertical: 18,
+          horizontal: 18,
+        ),
       ),
     );
   }
@@ -113,10 +121,7 @@ class _CustomTextFormFieldState extends State<CustomTextFormField> {
   Widget? _buildSuffixIcon() {
     /// Priority 1: Custom suffix icon
     if (widget.suffixIcon != null) {
-      return InkWell(
-        onTap: widget.onSuffixTap,
-        child: widget.suffixIcon,
-      );
+      return InkWell(onTap: widget.onSuffixTap, child: widget.suffixIcon);
     }
 
     /// Priority 2: Password toggle

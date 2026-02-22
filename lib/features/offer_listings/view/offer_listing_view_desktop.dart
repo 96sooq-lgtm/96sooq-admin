@@ -1,9 +1,8 @@
 import 'package:_96sooq_admin/constants/colors.dart';
 import 'package:_96sooq_admin/constants/themes.dart';
 import 'package:_96sooq_admin/core/bloc/language/widgets/dynamic_text.dart';
+import 'package:_96sooq_admin/features/auth/widgets/custom_textformfield.dart';
 import 'package:_96sooq_admin/features/offer_listings/widgets/offer_listing_widget.dart';
-import 'package:_96sooq_admin/features/promotion/widgets/promotion_slab_listing_widget.dart';
-import 'package:_96sooq_admin/features/shared/global_widgets/custom_button_widgets.dart';
 import 'package:flutter/material.dart';
 
 class OfferListingViewDesktop extends StatefulWidget {
@@ -15,6 +14,8 @@ class OfferListingViewDesktop extends StatefulWidget {
 }
 
 class _OfferListingViewDesktopState extends State<OfferListingViewDesktop> {
+  final TextEditingController searchController = TextEditingController();
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -28,12 +29,7 @@ class _OfferListingViewDesktopState extends State<OfferListingViewDesktop> {
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
                   const SizedBox(height: 36),
-                  DynamicText("Offers Listing", style: AppThemes.f28w600),
-                  const SizedBox(height: 10),
-                  DynamicText(
-                    "Review and approve seller offers",
-                    style: AppThemes.f20w400,
-                  ),
+                  DynamicText("Stores", style: AppThemes.f28w600),
                   const SizedBox(height: 24),
                   Container(
                     decoration: BoxDecoration(
@@ -46,27 +42,35 @@ class _OfferListingViewDesktopState extends State<OfferListingViewDesktop> {
                         /// Top Bar
                         Padding(
                           padding: const EdgeInsets.symmetric(
-                            horizontal: 28,
-                            vertical: 25,
+                            horizontal: 55,
+                            vertical: 55,
                           ),
                           child: SizedBox(
                             width: double.infinity,
                             child: Row(
-                              mainAxisAlignment: .start,
-                              crossAxisAlignment: .center,
+                              mainAxisAlignment: MainAxisAlignment.center,
+                              crossAxisAlignment: CrossAxisAlignment.center,
                               children: [
-                                DynamicText(
-                                  "Pending Approval",
-                                  style: AppThemes.f24w500,
+                                Expanded(
+                                  flex: 3,
+                                  child: CustomTextFormField(
+                                    controller: searchController,
+                                    labelText: "Search store name..",
+                                    prefixIcon: const Icon(
+                                      Icons.search,
+                                      color: Color(0xFF99A1Af),
+                                    ),
+                                  ),
                                 ),
+                                const Spacer(flex: 2),
                               ],
                             ),
                           ),
                         ),
                         Container(
                           decoration: BoxDecoration(
-                            color: Color(0xFFF9FAFB),
-                            border: Border.all(color: Color(0xFFE1E1E1)),
+                            color: const Color(0xFFF9FAFB),
+                            border: Border.all(color: const Color(0xFFE1E1E1)),
                           ),
                           child: Padding(
                             padding: const EdgeInsets.symmetric(vertical: 16),
@@ -74,9 +78,9 @@ class _OfferListingViewDesktopState extends State<OfferListingViewDesktop> {
                               children: const [
                                 SizedBox(width: 40),
                                 Expanded(
-                                  flex: 2,
+                                  flex: 4,
                                   child: DynamicText(
-                                    'Offer Title',
+                                    'Store name',
                                     style: AppThemes.f20w500,
                                   ),
                                 ),
@@ -84,16 +88,7 @@ class _OfferListingViewDesktopState extends State<OfferListingViewDesktop> {
                                   flex: 2,
                                   child: Center(
                                     child: DynamicText(
-                                      'Seller Name',
-                                      style: AppThemes.f20w500,
-                                    ),
-                                  ),
-                                ),
-                                Expanded(
-                                  flex: 2,
-                                  child: Center(
-                                    child: DynamicText(
-                                      'Date submitted',
+                                      'Status',
                                       style: AppThemes.f20w500,
                                     ),
                                   ),
@@ -104,7 +99,6 @@ class _OfferListingViewDesktopState extends State<OfferListingViewDesktop> {
                                     child: DynamicText(
                                       'Actions',
                                       style: AppThemes.f20w500,
-                                      textAlign: TextAlign.right,
                                     ),
                                   ),
                                 ),
@@ -114,108 +108,11 @@ class _OfferListingViewDesktopState extends State<OfferListingViewDesktop> {
                         ),
                         ListView.builder(
                           shrinkWrap: true,
-                          itemCount: 3,
+                          itemCount: 10,
                           itemBuilder: (context, index) {
                             return OfferListingWidget(
-                              offerTitle:
-                                  "Summer Sale - 50% OFF on Electronics",
-                              seller: 'Tech Store',
-                              dateOfSubmission: "2025-12-21",
-                              isReviewed: false,
-                            );
-                          },
-                        ),
-                      ],
-                    ),
-                  ),
-                  const SizedBox(height: 24),
-                  Container(
-                    decoration: BoxDecoration(
-                      color: Colors.white,
-                      borderRadius: BorderRadius.circular(18),
-                      border: Border.all(color: const Color(0xFFE1E1E1)),
-                    ),
-                    child: Column(
-                      children: [
-                        /// Top Bar
-                        Padding(
-                          padding: const EdgeInsets.symmetric(
-                            horizontal: 28,
-                            vertical: 25,
-                          ),
-                          child: SizedBox(
-                            width: double.infinity,
-                            child: Row(
-                              mainAxisAlignment: .start,
-                              crossAxisAlignment: .center,
-                              children: [
-                                DynamicText(
-                                  "Reviewed Offers",
-                                  style: AppThemes.f24w500,
-                                ),
-                              ],
-                            ),
-                          ),
-                        ),
-                        Container(
-                          decoration: BoxDecoration(
-                            color: Color(0xFFF9FAFB),
-                            border: Border.all(color: Color(0xFFE1E1E1)),
-                          ),
-                          child: Padding(
-                            padding: const EdgeInsets.symmetric(vertical: 16),
-                            child: Row(
-                              children: const [
-                                SizedBox(width: 40),
-                                Expanded(
-                                  flex: 2,
-                                  child: DynamicText(
-                                    'Offer Title',
-                                    style: AppThemes.f20w500,
-                                  ),
-                                ),
-                                Expanded(
-                                  flex: 2,
-                                  child: Center(
-                                    child: DynamicText(
-                                      'Seller Name',
-                                      style: AppThemes.f20w500,
-                                    ),
-                                  ),
-                                ),
-                                Expanded(
-                                  flex: 2,
-                                  child: Center(
-                                    child: DynamicText(
-                                      'Date submitted',
-                                      style: AppThemes.f20w500,
-                                    ),
-                                  ),
-                                ),
-                                Expanded(
-                                  flex: 2,
-                                  child: Center(
-                                    child: DynamicText(
-                                      'Actions',
-                                      style: AppThemes.f20w500,
-                                      textAlign: TextAlign.right,
-                                    ),
-                                  ),
-                                ),
-                              ],
-                            ),
-                          ),
-                        ),
-                        ListView.builder(
-                          shrinkWrap: true,
-                          itemCount: 3,
-                          itemBuilder: (context, index) {
-                            return OfferListingWidget(
-                              offerTitle:
-                                  "Summer Sale - 50% OFF on Electronics",
-                              seller: 'Tech Store',
-                              dateOfSubmission: "2025-12-21",
-                              isReviewed: true,
+                              storeName: "Tech Store",
+                              isActive: index % 2 == 0,
                             );
                           },
                         ),
