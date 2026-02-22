@@ -12,7 +12,6 @@ import 'package:_96sooq_admin/features/subcategory/bloc/subcategory_state.dart';
 import 'package:_96sooq_admin/core/bloc/language/translation_service.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
-import 'package:shimmer/shimmer.dart';
 
 class AddAttributePopup extends StatefulWidget {
   const AddAttributePopup({
@@ -213,6 +212,11 @@ class _AddAttributePopupState extends State<AddAttributePopup> {
                   _currentValue = AttributeUiItem(
                     nameEn: _nameEnController.text.trim(),
                     nameAr: _nameArController.text.trim(),
+                    rawType: _selectedType == AttributeType.dropdown
+                        ? 'dropdown'
+                        : _selectedType == AttributeType.radio
+                        ? 'radio'
+                        : 'text',
                     type: _selectedType,
                     isActive: _isActive,
                     options: List.from(_options),
@@ -226,6 +230,11 @@ class _AddAttributePopupState extends State<AddAttributePopup> {
                   _currentValue = AttributeUiItem(
                     nameEn: _nameEnController.text.trim(),
                     nameAr: _nameArController.text.trim(),
+                    rawType: _selectedType == AttributeType.dropdown
+                        ? 'dropdown'
+                        : _selectedType == AttributeType.radio
+                        ? 'radio'
+                        : 'text',
                     type: _selectedType,
                     isActive: _isActive,
                     options: List.from(_options),
@@ -312,6 +321,7 @@ class _AddAttributePopupState extends State<AddAttributePopup> {
                                       text,
                                       'ar',
                                     );
+                                if (!mounted) return;
                                 setState(() {
                                   _nameArController.text = translated;
                                 });

@@ -8,7 +8,14 @@ class SubcategoryLoading extends SubcategoryState {}
 
 class SubcategoryLoaded extends SubcategoryState {
   final List<SubcategoryModel> subcategories;
-  SubcategoryLoaded(this.subcategories);
+  final bool hasMore;
+  final bool isLoadingMore;
+
+  SubcategoryLoaded(
+    this.subcategories, {
+    this.hasMore = false,
+    this.isLoadingMore = false,
+  });
 }
 
 class SubcategorySuccess extends SubcategoryState {}

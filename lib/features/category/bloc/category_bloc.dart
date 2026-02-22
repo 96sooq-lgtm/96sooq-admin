@@ -10,6 +10,7 @@ class CategoryBloc extends Bloc<CategoryEvent, CategoryState> {
   CategoryBloc(this.repository) : super(CategoryInitial()) {
     on<LoadCategories>(_loadCategories);
     on<LoadMoreCategories>(_loadMoreCategories);
+    on<LoadCategoriesPage>(_loadCategoriesPage);
     on<CreateCategory>(_createCategory);
     on<UpdateCategory>(_updateCategory);
     on<DeleteCategory>(_deleteCategory);
@@ -19,13 +20,25 @@ class CategoryBloc extends Bloc<CategoryEvent, CategoryState> {
     LoadCategories event,
     Emitter<CategoryState> emit,
   ) async {
+    await _loadCategoriesPage(
+      LoadCategoriesPage(skip: 0, limit: _pageSize),
+      emit,
+    );
+  }
+
+  Future<void> _loadCategoriesPage(
+    LoadCategoriesPage event,
+    Emitter<CategoryState> emit,
+  ) async {
     emit(CategoryLoading());
     try {
       final categories = await repository.fetchCategories(
-        skip: 0,
-        limit: _pageSize,
+        skip: event.skip,
+        limit: event.limit,
       );
-      emit(CategoryLoaded(categories, hasMore: categories.length == _pageSize));
+      emit(
+        CategoryLoaded(categories, hasMore: categories.length == event.limit),
+      );
     } catch (e) {
       emit(CategoryError(e.toString()));
     }

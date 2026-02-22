@@ -56,9 +56,9 @@ Future<void> main() async {
   final adBannerBloc = AdBannerBloc(adBannerService);
 
   runApp(
-    // DevicePreview(
-    //   enabled: kDebugMode,
-    //   builder: (_) => 
+    DevicePreview(
+      enabled: kDebugMode,
+      builder: (_) => 
       MultiBlocProvider(
         providers: [
           BlocProvider.value(value: authBloc),
@@ -72,7 +72,7 @@ Future<void> main() async {
         ],
         child: MyApp(authBloc: authBloc),
       ),
-    // ),
+    ),
   );
 }
 

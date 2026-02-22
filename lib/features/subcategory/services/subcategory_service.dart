@@ -7,11 +7,27 @@ class SubcategoryService {
 
   SubcategoryService(this.dio);
 
-  Future<List<SubcategoryModel>> fetchAllSubcategories() async {
-    final response = await dio.get(ApiEndpoints.getAllSubcategories);
+  Future<List<SubcategoryModel>> fetchAllSubcategories({
+    int skip = 0,
+    int limit = 10,
+  }) async {
+    final response = await dio.get(
+      ApiEndpoints.getAllSubcategories,
+      queryParameters: {'skip': skip, 'limit': limit},
+    );
     final data = response.data;
     if (data is List) {
       return data.map((e) => SubcategoryModel.fromJson(e)).toList();
+    }
+    if (data is Map<String, dynamic>) {
+      final raw = data['data'];
+      if (raw is List) {
+        return raw.map((e) => SubcategoryModel.fromJson(e)).toList();
+      }
+      final nested = data['subcategories'];
+      if (nested is List) {
+        return nested.map((e) => SubcategoryModel.fromJson(e)).toList();
+      }
     }
     throw Exception('Unexpected subcategories response format');
   }

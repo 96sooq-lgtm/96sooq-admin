@@ -65,6 +65,252 @@ class QuickActionsWidget extends StatelessWidget {
 }
 
 class QuickActionPopupContent {
+  static const double _categoryPickerDesktopHeight = 360;
+  static const double _categoryPickerMobileHeightFactor = 0.72;
+  static const double _categoryLoadMoreThreshold = 120;
+
+  static void _ensureCategoriesLoaded(BuildContext context) {
+    final categoryState = context.read<CategoryBloc>().state;
+    if (categoryState is! CategoryLoaded && categoryState is! CategoryLoading) {
+      context.read<CategoryBloc>().add(LoadCategories());
+    }
+  }
+
+  static void _autoLoadMoreCategories(BuildContext context) {
+    final state = context.read<CategoryBloc>().state;
+    if (state is CategoryLoaded && state.hasMore && !state.isLoadingMore) {
+      context.read<CategoryBloc>().add(LoadMoreCategories());
+    }
+  }
+
+  static Widget _buildCategoryPickerTrigger({
+    required CategoryModel? selectedCategory,
+    required VoidCallback onTap,
+  }) {
+    return InkWell(
+      borderRadius: BorderRadius.circular(14),
+      onTap: onTap,
+      child: Container(
+        width: double.infinity,
+        padding: const EdgeInsets.symmetric(horizontal: 18, vertical: 18),
+        decoration: BoxDecoration(
+          color: const Color(0xFFEFEFEF),
+          borderRadius: BorderRadius.circular(14),
+          border: Border.all(color: const Color(0xFFEFEFEF)),
+        ),
+        child: Row(
+          children: [
+            Expanded(
+              child: Text(
+                selectedCategory?.nameEn ?? "Select category",
+                style: AppThemes.f14w400.copyWith(
+                  color: selectedCategory == null
+                      ? const Color(0xFF7A7A7A)
+                      : Colors.black,
+                ),
+              ),
+            ),
+            const Icon(Icons.keyboard_arrow_down),
+          ],
+        ),
+      ),
+    );
+  }
+
+  static Widget _buildCategoryPickerList({
+    required BuildContext context,
+    required BuildContext sheetContext,
+    required CategoryModel? selectedCategory,
+    required ScrollController scrollController,
+  }) {
+    return BlocBuilder<CategoryBloc, CategoryState>(
+      builder: (context, state) {
+        if (state is CategoryLoading) {
+          return const Center(child: CircularProgressIndicator());
+        }
+        if (state is CategoryError) {
+          return Center(
+            child: TextButton(
+              onPressed: () =>
+                  context.read<CategoryBloc>().add(LoadCategories()),
+              child: const Text("Retry loading categories"),
+            ),
+          );
+        }
+
+        final loadedState = state is CategoryLoaded ? state : null;
+        final categories = List<CategoryModel>.from(
+          loadedState?.categories ?? const <CategoryModel>[],
+        );
+        if (selectedCategory != null &&
+            !categories.any((c) => c.id == selectedCategory.id)) {
+          categories.insert(0, selectedCategory);
+        }
+
+        WidgetsBinding.instance.addPostFrameCallback((_) {
+          if (!scrollController.hasClients || loadedState == null) return;
+          final position = scrollController.position;
+          final isNearBottom =
+              position.maxScrollExtent <= 0 ||
+              position.pixels >=
+                  position.maxScrollExtent - _categoryLoadMoreThreshold;
+          if (isNearBottom &&
+              loadedState.hasMore &&
+              !loadedState.isLoadingMore) {
+            _autoLoadMoreCategories(context);
+          }
+        });
+
+        final itemCount =
+            categories.length + (loadedState?.isLoadingMore == true ? 1 : 0);
+        return NotificationListener<ScrollNotification>(
+          onNotification: (notification) {
+            if (notification.metrics.pixels >=
+                notification.metrics.maxScrollExtent -
+                    _categoryLoadMoreThreshold) {
+              _autoLoadMoreCategories(context);
+            }
+            return false;
+          },
+          child: ListView.builder(
+            controller: scrollController,
+            padding: const EdgeInsets.symmetric(vertical: 6),
+            itemCount: itemCount,
+            itemBuilder: (context, index) {
+              if (loadedState?.isLoadingMore == true &&
+                  index == categories.length) {
+                return const Padding(
+                  padding: EdgeInsets.symmetric(vertical: 12),
+                  child: Center(child: CircularProgressIndicator()),
+                );
+              }
+              final category = categories[index];
+              final isSelected = selectedCategory?.id == category.id;
+              return ListTile(
+                dense: true,
+                title: Text(category.nameEn),
+                trailing: isSelected ? const Icon(Icons.check, size: 18) : null,
+                onTap: () => Navigator.pop(sheetContext, category),
+              );
+            },
+          ),
+        );
+      },
+    );
+  }
+
+  static Future<CategoryModel?> _openDashboardCategoryPicker(
+    BuildContext context, {
+    required CategoryModel? selectedCategory,
+  }) async {
+    _ensureCategoriesLoaded(context);
+    final scrollController = ScrollController();
+    final isDesktop = MediaQuery.of(context).size.width >= 900;
+    try {
+      if (isDesktop) {
+        return await showDialog<CategoryModel>(
+          context: context,
+          builder: (dialogContext) {
+            return Dialog(
+              insetPadding: const EdgeInsets.symmetric(
+                horizontal: 24,
+                vertical: 24,
+              ),
+              shape: RoundedRectangleBorder(
+                borderRadius: BorderRadius.circular(14),
+              ),
+              child: SizedBox(
+                width: 460,
+                height: _categoryPickerDesktopHeight,
+                child: Column(
+                  children: [
+                    Padding(
+                      padding: const EdgeInsets.fromLTRB(16, 14, 8, 10),
+                      child: Row(
+                        children: [
+                          const Expanded(
+                            child: Text(
+                              "Select category",
+                              style: TextStyle(
+                                fontSize: 16,
+                                fontWeight: FontWeight.w600,
+                              ),
+                            ),
+                          ),
+                          IconButton(
+                            onPressed: () => Navigator.pop(dialogContext),
+                            icon: const Icon(Icons.close),
+                          ),
+                        ],
+                      ),
+                    ),
+                    const Divider(height: 1),
+                    Expanded(
+                      child: _buildCategoryPickerList(
+                        context: context,
+                        sheetContext: dialogContext,
+                        selectedCategory: selectedCategory,
+                        scrollController: scrollController,
+                      ),
+                    ),
+                  ],
+                ),
+              ),
+            );
+          },
+        );
+      }
+
+      return await showModalBottomSheet<CategoryModel>(
+        backgroundColor: AppColors.whiteTextColor,
+        context: context,
+        isScrollControlled: true,
+        builder: (sheetContext) {
+          return SizedBox(
+            height:
+                MediaQuery.of(sheetContext).size.height *
+                _categoryPickerMobileHeightFactor,
+            child: Column(
+              children: [
+                Padding(
+                  padding: const EdgeInsets.fromLTRB(16, 14, 8, 10),
+                  child: Row(
+                    children: [
+                      const Expanded(
+                        child: Text(
+                          "Select category",
+                          style: TextStyle(
+                            fontSize: 16,
+                            fontWeight: FontWeight.w600,
+                          ),
+                        ),
+                      ),
+                      IconButton(
+                        onPressed: () => Navigator.pop(sheetContext),
+                        icon: const Icon(Icons.close),
+                      ),
+                    ],
+                  ),
+                ),
+                const Divider(height: 1),
+                Expanded(
+                  child: _buildCategoryPickerList(
+                    context: context,
+                    sheetContext: sheetContext,
+                    selectedCategory: selectedCategory,
+                    scrollController: scrollController,
+                  ),
+                ),
+              ],
+            ),
+          );
+        },
+      );
+    } finally {
+      scrollController.dispose();
+    }
+  }
+
   static void showAddCategoryDialog(BuildContext context) {
     final nameEnController = TextEditingController();
     final nameArController = TextEditingController();
@@ -243,8 +489,7 @@ class QuickActionPopupContent {
     bool isActive = true;
     bool isUploading = false;
     bool isSubmitting = false;
-
-    context.read<CategoryBloc>().add(LoadCategories());
+    _ensureCategoriesLoaded(context);
 
     showDialog(
       context: context,
@@ -353,54 +598,17 @@ class QuickActionPopupContent {
                         controller: nameArController,
                       ),
                       const SizedBox(height: 8),
-                      BlocBuilder<CategoryBloc, CategoryState>(
-                        builder: (context, state) {
-                          final categories = state is CategoryLoaded
-                              ? state.categories
-                              : <CategoryModel>[];
-                          return DropdownButtonFormField<CategoryModel>(
-                            value: selectedCategory,
-                            decoration: InputDecoration(
-                              filled: true,
-                              fillColor: const Color(0xFFEFEFEF),
-                              border: OutlineInputBorder(
-                                borderRadius: BorderRadius.circular(14),
-                                borderSide: const BorderSide(
-                                  color: Color(0xFFEFEFEF),
-                                ),
-                              ),
-                              enabledBorder: OutlineInputBorder(
-                                borderRadius: BorderRadius.circular(14),
-                                borderSide: const BorderSide(
-                                  color: Color(0xFFEFEFEF),
-                                ),
-                              ),
-                              focusedBorder: OutlineInputBorder(
-                                borderRadius: BorderRadius.circular(14),
-                                borderSide: const BorderSide(
-                                  color: Color(0xFFEFEFEF),
-                                ),
-                              ),
-                              contentPadding: const EdgeInsets.symmetric(
-                                vertical: 18,
-                                horizontal: 18,
-                              ),
-                            ),
-                            hint: const DynamicText("Select category"),
-                            items: categories
-                                .map(
-                                  (c) => DropdownMenuItem(
-                                    value: c,
-                                    child: Text(c.nameEn),
-                                  ),
-                                )
-                                .toList(),
-                            onChanged: (value) {
-                              setState(() {
-                                selectedCategory = value;
-                              });
-                            },
+                      _buildCategoryPickerTrigger(
+                        selectedCategory: selectedCategory,
+                        onTap: () async {
+                          final picked = await _openDashboardCategoryPicker(
+                            context,
+                            selectedCategory: selectedCategory,
                           );
+                          if (picked == null) return;
+                          setState(() {
+                            selectedCategory = picked;
+                          });
                         },
                       ),
                       const SizedBox(height: 8),

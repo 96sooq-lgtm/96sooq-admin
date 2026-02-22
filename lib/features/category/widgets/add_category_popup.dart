@@ -30,7 +30,7 @@ class AdminActionDialog extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Dialog(
-      backgroundColor: Colors.transparent,
+      backgroundColor: Colors.white,
       insetPadding: const EdgeInsets.symmetric(horizontal: 16),
       child: Container(
         width: width,

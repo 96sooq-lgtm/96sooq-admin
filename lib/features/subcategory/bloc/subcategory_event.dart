@@ -4,6 +4,8 @@ abstract class SubcategoryEvent {}
 
 class LoadSubcategories extends SubcategoryEvent {}
 
+class LoadMoreSubcategories extends SubcategoryEvent {}
+
 class CreateSubcategory extends SubcategoryEvent {
   final SubcategoryModel model;
 

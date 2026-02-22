@@ -12,7 +12,6 @@ import 'package:_96sooq_admin/features/subcategory/bloc/subcategory_state.dart';
 import 'package:_96sooq_admin/features/subcategory/model/subcategory_model.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
-import 'package:shimmer/shimmer.dart';
 
 class AttributeMobileView extends StatefulWidget {
   final SubcategoryModel subcategory;
@@ -823,6 +822,7 @@ class _AddAttributeFormState extends State<_AddAttributeForm> {
                           text,
                           'ar',
                         );
+                        if (!mounted) return;
                         setState(() {
                           nameArController.text = translated;
                         });

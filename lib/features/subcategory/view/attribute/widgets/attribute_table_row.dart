@@ -33,9 +33,24 @@ class AttributeTableRow extends StatelessWidget {
           ),
           Expanded(
             flex: 3,
-            child: Text(
-              attribute.typeLabel,
-              style: AppThemes.f20w400.copyWith(fontSize: 24),
+            child: Align(
+              alignment: Alignment.centerLeft,
+              child: Container(
+                padding: const EdgeInsets.symmetric(
+                  horizontal: 10,
+                  vertical: 4,
+                ),
+                decoration: BoxDecoration(
+                  color: const Color(0xFFF3F4F6),
+                  borderRadius: BorderRadius.circular(12),
+                ),
+                child: DynamicText(
+                  attribute.typeBadgeLabel,
+                  style: AppThemes.f12w500.copyWith(
+                    color: const Color(0xFF374151),
+                  ),
+                ),
+              ),
             ),
           ),
           Expanded(

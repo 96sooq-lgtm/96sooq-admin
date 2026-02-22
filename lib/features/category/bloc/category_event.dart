@@ -6,6 +6,13 @@ class LoadCategories extends CategoryEvent {}
 
 class LoadMoreCategories extends CategoryEvent {}
 
+class LoadCategoriesPage extends CategoryEvent {
+  final int skip;
+  final int limit;
+
+  LoadCategoriesPage({required this.skip, required this.limit});
+}
+
 class CreateCategory extends CategoryEvent {
   final CategoryModel category;
 

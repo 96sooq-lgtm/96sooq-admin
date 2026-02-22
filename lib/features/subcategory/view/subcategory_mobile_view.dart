@@ -39,6 +39,210 @@ class _SubcategoryMobileViewState extends State<SubcategoryMobileView> {
   bool isSubmittingSubcategory = false;
   String? pendingActionMessage;
   final ScrollController _scrollController = ScrollController();
+  static const double _mobileSubcategoryTableWidth = 590;
+  static const double _categoryPickerHeightFactor = 0.72;
+  static const double _categoryLoadMoreThreshold = 120;
+
+  void _ensureCategoriesLoaded() {
+    final categoryState = context.read<CategoryBloc>().state;
+    if (categoryState is! CategoryLoaded && categoryState is! CategoryLoading) {
+      context.read<CategoryBloc>().add(LoadCategories());
+    }
+  }
+
+  void _autoLoadMoreCategories() {
+    final categoryState = context.read<CategoryBloc>().state;
+    if (categoryState is CategoryLoaded &&
+        categoryState.hasMore &&
+        !categoryState.isLoadingMore) {
+      context.read<CategoryBloc>().add(LoadMoreCategories());
+    }
+  }
+
+  Future<CategoryModel?> _openCategoryPicker(
+    TranslationState langState, {
+    required CategoryModel? selectedCategory,
+  }) async {
+    _ensureCategoriesLoaded();
+    final scrollController = ScrollController();
+    try {
+      return await showModalBottomSheet<CategoryModel>(
+        backgroundColor: AppColors.whiteTextColor,
+        context: context,
+        isScrollControlled: true,
+        builder: (sheetContext) {
+          return SizedBox(
+            height:
+                MediaQuery.of(sheetContext).size.height *
+                _categoryPickerHeightFactor,
+            child: Column(
+              children: [
+                Padding(
+                  padding: const EdgeInsets.fromLTRB(16, 14, 8, 10),
+                  child: Row(
+                    children: [
+                      Expanded(
+                        child: Text(
+                          _label(langState, "Select category", "اختر التصنيف"),
+                          style: const TextStyle(
+                            fontSize: 16,
+                            fontWeight: FontWeight.w600,
+                          ),
+                        ),
+                      ),
+                      IconButton(
+                        onPressed: () => Navigator.pop(sheetContext),
+                        icon: const Icon(Icons.close),
+                      ),
+                    ],
+                  ),
+                ),
+                const Divider(height: 1),
+                Expanded(
+                  child: BlocBuilder<CategoryBloc, CategoryState>(
+                    builder: (context, state) {
+                      if (state is CategoryLoading) {
+                        return const Center(child: CircularProgressIndicator());
+                      }
+                      if (state is CategoryError) {
+                        return Center(
+                          child: TextButton(
+                            onPressed: () => context.read<CategoryBloc>().add(
+                              LoadCategories(),
+                            ),
+                            child: Text(
+                              _label(
+                                langState,
+                                "Retry loading categories",
+                                "إعادة التحميل",
+                              ),
+                            ),
+                          ),
+                        );
+                      }
+
+                      final loadedState = state is CategoryLoaded
+                          ? state
+                          : null;
+                      final categories = List<CategoryModel>.from(
+                        loadedState?.categories ?? const <CategoryModel>[],
+                      );
+                      if (selectedCategory != null &&
+                          !categories.any((c) => c.id == selectedCategory.id)) {
+                        categories.insert(0, selectedCategory);
+                      }
+
+                      WidgetsBinding.instance.addPostFrameCallback((_) {
+                        if (!scrollController.hasClients ||
+                            loadedState == null) {
+                          return;
+                        }
+                        final position = scrollController.position;
+                        final isNearBottom =
+                            position.maxScrollExtent <= 0 ||
+                            position.pixels >=
+                                position.maxScrollExtent -
+                                    _categoryLoadMoreThreshold;
+                        if (isNearBottom &&
+                            loadedState.hasMore &&
+                            !loadedState.isLoadingMore) {
+                          _autoLoadMoreCategories();
+                        }
+                      });
+
+                      final itemCount =
+                          categories.length +
+                          (loadedState?.isLoadingMore == true ? 1 : 0);
+                      return NotificationListener<ScrollNotification>(
+                        onNotification: (notification) {
+                          if (notification.metrics.pixels >=
+                              notification.metrics.maxScrollExtent -
+                                  _categoryLoadMoreThreshold) {
+                            _autoLoadMoreCategories();
+                          }
+                          return false;
+                        },
+                        child: ListView.builder(
+                          controller: scrollController,
+                          padding: const EdgeInsets.symmetric(vertical: 6),
+                          itemCount: itemCount,
+                          itemBuilder: (context, index) {
+                            if (loadedState?.isLoadingMore == true &&
+                                index == categories.length) {
+                              return const Padding(
+                                padding: EdgeInsets.symmetric(vertical: 12),
+                                child: Center(
+                                  child: CircularProgressIndicator(),
+                                ),
+                              );
+                            }
+                            final category = categories[index];
+                            final isSelected =
+                                selectedCategory?.id == category.id;
+                            final title = langState.isRTL
+                                ? category.nameAr
+                                : category.nameEn;
+                            return ListTile(
+                              dense: true,
+                              title: DynamicText(title),
+                              trailing: isSelected
+                                  ? const Icon(Icons.check, size: 18)
+                                  : null,
+                              onTap: () =>
+                                  Navigator.pop(sheetContext, category),
+                            );
+                          },
+                        ),
+                      );
+                    },
+                  ),
+                ),
+              ],
+            ),
+          );
+        },
+      );
+    } finally {
+      scrollController.dispose();
+    }
+  }
+
+  Widget _buildCategoryPickerTrigger(
+    TranslationState langState, {
+    required CategoryModel? selectedCategory,
+    required VoidCallback onTap,
+  }) {
+    final label = selectedCategory == null
+        ? _label(langState, "Category", "التصنيف")
+        : (langState.isRTL ? selectedCategory.nameAr : selectedCategory.nameEn);
+
+    return InkWell(
+      borderRadius: BorderRadius.circular(12),
+      onTap: onTap,
+      child: Container(
+        padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 16),
+        decoration: BoxDecoration(
+          border: Border.all(color: const Color(0xFFE1E1E1)),
+          borderRadius: BorderRadius.circular(12),
+        ),
+        child: Row(
+          children: [
+            Expanded(
+              child: DynamicText(
+                label,
+                style: AppThemes.f14w400.copyWith(
+                  color: selectedCategory == null
+                      ? const Color(0xFF99A1AF)
+                      : Colors.black,
+                ),
+              ),
+            ),
+            const Icon(Icons.keyboard_arrow_down),
+          ],
+        ),
+      ),
+    );
+  }
 
   @override
   void initState() {
@@ -62,8 +266,7 @@ class _SubcategoryMobileViewState extends State<SubcategoryMobileView> {
     if (!_scrollController.hasClients) return;
     final position = _scrollController.position;
     if (position.pixels >= position.maxScrollExtent - 200) {
-      // Note: load more subcategories is not supported yet by backend block.
-      // context.read<SubcategoryBloc>().add(LoadMoreSubcategories());
+      context.read<SubcategoryBloc>().add(LoadMoreSubcategories());
     }
   }
 
@@ -107,6 +310,7 @@ class _SubcategoryMobileViewState extends State<SubcategoryMobileView> {
   }
 
   void _openAddSubcategoryDialog(TranslationState langState) {
+    _ensureCategoriesLoaded();
     final nameEnController = TextEditingController();
     final nameArController = TextEditingController();
     CategoryModel? selectedCategory;
@@ -182,53 +386,20 @@ class _SubcategoryMobileViewState extends State<SubcategoryMobileView> {
                     children: [
                       BlocBuilder<CategoryBloc, CategoryState>(
                         builder: (context, state) {
-                          if (state is CategoryLoading) {
-                            return const Center(
-                              child: CircularProgressIndicator(),
-                            );
-                          }
-                          if (state is CategoryLoaded) {
-                            return Container(
-                              padding: const EdgeInsets.symmetric(
-                                horizontal: 16,
-                              ),
-                              decoration: BoxDecoration(
-                                border: Border.all(
-                                  color: const Color(0xFFE1E1E1),
-                                ),
-                                borderRadius: BorderRadius.circular(12),
-                              ),
-                              child: DropdownButtonHideUnderline(
-                                child: DropdownButton<CategoryModel>(
-                                  value: selectedCategory,
-                                  isExpanded: true,
-                                  hint: DynamicText(
-                                    _label(langState, "Category", "التصنيف"),
-                                    style: AppThemes.f14w400.copyWith(
-                                      color: Color(0xFF99A1AF),
-                                    ),
-                                  ),
-                                  icon: const Icon(Icons.keyboard_arrow_down),
-                                  items: state.categories.map((category) {
-                                    return DropdownMenuItem(
-                                      value: category,
-                                      child: DynamicText(
-                                        langState.isRTL
-                                            ? category.nameAr
-                                            : category.nameEn,
-                                      ),
-                                    );
-                                  }).toList(),
-                                  onChanged: (value) {
-                                    setDialogState(() {
-                                      selectedCategory = value;
-                                    });
-                                  },
-                                ),
-                              ),
-                            );
-                          }
-                          return const SizedBox();
+                          return _buildCategoryPickerTrigger(
+                            langState,
+                            selectedCategory: selectedCategory,
+                            onTap: () async {
+                              final picked = await _openCategoryPicker(
+                                langState,
+                                selectedCategory: selectedCategory,
+                              );
+                              if (picked == null) return;
+                              setDialogState(() {
+                                selectedCategory = picked;
+                              });
+                            },
+                          );
                         },
                       ),
                       const SizedBox(height: 12),
@@ -269,6 +440,7 @@ class _SubcategoryMobileViewState extends State<SubcategoryMobileView> {
                             nameEn,
                             'ar',
                           );
+                          if (!dialogContext.mounted) return;
                           nameArController.text = translated;
                         },
                       ),
@@ -450,6 +622,7 @@ class _SubcategoryMobileViewState extends State<SubcategoryMobileView> {
     TranslationState langState,
     SubcategoryModel subcategory,
   ) {
+    _ensureCategoriesLoaded();
     final nameEnController = TextEditingController(text: subcategory.nameEn);
     final nameArController = TextEditingController(text: subcategory.nameAr);
     CategoryModel? selectedCategory;
@@ -572,64 +745,21 @@ class _SubcategoryMobileViewState extends State<SubcategoryMobileView> {
                     children: [
                       BlocBuilder<CategoryBloc, CategoryState>(
                         builder: (context, state) {
-                          if (state is CategoryLoading) {
-                            return const Center(
-                              child: CircularProgressIndicator(),
-                            );
-                          }
-                          if (state is CategoryLoaded) {
-                            final categories = List<CategoryModel>.from(
-                              state.categories,
-                            );
-                            if (selectedCategory != null &&
-                                !categories.any(
-                                  (c) => c.id == selectedCategory!.id,
-                                )) {
-                              categories.add(selectedCategory!);
-                            }
-
-                            return Container(
-                              padding: const EdgeInsets.symmetric(
-                                horizontal: 16,
-                              ),
-                              decoration: BoxDecoration(
-                                border: Border.all(
-                                  color: const Color(0xFFE1E1E1),
-                                ),
-                                borderRadius: BorderRadius.circular(12),
-                              ),
-                              child: DropdownButtonHideUnderline(
-                                child: DropdownButton<CategoryModel>(
-                                  value: selectedCategory,
-                                  isExpanded: true,
-                                  hint: DynamicText(
-                                    _label(langState, "Category", "التصنيف"),
-                                    style: AppThemes.f14w400.copyWith(
-                                      color: Color(0xFF99A1AF),
-                                    ),
-                                  ),
-                                  icon: const Icon(Icons.keyboard_arrow_down),
-                                  items: categories.map((category) {
-                                    return DropdownMenuItem(
-                                      value: category,
-                                      child: DynamicText(
-                                        langState.isRTL
-                                            ? category.nameAr
-                                            : category.nameEn,
-                                      ),
-                                    );
-                                  }).toList(),
-                                  onChanged: (value) {
-                                    setDialogState(() {
-                                      selectedCategory = value;
-                                      updateHasChanges();
-                                    });
-                                  },
-                                ),
-                              ),
-                            );
-                          }
-                          return const SizedBox();
+                          return _buildCategoryPickerTrigger(
+                            langState,
+                            selectedCategory: selectedCategory,
+                            onTap: () async {
+                              final picked = await _openCategoryPicker(
+                                langState,
+                                selectedCategory: selectedCategory,
+                              );
+                              if (picked == null) return;
+                              setDialogState(() {
+                                selectedCategory = picked;
+                                updateHasChanges();
+                              });
+                            },
+                          );
                         },
                       ),
                       const SizedBox(height: 12),
@@ -672,6 +802,7 @@ class _SubcategoryMobileViewState extends State<SubcategoryMobileView> {
                             nameEn,
                             'ar',
                           );
+                          if (!dialogContext.mounted) return;
                           nameArController.text = translated;
                           setDialogState(updateHasChanges);
                         },
@@ -1064,21 +1195,26 @@ class _SubcategoryMobileViewState extends State<SubcategoryMobileView> {
                                         >(
                                           builder: (context, state) {
                                             if (state is SubcategoryLoading) {
-                                              return Padding(
-                                                padding: const EdgeInsets.all(
-                                                  24,
-                                                ),
-                                                child: Column(
-                                                  children: List.generate(
-                                                    6,
-                                                    (index) => Padding(
-                                                      padding: EdgeInsets.only(
-                                                        bottom: index == 5
-                                                            ? 0
-                                                            : 20,
+                                              return SizedBox(
+                                                width:
+                                                    _mobileSubcategoryTableWidth,
+                                                child: Padding(
+                                                  padding: const EdgeInsets.all(
+                                                    24,
+                                                  ),
+                                                  child: Column(
+                                                    children: List.generate(
+                                                      6,
+                                                      (index) => Padding(
+                                                        padding:
+                                                            EdgeInsets.only(
+                                                              bottom: index == 5
+                                                                  ? 0
+                                                                  : 20,
+                                                            ),
+                                                        child:
+                                                            const _SubcategoryShimmerRowMobile(),
                                                       ),
-                                                      child:
-                                                          const _SubcategoryShimmerRowMobile(),
                                                     ),
                                                   ),
                                                 ),
@@ -1093,8 +1229,9 @@ class _SubcategoryMobileViewState extends State<SubcategoryMobileView> {
                                                   state.subcategories.where((
                                                     subcat,
                                                   ) {
-                                                    if (query.isEmpty)
+                                                    if (query.isEmpty) {
                                                       return true;
+                                                    }
                                                     return subcat.nameEn
                                                             .toLowerCase()
                                                             .contains(query) ||
@@ -1105,52 +1242,80 @@ class _SubcategoryMobileViewState extends State<SubcategoryMobileView> {
 
                                               if (filteredSubcategories
                                                   .isEmpty) {
-                                                return Padding(
-                                                  padding: const EdgeInsets.all(
-                                                    20,
-                                                  ),
-                                                  child: DynamicText(
-                                                    _label(
-                                                      langState,
-                                                      "No subcategories present",
-                                                      "لا توجد تصنيفات فرعية",
+                                                return SizedBox(
+                                                  width:
+                                                      _mobileSubcategoryTableWidth,
+                                                  child: Padding(
+                                                    padding:
+                                                        const EdgeInsets.all(
+                                                          20,
+                                                        ),
+                                                    child: DynamicText(
+                                                      _label(
+                                                        langState,
+                                                        "No subcategories present",
+                                                        "لا توجد تصنيفات فرعية",
+                                                      ),
                                                     ),
                                                   ),
                                                 );
                                               }
-                                              return Column(
-                                                children: filteredSubcategories
-                                                    .map((item) {
-                                                      return _buildMobileSubcatRow(
-                                                        item,
-                                                        langState,
-                                                        langState.isRTL,
+                                              final itemCount =
+                                                  filteredSubcategories.length +
+                                                  (state.isLoadingMore ? 1 : 0);
+                                              return SizedBox(
+                                                width:
+                                                    _mobileSubcategoryTableWidth,
+                                                child: ListView.builder(
+                                                  shrinkWrap: true,
+                                                  physics:
+                                                      const NeverScrollableScrollPhysics(),
+                                                  itemCount: itemCount,
+                                                  itemBuilder: (context, index) {
+                                                    if (state.isLoadingMore &&
+                                                        index ==
+                                                            filteredSubcategories
+                                                                .length) {
+                                                      return const Padding(
+                                                        padding:
+                                                            EdgeInsets.symmetric(
+                                                              vertical: 16,
+                                                            ),
+                                                        child: Center(
+                                                          child:
+                                                              CircularProgressIndicator(),
+                                                        ),
                                                       );
-                                                    })
-                                                    .toList(),
+                                                    }
+
+                                                    final item =
+                                                        filteredSubcategories[index];
+                                                    return _buildMobileSubcatRow(
+                                                      item,
+                                                      langState,
+                                                      langState.isRTL,
+                                                    );
+                                                  },
+                                                ),
                                               );
                                             }
                                             if (state is SubcategoryError) {
-                                              return Padding(
-                                                padding: const EdgeInsets.all(
-                                                  20,
-                                                ),
-                                                child: Text(
-                                                  state.message,
-                                                  style: const TextStyle(
-                                                    color: Colors.red,
+                                              return SizedBox(
+                                                width:
+                                                    _mobileSubcategoryTableWidth,
+                                                child: Padding(
+                                                  padding: const EdgeInsets.all(
+                                                    20,
+                                                  ),
+                                                  child: Text(
+                                                    state.message,
+                                                    style: const TextStyle(
+                                                      color: Colors.red,
+                                                    ),
                                                   ),
                                                 ),
                                               );
                                             }
-                                            return const SizedBox.shrink();
-                                          },
-                                        ),
-                                        BlocBuilder<
-                                          SubcategoryBloc,
-                                          SubcategoryState
-                                        >(
-                                          builder: (context, state) {
                                             return const SizedBox.shrink();
                                           },
                                         ),

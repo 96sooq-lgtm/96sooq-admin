@@ -20,7 +20,7 @@ class BaseDio {
         contentType: Headers.jsonContentType,
         connectTimeout: const Duration(seconds: 15),
         receiveTimeout: const Duration(seconds: 15),
-        sendTimeout: const Duration(seconds: 15),
+        sendTimeout: kIsWeb ? null : const Duration(seconds: 15),
       ),
     );
 
