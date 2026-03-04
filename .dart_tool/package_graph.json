@@ -19,6 +19,7 @@
         "go_router",
         "image_picker",
         "image_picker_for_web",
+        "intl",
         "responsive_builder",
         "shared_preferences",
         "shimmer",
@@ -53,6 +54,15 @@
         "stream_channel",
         "test_api",
         "vector_math"
+      ]
+    },
+    {
+      "name": "intl",
+      "version": "0.20.2",
+      "dependencies": [
+        "clock",
+        "meta",
+        "path"
       ]
     },
     {
@@ -348,15 +358,6 @@
       "version": "0.0.0",
       "dependencies": [
         "flutter"
-      ]
-    },
-    {
-      "name": "intl",
-      "version": "0.20.2",
-      "dependencies": [
-        "clock",
-        "meta",
-        "path"
       ]
     },
     {

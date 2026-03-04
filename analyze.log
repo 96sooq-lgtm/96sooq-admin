@@ -1,0 +1,57 @@
+Analyzing 96sooq-admin...                                       
+
+   info • The import of 'dart:ui' is unnecessary because all of the used elements are also provided by the import of 'package:flutter/material.dart' • lib/core/bloc/language/widgets/dynamic_text.dart:1:8 • unnecessary_import
+   info • 'textScaleFactor' is deprecated and shouldn't be used. Use textScaler instead. Use of textScaleFactor was deprecated in preparation for the upcoming nonlinear text scaling support. This feature was deprecated after v3.12.0-2.0.pre • lib/core/bloc/language/widgets/dynamic_text.dart:58:11 • deprecated_member_use
+warning • Unused import: 'package:image_picker/image_picker.dart' • lib/core/utils/image_picker_platform_web.dart:1:8 • unused_import
+   info • The imported package 'image_picker_platform_interface' isn't a dependency of the importing package • lib/core/utils/image_picker_platform_web.dart:2:8 • depend_on_referenced_packages
+   info • Statements in an if should be enclosed in a block • lib/features/ad_bannner/view/ad_banner_view_desktop.dart:1084:37 • curly_braces_in_flow_control_structures
+   info • Statements in an if should be enclosed in a block • lib/features/ad_bannner/view/ad_banner_view_desktop.dart:1087:37 • curly_braces_in_flow_control_structures
+   info • Statements in an if should be enclosed in a block • lib/features/ad_bannner/view/ad_banner_view_desktop.dart:1110:39 • curly_braces_in_flow_control_structures
+   info • Statements in an if should be enclosed in a block • lib/features/ad_bannner/view/ad_banner_view_desktop.dart:1113:39 • curly_braces_in_flow_control_structures
+   info • 'withOpacity' is deprecated and shouldn't be used. Use .withValues() to avoid precision loss • lib/features/ad_bannner/view/ad_banner_view_desktop.dart:1353:42 • deprecated_member_use
+   info • The import of 'dart:typed_data' is unnecessary because all of the used elements are also provided by the import of 'package:flutter/services.dart' • lib/features/ad_bannner/view/ad_banner_view_mobile.dart:1:8 • unnecessary_import
+warning • A value for optional parameter 'radius' isn't ever given • lib/features/ad_bannner/view/ad_banner_view_mobile.dart:1169:10 • unused_element_parameter
+warning • A value for optional parameter 'onCancel' isn't ever given • lib/features/ad_bannner/view/ad_banner_view_mobile.dart:1190:10 • unused_element_parameter
+warning • Unused import: 'package:_96sooq_admin/constants/api_endpoints.dart' • lib/features/auth/bloc/auth_bloc.dart:1:8 • unused_import
+   info • 'withOpacity' is deprecated and shouldn't be used. Use .withValues() to avoid precision loss • lib/features/auth/widgets/custom_textformfield.dart:92:60 • deprecated_member_use
+   info • 'withOpacity' is deprecated and shouldn't be used. Use .withValues() to avoid precision loss • lib/features/auth/widgets/custom_textformfield.dart:135:31 • deprecated_member_use
+warning • Unused import: 'package:_96sooq_admin/features/stores/view/offer_listing_view_desktop.dart' • lib/features/notifications/view/notifications_view.dart:3:8 • unused_import
+warning • Unused import: 'package:_96sooq_admin/features/stores/view/offer_listing_view_mobile.dart' • lib/features/notifications/view/notifications_view.dart:4:8 • unused_import
+warning • Unused import: 'package:_96sooq_admin/features/stores/view/offer_listing_view_desktop.dart' • lib/features/payments/view/payments_view.dart:1:8 • unused_import
+warning • Unused import: 'package:_96sooq_admin/features/stores/view/offer_listing_view_mobile.dart' • lib/features/payments/view/payments_view.dart:2:8 • unused_import
+   info • The private field _isLoading could be 'final' • lib/features/payments/view/payments_view_mobile.dart:17:8 • prefer_final_fields
+warning • A value for optional parameter 'radius' isn't ever given • lib/features/payments/view/payments_view_mobile.dart:428:10 • unused_element_parameter
+   info • The imported package 'bloc' isn't a dependency of the importing package • lib/features/promotion/bloc/subscription_bloc.dart:1:8 • depend_on_referenced_packages
+   info • 'value' is deprecated and shouldn't be used. Use initialValue instead. This will set the initial value for the form field. This feature was deprecated after v3.33.0-1.0.pre • lib/features/promotion/view/promotion_view_desktop.dart:457:27 • deprecated_member_use
+   info • 'value' is deprecated and shouldn't be used. Use initialValue instead. This will set the initial value for the form field. This feature was deprecated after v3.33.0-1.0.pre • lib/features/promotion/view/promotion_view_desktop.dart:511:29 • deprecated_member_use
+   info • 'value' is deprecated and shouldn't be used. Use initialValue instead. This will set the initial value for the form field. This feature was deprecated after v3.33.0-1.0.pre • lib/features/promotion/view/promotion_view_desktop.dart:567:27 • deprecated_member_use
+   info • 'value' is deprecated and shouldn't be used. Use initialValue instead. This will set the initial value for the form field. This feature was deprecated after v3.33.0-1.0.pre • lib/features/promotion/view/promotion_view_desktop.dart:619:27 • deprecated_member_use
+warning • A value for optional parameter 'radius' isn't ever given • lib/features/promotion/view/promotion_view_desktop.dart:1012:10 • unused_element_parameter
+warning • Unused import: 'package:_96sooq_admin/features/category/widgets/add_category_popup.dart' • lib/features/promotion/view/promotion_view_mobile.dart:9:8 • unused_import
+   info • 'value' is deprecated and shouldn't be used. Use initialValue instead. This will set the initial value for the form field. This feature was deprecated after v3.33.0-1.0.pre • lib/features/promotion/view/promotion_view_mobile.dart:452:23 • deprecated_member_use
+   info • 'value' is deprecated and shouldn't be used. Use initialValue instead. This will set the initial value for the form field. This feature was deprecated after v3.33.0-1.0.pre • lib/features/promotion/view/promotion_view_mobile.dart:504:25 • deprecated_member_use
+   info • 'value' is deprecated and shouldn't be used. Use initialValue instead. This will set the initial value for the form field. This feature was deprecated after v3.33.0-1.0.pre • lib/features/promotion/view/promotion_view_mobile.dart:557:23 • deprecated_member_use
+   info • 'value' is deprecated and shouldn't be used. Use initialValue instead. This will set the initial value for the form field. This feature was deprecated after v3.33.0-1.0.pre • lib/features/promotion/view/promotion_view_mobile.dart:606:23 • deprecated_member_use
+warning • A value for optional parameter 'onCancel' isn't ever given • lib/features/promotion/view/promotion_view_mobile.dart:896:10 • unused_element_parameter
+   info • Missing type annotation • lib/features/request_approval/view/request_approval_view_desktop.dart:36:43 • strict_top_level_inference
+   info • 'value' is deprecated and shouldn't be used. Use initialValue instead. This will set the initial value for the form field. This feature was deprecated after v3.33.0-1.0.pre • lib/features/request_approval/view/request_approval_view_desktop.dart:95:31 • deprecated_member_use
+   info • Missing type annotation • lib/features/request_approval/view/request_approval_view_mobile.dart:35:43 • strict_top_level_inference
+   info • 'value' is deprecated and shouldn't be used. Use initialValue instead. This will set the initial value for the form field. This feature was deprecated after v3.33.0-1.0.pre • lib/features/request_approval/view/request_approval_view_mobile.dart:90:21 • deprecated_member_use
+   info • Parameter 'key' could be a super parameter • lib/features/request_approval/widgets/listing_details_widget.dart:10:9 • use_super_parameters
+   info • 'withOpacity' is deprecated and shouldn't be used. Use .withValues() to avoid precision loss • lib/features/request_approval/widgets/listing_details_widget.dart:102:43 • deprecated_member_use
+warning • Unused import: 'package:_96sooq_admin/constants/colors.dart' • lib/features/root/widgets/admin_sidebar_item_widget.dart:1:8 • unused_import
+warning • Unused import: 'package:_96sooq_admin/constants/themes.dart' • lib/features/root/widgets/admin_sidebar_item_widget.dart:2:8 • unused_import
+warning • Unused import: 'package:_96sooq_admin/core/bloc/navigation/navigation_cubit.dart' • lib/features/root/widgets/admin_sidebar_widget.dart:6:8 • unused_import
+warning • Unused import: 'package:_96sooq_admin/features/stores/view/offer_listing_view_desktop.dart' • lib/features/settings/view/settings_view.dart:1:8 • unused_import
+warning • Unused import: 'package:_96sooq_admin/features/stores/view/offer_listing_view_mobile.dart' • lib/features/settings/view/settings_view.dart:2:8 • unused_import
+warning • Unused import: 'package:_96sooq_admin/features/stores/widgets/offer_listing_widget.dart' • lib/features/settings/view/settings_view_desktop.dart:6:8 • unused_import
+   info • 'value' is deprecated and shouldn't be used. Use initialValue instead. This will set the initial value for the form field. This feature was deprecated after v3.33.0-1.0.pre • lib/features/settings/view/settings_view_mobile.dart:78:23 • deprecated_member_use
+warning • Unused import: 'package:_96sooq_admin/features/root/view/admin_root_desktop_view.dart' • lib/features/shared/router/app_router.dart:4:8 • unused_import
+   info • 'withOpacity' is deprecated and shouldn't be used. Use .withValues() to avoid precision loss • lib/features/subcategory/view/attribute/attribute_mobile_view.dart:475:60 • deprecated_member_use
+   info • 'withOpacity' is deprecated and shouldn't be used. Use .withValues() to avoid precision loss • lib/features/subcategory/view/subcategory_mobile_view.dart:1493:60 • deprecated_member_use
+warning • Unused import: 'package:_96sooq_admin/features/shared/global_widgets/custom_button_widgets.dart' • lib/features/user_management/view/user_management_view_desktop.dart:5:8 • unused_import
+warning • Unused import: 'package:_96sooq_admin/features/subcategory/widgets/subcategory_list_widget.dart' • lib/features/user_management/view/user_management_view_desktop.dart:6:8 • unused_import
+   info • The private field _isLoading could be 'final' • lib/features/user_management/view/user_management_view_mobile.dart:18:8 • prefer_final_fields
+warning • A value for optional parameter 'radius' isn't ever given • lib/features/user_management/view/user_management_view_mobile.dart:363:10 • unused_element_parameter
+   info • The package name '_96sooq_admin' isn't a lower_case_with_underscores identifier • pubspec.yaml:1:7 • package_names
+

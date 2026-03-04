@@ -11,6 +11,7 @@ class SubscriptionModel {
   final String description;
   final Map<String, dynamic>? features;
   final String? targetAudience;
+  final String? adSubType;
   final bool isActive;
   final bool isBestValue;
   final DateTime? createdAt;
@@ -26,6 +27,7 @@ class SubscriptionModel {
     required this.description,
     required this.features,
     required this.targetAudience,
+    this.adSubType,
     required this.isActive,
     required this.isBestValue,
     required this.createdAt,
@@ -45,6 +47,7 @@ class SubscriptionModel {
           ? Map<String, dynamic>.from(json['features'])
           : null,
       targetAudience: json['target_audience']?.toString(),
+      adSubType: json['ad_sub_type']?.toString(),
       isActive: json['is_active'] ?? false,
       isBestValue: json['is_best_value'] ?? json['isBestValue'] ?? false,
       createdAt: _parseDateTime(json['created_at']),
@@ -62,10 +65,12 @@ class SubscriptionModel {
       "description": description,
       "is_active": isActive,
       "isBestValue": isBestValue,
-      if (type == SubscriptionType.productListing &&
-          targetAudience != null &&
-          targetAudience!.isNotEmpty)
+      if (targetAudience != null && targetAudience!.isNotEmpty)
         "target_audience": targetAudience,
+      if (type == SubscriptionType.advertisement &&
+          adSubType != null &&
+          adSubType!.isNotEmpty)
+        "ad_sub_type": adSubType,
       if (features != null) "features": features,
     };
   }
@@ -81,10 +86,12 @@ class SubscriptionModel {
       "description": description,
       "is_active": isActive,
       "is_best_value": isBestValue,
-      if (type == SubscriptionType.productListing &&
-          targetAudience != null &&
-          targetAudience!.isNotEmpty)
+      if (targetAudience != null && targetAudience!.isNotEmpty)
         "target_audience": targetAudience,
+      if (type == SubscriptionType.advertisement &&
+          adSubType != null &&
+          adSubType!.isNotEmpty)
+        "ad_sub_type": adSubType,
       if (features != null) "features": features,
     };
   }

@@ -274,7 +274,7 @@ class _PromotionViewDesktopState extends State<PromotionViewDesktop> {
       text: existing?.nameAr ?? '',
     );
     final priceController = TextEditingController(
-      text: existing == null ? '' : existing.price.toInt().toString(),
+      text: existing == null ? '' : existing.price.toString(),
     );
     final durationController = TextEditingController(
       text: existing == null ? '' : existing.durationDays.toString(),
@@ -288,9 +288,9 @@ class _PromotionViewDesktopState extends State<PromotionViewDesktop> {
     final descriptionController = TextEditingController(
       text: _normalizeNumberedDescription(existing?.description ?? '1. '),
     );
-    String? targetAudienceValue =
-        planTypeValue == SubscriptionType.productListing
-        ? (existing?.targetAudience ?? 'individual')
+    String? targetAudienceValue = existing?.targetAudience ?? 'individual';
+    String? adSubTypeValue = planTypeValue == SubscriptionType.advertisement
+        ? (existing?.adSubType ?? 'product_listing')
         : null;
     bool isBestValue = existing?.isBestValue ?? false;
     bool isSaving = false;
@@ -390,7 +390,9 @@ class _PromotionViewDesktopState extends State<PromotionViewDesktop> {
                           labelText: "Price",
                           keyboardType: TextInputType.number,
                           inputFormatters: [
-                            FilteringTextInputFormatter.digitsOnly,
+                            FilteringTextInputFormatter.allow(
+                              RegExp(r'^\d*\.?\d*$'),
+                            ),
                           ],
                         ),
                         const SizedBox(height: 12),
@@ -404,22 +406,25 @@ class _PromotionViewDesktopState extends State<PromotionViewDesktop> {
                             FilteringTextInputFormatter.digitsOnly,
                           ],
                         ),
-                        const SizedBox(height: 12),
-                        DynamicText(
-                          "Number of listings available",
-                          style: AppThemes.f16w500,
-                        ),
-                        const SizedBox(height: 8),
-                        CustomTextFormField(
-                          controller: quotaController,
-                          labelText: "Number of listings available",
-                          keyboardType: TextInputType.number,
-                          inputFormatters: [
-                            FilteringTextInputFormatter.allow(
-                              RegExp(r'^-?\d*$'),
-                            ),
-                          ],
-                        ),
+                        if (planTypeValue !=
+                            SubscriptionType.advertisement) ...[
+                          const SizedBox(height: 12),
+                          DynamicText(
+                            "Number of listings available",
+                            style: AppThemes.f16w500,
+                          ),
+                          const SizedBox(height: 8),
+                          CustomTextFormField(
+                            controller: quotaController,
+                            labelText: "Number of listings available",
+                            keyboardType: TextInputType.number,
+                            inputFormatters: [
+                              FilteringTextInputFormatter.allow(
+                                RegExp(r'^-?\d*$'),
+                              ),
+                            ],
+                          ),
+                        ],
                         const SizedBox(height: 12),
                         DynamicText("Description", style: AppThemes.f16w500),
                         const SizedBox(height: 8),
@@ -489,24 +494,21 @@ class _PromotionViewDesktopState extends State<PromotionViewDesktop> {
                             setDialogState(() {
                               planTypeValue = value;
                               if (planTypeValue ==
-                                  SubscriptionType.productListing) {
-                                targetAudienceValue ??= 'individual';
+                                  SubscriptionType.advertisement) {
+                                adSubTypeValue ??= 'product_listing';
                               } else {
-                                targetAudienceValue = null;
+                                adSubTypeValue = null;
                               }
                             });
                           },
                         ),
                         if (planTypeValue ==
-                            SubscriptionType.productListing) ...[
+                            SubscriptionType.advertisement) ...[
                           const SizedBox(height: 12),
-                          DynamicText(
-                            "Target Audience",
-                            style: AppThemes.f16w500,
-                          ),
+                          DynamicText("Ad Sub Type", style: AppThemes.f16w500),
                           const SizedBox(height: 8),
                           DropdownButtonFormField<String>(
-                            value: targetAudienceValue,
+                            value: adSubTypeValue,
                             decoration: InputDecoration(
                               filled: true,
                               fillColor: const Color(0xFFEFEFEF),
@@ -535,26 +537,81 @@ class _PromotionViewDesktopState extends State<PromotionViewDesktop> {
                             ),
                             items: const [
                               DropdownMenuItem(
-                                value: 'individual',
-                                child: Text('Individual'),
+                                value: 'product_listing',
+                                child: Text('Product Listing'),
                               ),
                               DropdownMenuItem(
-                                value: 'store',
-                                child: Text('Store'),
+                                value: 'offers',
+                                child: Text('Offers'),
                               ),
                               DropdownMenuItem(
-                                value: 'everyone',
-                                child: Text('Everyone'),
+                                value: 'chat_screen',
+                                child: Text('Chat Screen'),
                               ),
                             ],
                             onChanged: (value) {
                               setDialogState(() {
-                                targetAudienceValue = value;
+                                adSubTypeValue = value;
                               });
                             },
-                            hint: const Text('Target Audience'),
+                            hint: const Text('Ad Sub Type'),
                           ),
                         ],
+                        const SizedBox(height: 12),
+                        DynamicText(
+                          "Target Audience",
+                          style: AppThemes.f16w500,
+                        ),
+                        const SizedBox(height: 8),
+                        DropdownButtonFormField<String>(
+                          value: targetAudienceValue,
+                          decoration: InputDecoration(
+                            filled: true,
+                            fillColor: const Color(0xFFEFEFEF),
+                            border: OutlineInputBorder(
+                              borderRadius: BorderRadius.circular(14),
+                              borderSide: const BorderSide(
+                                color: Color(0xFFEFEFEF),
+                              ),
+                            ),
+                            enabledBorder: OutlineInputBorder(
+                              borderRadius: BorderRadius.circular(14),
+                              borderSide: const BorderSide(
+                                color: Color(0xFFEFEFEF),
+                              ),
+                            ),
+                            focusedBorder: OutlineInputBorder(
+                              borderRadius: BorderRadius.circular(14),
+                              borderSide: const BorderSide(
+                                color: Color(0xFFEFEFEF),
+                              ),
+                            ),
+                            contentPadding: const EdgeInsets.symmetric(
+                              vertical: 18,
+                              horizontal: 18,
+                            ),
+                          ),
+                          items: const [
+                            DropdownMenuItem(
+                              value: 'individual',
+                              child: Text('Individual'),
+                            ),
+                            DropdownMenuItem(
+                              value: 'store',
+                              child: Text('Store'),
+                            ),
+                            DropdownMenuItem(
+                              value: 'everyone',
+                              child: Text('Everyone'),
+                            ),
+                          ],
+                          onChanged: (value) {
+                            setDialogState(() {
+                              targetAudienceValue = value;
+                            });
+                          },
+                          hint: const Text('Target Audience'),
+                        ),
                         const SizedBox(height: 12),
                         DynamicText("Status", style: AppThemes.f16w500),
                         const SizedBox(height: 8),
@@ -625,20 +682,28 @@ class _PromotionViewDesktopState extends State<PromotionViewDesktop> {
                     );
                     return;
                   }
-                  if (planTypeValue == SubscriptionType.productListing &&
-                      (targetAudienceValue == null ||
-                          targetAudienceValue!.isEmpty)) {
+                  if (targetAudienceValue == null ||
+                      targetAudienceValue!.isEmpty) {
+                    ScaffoldMessenger.of(dialogContext).showSnackBar(
+                      const SnackBar(
+                        content: Text("Target Audience is required"),
+                      ),
+                    );
+                    return;
+                  }
+                  if (planTypeValue == SubscriptionType.advertisement &&
+                      (adSubTypeValue == null || adSubTypeValue!.isEmpty)) {
                     ScaffoldMessenger.of(dialogContext).showSnackBar(
                       const SnackBar(
                         content: Text(
-                          "Target Audience is required for Product Listing",
+                          "Ad Sub Type is required for Advertisement",
                         ),
                       ),
                     );
                     return;
                   }
-                  final price = (int.tryParse(priceController.text.trim()) ?? 0)
-                      .toDouble();
+                  final price =
+                      double.tryParse(priceController.text.trim()) ?? 0.0;
                   final durationDays =
                       int.tryParse(durationController.text.trim()) ?? 0;
                   final parsedQuota = int.tryParse(quotaController.text.trim());
@@ -663,6 +728,7 @@ class _PromotionViewDesktopState extends State<PromotionViewDesktop> {
                     description: normalizedDescription,
                     features: null,
                     targetAudience: targetAudienceValue,
+                    adSubType: adSubTypeValue,
                     isActive: statusValue == "Active",
                     isBestValue: isBestValue,
                     createdAt: null,

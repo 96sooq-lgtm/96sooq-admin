@@ -3,10 +3,12 @@ import 'package:_96sooq_admin/core/bloc/language/widgets/dynamic_text.dart';
 import 'package:_96sooq_admin/features/ad_bannner/view/ad_banner_view.dart';
 import 'package:_96sooq_admin/features/category/view/category_view.dart';
 import 'package:_96sooq_admin/features/home/view/home_view.dart';
-import 'package:_96sooq_admin/features/offer_listings/view/offer_listing_view.dart';
+import 'package:_96sooq_admin/features/stores/view/offer_listing_view.dart';
 import 'package:_96sooq_admin/features/payments/view/payments_view.dart';
 import 'package:_96sooq_admin/features/promotion/view/promotion_view.dart';
 import 'package:_96sooq_admin/features/request_approval/view/request_approval_view.dart';
+import 'package:_96sooq_admin/features/home/bloc/dashboard_bloc.dart';
+import 'package:_96sooq_admin/features/home/bloc/dashboard_event.dart';
 import 'package:_96sooq_admin/features/root/cubit/admin_navigation_cubit.dart';
 import 'package:_96sooq_admin/features/root/widgets/admin_sidebar_widget.dart';
 import 'package:_96sooq_admin/features/settings/view/settings_view.dart';
@@ -42,60 +44,74 @@ class _AdminRootDesktopViewState extends State<AdminRootDesktopView> {
   ];
 
   @override
+  void initState() {
+    super.initState();
+    // Load dashboard metrics on initial build (dashboard is the default page)
+    context.read<DashboardBloc>().add(LoadDashboardMetrics());
+  }
+
+  @override
   Widget build(BuildContext context) {
     return BlocProvider(
       create: (_) => AdminNavigationCubit(),
-      child: Scaffold(
-        backgroundColor: const Color(0xFFF9FAFB),
-        body: Column(
-          children: [
-            Container(
-              height: 98,
-              decoration: BoxDecoration(
-                border: Border.all(color: const Color(0xFFE1E1E1)),
+      child: BlocListener<AdminNavigationCubit, int>(
+        listener: (context, selectedIndex) {
+          if (selectedIndex == 0) {
+            context.read<DashboardBloc>().add(LoadDashboardMetrics());
+          }
+        },
+        child: Scaffold(
+          backgroundColor: const Color(0xFFF9FAFB),
+          body: Column(
+            children: [
+              Container(
+                height: 98,
+                decoration: BoxDecoration(
+                  border: Border.all(color: const Color(0xFFE1E1E1)),
+                ),
+                child: Padding(
+                  padding: const EdgeInsets.symmetric(horizontal: 60),
+                  child: Row(
+                    children: [
+                      DynamicText('96 Sooq Admin', style: AppThemes.f24w400),
+                      const Spacer(),
+                      InkWell(
+                        onTap: () {
+                          // The Bloc handles both storage and state change
+                          context.read<AuthBloc>().add(LogoutRequested());
+                        },
+                        child: Row(
+                          children: [
+                            Icon(Icons.logout, color: Color(0xFF707070)),
+                            DynamicText(
+                              "Logout",
+                              style: AppThemes.f24w500.copyWith(
+                                color: Color(0xFF707070),
+                              ),
+                            ),
+                          ],
+                        ),
+                      ),
+                    ],
+                  ),
+                ),
               ),
-              child: Padding(
-                padding: const EdgeInsets.symmetric(horizontal: 60),
+              Expanded(
                 child: Row(
                   children: [
-                    DynamicText('96 Sooq Admin', style: AppThemes.f24w400),
-                    const Spacer(),
-                    InkWell(
-                      onTap: () {
-                        // The Bloc handles both storage and state change
-                        context.read<AuthBloc>().add(LogoutRequested());
-                      },
-                      child: Row(
-                        children: [
-                          Icon(Icons.logout, color: Color(0xFF707070)),
-                          DynamicText(
-                            "Logout",
-                            style: AppThemes.f24w500.copyWith(
-                              color: Color(0xFF707070),
-                            ),
-                          ),
-                        ],
+                    const AdminSidebarWidget(),
+                    Expanded(
+                      child: BlocBuilder<AdminNavigationCubit, int>(
+                        builder: (context, selectedIndex) {
+                          return adminPages[selectedIndex];
+                        },
                       ),
                     ),
                   ],
                 ),
               ),
-            ),
-            Expanded(
-              child: Row(
-                children: [
-                  const AdminSidebarWidget(),
-                  Expanded(
-                    child: BlocBuilder<AdminNavigationCubit, int>(
-                      builder: (context, selectedIndex) {
-                        return adminPages[selectedIndex];
-                      },
-                    ),
-                  ),
-                ],
-              ),
-            ),
-          ],
+            ],
+          ),
         ),
       ),
     );

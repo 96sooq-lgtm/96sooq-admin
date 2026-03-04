@@ -27,4 +27,22 @@ class ApiEndpoints {
       "$baseUrl/api/admin/categories/$id/attributes";
   static String updateSubcategoryAttribute(String id, String attributeName) =>
       "$baseUrl/api/admin/categories/$id/attributes/$attributeName";
+  static const String getDashboard = "$baseUrl/api/admin/dashboard";
+  static const String getStores = "$baseUrl/api/admin/stores/";
+  static String lockStore(String id) => "$baseUrl/api/admin/stores/$id/lock";
+  static String unlockStore(String id) =>
+      "$baseUrl/api/admin/stores/$id/unlock";
+  static String getListings(String status, {int skip = 0, int limit = 10}) =>
+      "$baseUrl/api/admin/listings/?status=$status&skip=$skip&limit=$limit";
+  static String approveListing(String id) =>
+      "$baseUrl/api/admin/listings/$id/approve";
+  static String rejectListing(String id, String reason) =>
+      "$baseUrl/api/admin/listings/$id/reject?reason=$reason";
+  static String getUsers({int page = 1, int limit = 20}) =>
+      "$baseUrl/api/admin/users/?page=$page&limit=$limit";
+  static String getUserDetails(String id) => "$baseUrl/api/admin/users/$id";
+  static String getTransactions({int page = 1, int limit = 20}) =>
+      "$baseUrl/api/admin/payments/transactions?page=$page&limit=$limit";
+  static String getTransactionDetails(String id) =>
+      "$baseUrl/api/admin/payments/transactions/$id";
 }

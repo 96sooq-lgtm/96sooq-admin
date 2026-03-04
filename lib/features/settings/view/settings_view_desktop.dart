@@ -3,7 +3,6 @@ import 'package:_96sooq_admin/constants/themes.dart';
 import 'package:_96sooq_admin/core/bloc/language/bloc/language_bloc.dart';
 import 'package:_96sooq_admin/core/bloc/language/bloc/language_event.dart';
 import 'package:_96sooq_admin/core/bloc/language/widgets/dynamic_text.dart';
-import 'package:_96sooq_admin/features/offer_listings/widgets/offer_listing_widget.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 

@@ -21,10 +21,7 @@ class _SettingsViewMobileState extends State<SettingsViewMobile> {
       appBar: AppBar(
         backgroundColor: AppColors.scaffoldColor,
         elevation: 0,
-        title: const DynamicText(
-          "Admin Settings",
-          style: AppThemes.f20w600,
-        ),
+        title: const DynamicText("Admin Settings", style: AppThemes.f20w600),
         centerTitle: true,
       ),
       body: SafeArea(
@@ -33,7 +30,6 @@ class _SettingsViewMobileState extends State<SettingsViewMobile> {
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
-
               /// Subtitle
               const DynamicText(
                 "Manage your admin preferences",
@@ -54,7 +50,6 @@ class _SettingsViewMobileState extends State<SettingsViewMobile> {
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
-
                     /// Section Title
                     const DynamicText(
                       "General Settings",
@@ -75,15 +70,15 @@ class _SettingsViewMobileState extends State<SettingsViewMobile> {
 
                     /// Language Dropdown
                     DropdownButtonFormField<String>(
-                      value: context
+                      initialValue: context
                           .read<TranslationBloc>()
                           .state
                           .languageCode,
                       onChanged: (newValue) {
                         if (newValue != null) {
                           context.read<TranslationBloc>().add(
-                                ChangeLanguage(newValue),
-                              );
+                            ChangeLanguage(newValue),
+                          );
                         }
                       },
                       borderRadius: BorderRadius.circular(12),
@@ -109,9 +104,7 @@ class _SettingsViewMobileState extends State<SettingsViewMobile> {
                         ),
                         focusedBorder: OutlineInputBorder(
                           borderRadius: BorderRadius.circular(12),
-                          borderSide: const BorderSide(
-                            color: Colors.black,
-                          ),
+                          borderSide: const BorderSide(color: Colors.black),
                         ),
                       ),
                       items: const [

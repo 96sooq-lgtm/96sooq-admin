@@ -1,16 +1,20 @@
 import 'dart:convert';
-import 'dart:developer' as developer;
 
-import 'package:_96sooq_admin/features/auth/login/view/login_view.dart';
+import 'package:_96sooq_admin/features/auth/bloc/auth_bloc.dart';
+import 'package:_96sooq_admin/features/auth/bloc/auth_event.dart';
 import 'package:_96sooq_admin/features/auth/storage/auth_storage.dart';
-import 'package:_96sooq_admin/main.dart';
 import 'package:dio/dio.dart';
 import 'package:flutter/foundation.dart';
-import 'package:flutter/material.dart';
 
 class BaseDio {
   static final BaseDio _instance = BaseDio._internal();
   factory BaseDio() => _instance;
+
+  static AuthBloc? _authBloc;
+
+  static void setAuthBloc(AuthBloc bloc) {
+    _authBloc = bloc;
+  }
 
   late final Dio dio;
 
@@ -34,27 +38,27 @@ class BaseDio {
           }
 
           if (true) {
-            developer.log('''
-${DioColors.green}▶▶▶ REQUEST
+            debugPrint('''
+${DioColors.yellow}▶▶▶ REQUEST
 METHOD : ${options.method}
 URL    : ${options.uri}
 HEADERS: ${_prettyJson(options.headers)}
 BODY   : ${_prettyJson(options.data)}
 ◀◀◀${DioColors.reset}
-''', name: 'DIO');
+''');
           }
 
           handler.next(options);
         },
         onResponse: (response, handler) {
           if (true) {
-            developer.log('''
-${DioColors.cyan}▶▶▶ RESPONSE
+            debugPrint('''
+${DioColors.green}▶▶▶ RESPONSE
 STATUS : ${response.statusCode}
 URL    : ${response.requestOptions.uri}
 DATA   : ${_prettyJson(response.data)}
 ◀◀◀${DioColors.reset}
-''', name: 'DIO');
+''');
           }
 
           handler.next(response);
@@ -63,24 +67,18 @@ DATA   : ${_prettyJson(response.data)}
           final statusCode = error.response?.statusCode;
 
           if (true) {
-            developer.log('''
+            debugPrint('''
 ${DioColors.red}▶▶▶ ERROR
 STATUS : ${statusCode ?? 'NO STATUS'}
 URL    : ${error.requestOptions.uri}
 MESSAGE: ${error.message}
 DATA   : ${_prettyJson(error.response?.data)}
 ◀◀◀${DioColors.reset}
-''', name: 'DIO');
+''');
           }
 
           if (statusCode == 401) {
-            await AuthStorage.logout();
-            WidgetsBinding.instance.addPostFrameCallback((_) {
-              navKey.currentState?.pushAndRemoveUntil(
-                MaterialPageRoute(builder: (_) => const LoginView()),
-                (_) => false,
-              );
-            });
+            _authBloc?.add(LogoutRequested());
           }
 
           handler.next(error);

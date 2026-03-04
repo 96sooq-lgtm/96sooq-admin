@@ -1,7 +1,7 @@
 import 'package:_96sooq_admin/features/notifications/view/notfications_view_mobile.dart';
 import 'package:_96sooq_admin/features/notifications/view/notifications_view_desktop.dart';
-import 'package:_96sooq_admin/features/offer_listings/view/offer_listing_view_desktop.dart';
-import 'package:_96sooq_admin/features/offer_listings/view/offer_listing_view_mobile.dart';
+import 'package:_96sooq_admin/features/stores/view/offer_listing_view_desktop.dart';
+import 'package:_96sooq_admin/features/stores/view/offer_listing_view_mobile.dart';
 import 'package:flutter/material.dart';
 import 'package:responsive_builder/responsive_builder.dart';
 

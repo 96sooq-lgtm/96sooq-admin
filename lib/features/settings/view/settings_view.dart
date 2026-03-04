@@ -1,5 +1,3 @@
-import 'package:_96sooq_admin/features/offer_listings/view/offer_listing_view_desktop.dart';
-import 'package:_96sooq_admin/features/offer_listings/view/offer_listing_view_mobile.dart';
 import 'package:_96sooq_admin/features/settings/view/settings_view_desktop.dart';
 import 'package:_96sooq_admin/features/settings/view/settings_view_mobile.dart';
 import 'package:flutter/material.dart';

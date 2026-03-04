@@ -7,6 +7,8 @@ import 'package:_96sooq_admin/features/home/widgets/quick_actions_widget.dart';
 import 'package:_96sooq_admin/features/root/cubit/admin_navigation_cubit.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:_96sooq_admin/features/home/bloc/dashboard_bloc.dart';
+import 'package:_96sooq_admin/features/home/bloc/dashboard_state.dart';
 
 class HomeViewDesktop extends StatefulWidget {
   const HomeViewDesktop({super.key});
@@ -16,18 +18,6 @@ class HomeViewDesktop extends StatefulWidget {
 }
 
 class _HomeViewDesktopState extends State<HomeViewDesktop> {
-  final dashboardItems = [
-    {'icon': AssetPath.totalUsersIc, 'title': 'Users', 'index': 6},
-    {'icon': AssetPath.storeIc, 'title': 'Stores', 'index': 5},
-    {'icon': AssetPath.listingIc, 'title': 'Listings', 'index': 5},
-    {'icon': AssetPath.dealsIc, 'title': 'Deals', 'index': 3},
-    {
-      'icon': AssetPath.pendingRequestIc,
-      'title': 'Pending Request',
-      'index': 7,
-    },
-  ];
-
   final quickActionItems = [
     {
       'icon': AssetPath.categoryUnSelectedIc,
@@ -73,27 +63,86 @@ class _HomeViewDesktopState extends State<HomeViewDesktop> {
             ),
             SliverPadding(
               padding: const EdgeInsets.only(right: 24, bottom: 24),
-              sliver: SliverGrid(
-                gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
-                  crossAxisCount: 3,
-                  crossAxisSpacing: 16,
-                  mainAxisSpacing: 16,
-                  childAspectRatio: 2,
-                ),
-                delegate: SliverChildBuilderDelegate((context, index) {
-                  final item = dashboardItems[index];
-                  return IconAndTextWidget(
-                    svgPath: item['icon'] as String,
-                    count: 5,
-                    title: item['title'] as String,
-                    onTap: () {
-                      final targetIndex = item['index'] as int;
-                      context.read<AdminNavigationCubit>().changePage(
-                        targetIndex,
-                      );
+              sliver: BlocBuilder<DashboardBloc, DashboardState>(
+                builder: (context, state) {
+                  final List<Map<String, dynamic>> dashboardItems = [
+                    {
+                      'icon': AssetPath.totalUsersIc,
+                      'title': 'Users',
+                      'index': 6,
+                      'count': state is DashboardLoaded
+                          ? state.metrics.totalUsers
+                          : null,
                     },
+                    {
+                      'icon': AssetPath.storeIc,
+                      'title': 'Stores',
+                      'index': 5,
+                      'count': state is DashboardLoaded
+                          ? state.metrics.totalStores
+                          : null,
+                    },
+                    {
+                      'icon': AssetPath.listingIc,
+                      'title': 'Listings',
+                      'index': -1, // No navigation
+                      'count': state is DashboardLoaded
+                          ? state.metrics.totalListings
+                          : null,
+                    },
+                    {
+                      'icon': AssetPath.dealsIc,
+                      'title': 'Transactions',
+                      'index': 8, // Payments Tab
+                      'count': state is DashboardLoaded
+                          ? state.metrics.totalTransactions
+                          : null,
+                    },
+                    {
+                      'icon': AssetPath.pendingRequestIc,
+                      'title': 'Pending Request',
+                      'index': 7, // Request Approval Tab
+                      'count': state is DashboardLoaded
+                          ? state.metrics.pendingRequests
+                          : null,
+                    },
+                    {
+                      'icon': AssetPath.dealsIc,
+                      'title': 'Revenue',
+                      'index': -1, // No navigation
+                      'count': state is DashboardLoaded
+                          ? state.metrics.totalRevenue.toInt()
+                          : null,
+                    },
+                  ];
+
+                  return SliverGrid(
+                    gridDelegate:
+                        const SliverGridDelegateWithFixedCrossAxisCount(
+                          crossAxisCount: 3,
+                          crossAxisSpacing: 16,
+                          mainAxisSpacing: 16,
+                          childAspectRatio: 2,
+                        ),
+                    delegate: SliverChildBuilderDelegate((context, index) {
+                      final item = dashboardItems[index];
+                      return IconAndTextWidget(
+                        svgPath: item['icon'] as String,
+                        isLoading: state is DashboardLoading,
+                        count: item['count'] as int?,
+                        title: item['title'] as String,
+                        onTap: () {
+                          final targetIndex = item['index'] as int;
+                          if (targetIndex != -1) {
+                            context.read<AdminNavigationCubit>().changePage(
+                              targetIndex,
+                            );
+                          }
+                        },
+                      );
+                    }, childCount: dashboardItems.length),
                   );
-                }, childCount: dashboardItems.length),
+                },
               ),
             ),
             SliverPadding(
@@ -134,7 +183,7 @@ class _HomeViewDesktopState extends State<HomeViewDesktop> {
                         break;
 
                       case 'add_banner':
-                        // showAddBannerDialog(context);
+                        context.read<AdminNavigationCubit>().changePage(4);
                         break;
                     }
                   },

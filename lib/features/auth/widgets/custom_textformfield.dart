@@ -10,6 +10,7 @@ class CustomTextFormField extends StatefulWidget {
     this.obscureText = false,
     this.isPassword = false,
     this.hintStyle,
+    this.fillColor,
     super.key,
     this.enabled = true,
     this.autovalidateMode = AutovalidateMode.onUserInteraction,
@@ -38,6 +39,7 @@ class CustomTextFormField extends StatefulWidget {
   final bool enabled;
 
   final TextStyle? hintStyle;
+  final Color? fillColor;
   final AutovalidateMode? autovalidateMode;
   final Widget? suffixIcon;
   final Widget? prefixIcon;
@@ -83,7 +85,7 @@ class _CustomTextFormFieldState extends State<CustomTextFormField> {
       validator: widget.validator,
       decoration: InputDecoration(
         filled: true,
-        fillColor: const Color(0xFFEFEFEF),
+        fillColor: widget.fillColor ?? const Color(0xFFEFEFEF),
         hintText: widget.labelText,
         hintStyle:
             widget.hintStyle ??

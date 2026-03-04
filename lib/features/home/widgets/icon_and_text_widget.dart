@@ -2,6 +2,7 @@ import 'package:_96sooq_admin/constants/themes.dart';
 import 'package:_96sooq_admin/core/bloc/language/widgets/dynamic_text.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_svg/svg.dart';
+import 'package:shimmer/shimmer.dart';
 
 class IconAndTextWidget extends StatelessWidget {
   const IconAndTextWidget({
@@ -9,12 +10,14 @@ class IconAndTextWidget extends StatelessWidget {
     required this.svgPath,
     required this.title,
     this.count,
+    this.isLoading = false,
     this.onTap,
   });
 
   final String svgPath;
   final String title;
   final int? count;
+  final bool isLoading;
   final VoidCallback? onTap;
 
   @override
@@ -45,8 +48,8 @@ class IconAndTextWidget extends StatelessWidget {
             const SizedBox(width: 20),
             Expanded(
               child: Column(
-                mainAxisAlignment: .center,
-                crossAxisAlignment: .start,
+                mainAxisAlignment: MainAxisAlignment.center,
+                crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
                   DynamicText(
                     title,
@@ -54,11 +57,28 @@ class IconAndTextWidget extends StatelessWidget {
                     // overflow: TextOverflow.ellipsis,
                     style: AppThemes.f20w500.copyWith(color: Color(0xFF8A8A8A)),
                   ),
-                  DynamicText(
-                    "$count",
-                    textAlign: TextAlign.center,
-                    style: AppThemes.f24w500,
-                  ),
+                  if (isLoading)
+                    Padding(
+                      padding: const EdgeInsets.only(top: 8.0),
+                      child: Shimmer.fromColors(
+                        baseColor: Colors.grey[300]!,
+                        highlightColor: Colors.grey[100]!,
+                        child: Container(
+                          width: 80,
+                          height: 24,
+                          decoration: BoxDecoration(
+                            color: Colors.white,
+                            borderRadius: BorderRadius.circular(4),
+                          ),
+                        ),
+                      ),
+                    )
+                  else
+                    DynamicText(
+                      "$count",
+                      textAlign: TextAlign.center,
+                      style: AppThemes.f24w500,
+                    ),
                 ],
               ),
             ),

@@ -1,5 +1,3 @@
-import 'package:_96sooq_admin/constants/colors.dart';
-import 'package:_96sooq_admin/constants/themes.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import '../cubit/admin_navigation_cubit.dart';
@@ -10,6 +8,7 @@ class AdminSidebarItemWidget extends StatelessWidget {
   final Widget title;
   final String svgAssetSelected;
   final String svgAssetNotSelected;
+  final int? notificationCount;
 
   const AdminSidebarItemWidget({
     super.key,
@@ -17,6 +16,7 @@ class AdminSidebarItemWidget extends StatelessWidget {
     required this.title,
     required this.svgAssetSelected,
     required this.svgAssetNotSelected,
+    this.notificationCount,
   });
 
   @override
@@ -43,7 +43,26 @@ class AdminSidebarItemWidget extends StatelessWidget {
                   isSelected ? svgAssetSelected : svgAssetNotSelected,
                 ),
                 const SizedBox(width: 16),
-                title,
+                Expanded(child: title),
+                if (notificationCount != null && notificationCount! > 0)
+                  Container(
+                    padding: const EdgeInsets.symmetric(
+                      horizontal: 8,
+                      vertical: 2,
+                    ),
+                    decoration: BoxDecoration(
+                      color: isSelected ? Colors.white : Colors.red,
+                      borderRadius: BorderRadius.circular(10),
+                    ),
+                    child: Text(
+                      notificationCount.toString(),
+                      style: TextStyle(
+                        color: isSelected ? Colors.black : Colors.white,
+                        fontSize: 12,
+                        fontWeight: FontWeight.bold,
+                      ),
+                    ),
+                  ),
               ],
             ),
           ),
