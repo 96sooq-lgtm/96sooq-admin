@@ -68,6 +68,34 @@ class ListingModel {
   });
 
   factory ListingModel.fromJson(Map<String, dynamic> json) {
+    String? sanitizeOptionalUrl(dynamic rawUrl) {
+      if (rawUrl == null) return null;
+      final value = rawUrl.toString().trim();
+      if (value.isEmpty || value.toLowerCase() == 'null') return null;
+      return value;
+    }
+
+    List<String> sanitizeImageUrls(dynamic rawImages) {
+      if (rawImages == null) return [];
+      final values = <String>[];
+      if (rawImages is List) {
+        values.addAll(rawImages.map((e) => e.toString()));
+      } else {
+        values.add(rawImages.toString());
+      }
+
+      final seen = <String>{};
+      final cleaned = <String>[];
+      for (final value in values) {
+        final url = value.trim();
+        if (url.isEmpty || url.toLowerCase() == 'null') continue;
+        if (seen.add(url)) {
+          cleaned.add(url);
+        }
+      }
+      return cleaned;
+    }
+
     return ListingModel(
       id: json['id'] as String? ?? '',
       userId: json['user_id'] as String? ?? '',
@@ -87,14 +115,10 @@ class ListingModel {
       createdAt: json['created_at'] as String? ?? '',
       sellerType: json['seller_type'] as String? ?? '',
       userName: json['user_name'] as String?,
-      userProfilePicture: json['user_profile_picture'] as String?,
+      userProfilePicture: sanitizeOptionalUrl(json['user_profile_picture']),
       storeName: json['store_name'] as String?,
-      storeLogo: json['store_logo'] as String?,
-      images:
-          (json['images'] as List<dynamic>?)
-              ?.map((e) => e.toString())
-              .toList() ??
-          [],
+      storeLogo: sanitizeOptionalUrl(json['store_logo']),
+      images: sanitizeImageUrls(json['images']),
       sellerPhoneNumber: json['seller_phone_number'] as String?,
       categoryNameEn: json['category_name_en'] as String?,
       categoryNameAr: json['category_name_ar'] as String?,

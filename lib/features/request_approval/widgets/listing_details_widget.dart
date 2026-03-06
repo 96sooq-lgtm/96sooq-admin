@@ -7,8 +7,7 @@ class ListingDetailsWidget extends StatefulWidget {
   final ListingModel listing;
   final VoidCallback? onClose;
 
-  const ListingDetailsWidget({Key? key, required this.listing, this.onClose})
-    : super(key: key);
+  const ListingDetailsWidget({super.key, required this.listing, this.onClose});
 
   @override
   State<ListingDetailsWidget> createState() => _ListingDetailsWidgetState();
@@ -16,6 +15,14 @@ class ListingDetailsWidget extends StatefulWidget {
 
 class _ListingDetailsWidgetState extends State<ListingDetailsWidget> {
   int _currentImageIndex = 0;
+
+  @override
+  void didUpdateWidget(covariant ListingDetailsWidget oldWidget) {
+    super.didUpdateWidget(oldWidget);
+    if (oldWidget.listing.id != widget.listing.id) {
+      _currentImageIndex = 0;
+    }
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -72,12 +79,24 @@ class _ListingDetailsWidgetState extends State<ListingDetailsWidget> {
   }
 
   Widget _buildImageCarousel() {
-    final images = widget.listing.images.isNotEmpty
-        ? widget.listing.images
+    final images =
+        widget.listing.images
+            .map((url) => url.trim())
+            .where((url) => url.isNotEmpty)
+            .toSet()
+            .toList()
+          ..removeWhere((url) => url.toLowerCase() == 'null');
+
+    final displayImages = images.isNotEmpty
+        ? images
         : [
             // Dummy placeholder if no array provided
             'https://via.placeholder.com/400x300?text=No+Image',
           ];
+
+    if (_currentImageIndex >= displayImages.length) {
+      _currentImageIndex = 0;
+    }
 
     return SizedBox(
       height: 300,
@@ -85,7 +104,7 @@ class _ListingDetailsWidgetState extends State<ListingDetailsWidget> {
       child: Stack(
         children: [
           PageView.builder(
-            itemCount: images.length,
+            itemCount: displayImages.length,
             onPageChanged: (index) {
               setState(() {
                 _currentImageIndex = index;
@@ -98,14 +117,37 @@ class _ListingDetailsWidgetState extends State<ListingDetailsWidget> {
                   borderRadius: BorderRadius.circular(24),
                   boxShadow: [
                     BoxShadow(
-                      color: Colors.black.withOpacity(0.05),
+                      color: Colors.black.withValues(alpha: 0.05),
                       blurRadius: 10,
                       offset: const Offset(0, 4),
                     ),
                   ],
-                  image: DecorationImage(
-                    image: NetworkImage(images[index]),
+                ),
+                child: ClipRRect(
+                  borderRadius: BorderRadius.circular(24),
+                  child: Image.network(
+                    displayImages[index],
                     fit: BoxFit.cover,
+                    loadingBuilder: (context, child, loadingProgress) {
+                      if (loadingProgress == null) return child;
+                      return const Center(
+                        child: SizedBox(
+                          width: 22,
+                          height: 22,
+                          child: CircularProgressIndicator(strokeWidth: 2),
+                        ),
+                      );
+                    },
+                    errorBuilder: (context, error, stackTrace) {
+                      return Container(
+                        color: const Color(0xFFF8FAFC),
+                        alignment: Alignment.center,
+                        child: const Icon(
+                          Icons.broken_image_outlined,
+                          color: Color(0xFF94A3B8),
+                        ),
+                      );
+                    },
                   ),
                 ),
               );
@@ -117,7 +159,7 @@ class _ListingDetailsWidgetState extends State<ListingDetailsWidget> {
             right: 0,
             child: Row(
               mainAxisAlignment: MainAxisAlignment.center,
-              children: images.asMap().entries.map((entry) {
+              children: displayImages.asMap().entries.map((entry) {
                 return Container(
                   width: _currentImageIndex == entry.key ? 16.0 : 6.0,
                   height: 6.0,
@@ -140,9 +182,11 @@ class _ListingDetailsWidgetState extends State<ListingDetailsWidget> {
   Widget _buildStoreHeader() {
     final isIndividual =
         widget.listing.sellerType.toLowerCase() == 'individual';
-    final String? imageUrl = isIndividual
-        ? widget.listing.userProfilePicture
-        : widget.listing.storeLogo;
+    final String? imageUrl = _cleanImageUrl(
+      isIndividual
+          ? widget.listing.userProfilePicture
+          : widget.listing.storeLogo,
+    );
     final String displayName = isIndividual
         ? (widget.listing.userName ?? 'Unknown Seller')
         : (widget.listing.storeName ?? 'Unknown Store');
@@ -152,16 +196,36 @@ class _ListingDetailsWidgetState extends State<ListingDetailsWidget> {
       children: [
         CircleAvatar(
           radius: 16,
-          backgroundColor: Colors.grey.shade200,
-          backgroundImage: imageUrl != null ? NetworkImage(imageUrl) : null,
+          backgroundColor: imageUrl == null
+              ? Colors.grey.shade200
+              : Colors.transparent,
           child: imageUrl == null
               ? Icon(fallbackIcon, size: 16, color: Colors.grey)
-              : null,
+              : ClipOval(
+                  child: Image.network(
+                    imageUrl,
+                    width: 32,
+                    height: 32,
+                    fit: BoxFit.cover,
+                    errorBuilder: (context, error, stackTrace) {
+                      return Icon(fallbackIcon, size: 16, color: Colors.grey);
+                    },
+                  ),
+                ),
         ),
         const SizedBox(width: 8),
         Flexible(child: DynamicText(displayName, style: AppThemes.f16w600)),
       ],
     );
+  }
+
+  String? _cleanImageUrl(String? value) {
+    if (value == null) return null;
+    final sanitized = value.trim();
+    if (sanitized.isEmpty || sanitized.toLowerCase() == 'null') {
+      return null;
+    }
+    return sanitized;
   }
 
   Widget _buildTitleAndPrice() {

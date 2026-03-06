@@ -5,6 +5,7 @@ class AdBannerModel {
   final int durationDays;
   final String imageUrl;
   final String linkUrl;
+  final String? whatsappNumber;
   final String description;
   final DateTime? createdAt;
   final DateTime? updatedAt;
@@ -16,6 +17,7 @@ class AdBannerModel {
     required this.durationDays,
     required this.imageUrl,
     required this.linkUrl,
+    this.whatsappNumber,
     required this.description,
     required this.createdAt,
     required this.updatedAt,
@@ -37,6 +39,7 @@ class AdBannerModel {
       durationDays: _parseInt(json['duration_days']),
       imageUrl: imgStr,
       linkUrl: json['link_url'] ?? '',
+      whatsappNumber: _parseNullableString(json['whatsapp_number']),
       description: json['description'] ?? '',
       createdAt: _parseDateTime(json['created_at']),
       updatedAt: _parseDateTime(json['updated_at']),
@@ -53,6 +56,7 @@ class AdBannerModel {
             ? []
             : imageUrl.split(',').map((e) => e.trim()).toList(),
         "link_url": linkUrl,
+        "whatsapp_number": whatsappNumber,
         "description": description,
       };
     } else {
@@ -77,6 +81,7 @@ class AdBannerModel {
             ? []
             : imageUrl.split(',').map((e) => e.trim()).toList(),
         "link_url": linkUrl,
+        "whatsapp_number": whatsappNumber,
         "description": description,
       };
     } else {
@@ -104,4 +109,11 @@ int _parseInt(dynamic value, {int fallback = 0}) {
   if (value is num) return value.toInt();
   if (value is String) return int.tryParse(value) ?? fallback;
   return fallback;
+}
+
+String? _parseNullableString(dynamic value) {
+  if (value == null) return null;
+  final text = value.toString().trim();
+  if (text.isEmpty || text.toLowerCase() == 'null') return null;
+  return text;
 }

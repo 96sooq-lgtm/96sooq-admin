@@ -1,5 +1,3 @@
-import 'dart:typed_data';
-
 import 'package:_96sooq_admin/constants/colors.dart';
 import 'package:_96sooq_admin/constants/themes.dart';
 import 'package:_96sooq_admin/core/bloc/language/widgets/dynamic_text.dart';
@@ -31,6 +29,25 @@ class _AdBannerViewMobileState extends State<AdBannerViewMobile> {
   String? _pendingMutationAction;
   String _currentFilter = 'all';
   final ScrollController _tableScrollController = ScrollController();
+  static const String _omanCountryCode = '+968';
+
+  String _extractLocalWhatsappNumber(String? whatsappNumber) {
+    if (whatsappNumber == null) return '';
+    final sanitized = whatsappNumber.trim().replaceAll(RegExp(r'\s+'), '');
+    if (sanitized.startsWith(_omanCountryCode)) {
+      return sanitized.substring(_omanCountryCode.length);
+    }
+    if (sanitized.startsWith('968')) {
+      return sanitized.substring(3);
+    }
+    return sanitized.replaceAll(RegExp(r'\D'), '');
+  }
+
+  String? _formatWhatsappNumberForApi(String rawValue) {
+    final digits = rawValue.replaceAll(RegExp(r'\D'), '');
+    if (digits.isEmpty) return null;
+    return '$_omanCountryCode$digits';
+  }
 
   @override
   void initState() {
@@ -59,7 +76,9 @@ class _AdBannerViewMobileState extends State<AdBannerViewMobile> {
       default:
         message = 'Banner created successfully';
     }
-    ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text(message)));
+    ScaffoldMessenger.of(
+      context,
+    ).showSnackBar(SnackBar(content: Text(message)));
   }
 
   void _showBannerPreviewDialog(String imageUrlsCsv) {
@@ -91,8 +110,9 @@ class _AdBannerViewMobileState extends State<AdBannerViewMobile> {
     if (uri == null) return;
     final didLaunch = await launchUrl(uri, mode: LaunchMode.platformDefault);
     if (!didLaunch && mounted) {
-      ScaffoldMessenger.of(context)
-          .showSnackBar(const SnackBar(content: Text('Unable to open link')));
+      ScaffoldMessenger.of(
+        context,
+      ).showSnackBar(const SnackBar(content: Text('Unable to open link')));
     }
   }
 
@@ -154,9 +174,9 @@ class _AdBannerViewMobileState extends State<AdBannerViewMobile> {
 
       _pendingMutationAction = isEditMode ? 'update' : 'create';
       if (isEditMode) {
-        context
-            .read<AdBannerBloc>()
-            .add(UpdateBanner(id: existing.id, banner: model));
+        context.read<AdBannerBloc>().add(
+          UpdateBanner(id: existing.id, banner: model),
+        );
       } else {
         context.read<AdBannerBloc>().add(CreateBanner(model));
       }
@@ -178,8 +198,9 @@ class _AdBannerViewMobileState extends State<AdBannerViewMobile> {
                     isUploading = false;
                     isSaving = false;
                   });
-                  ScaffoldMessenger.of(dialogContext)
-                      .showSnackBar(SnackBar(content: Text(state.message)));
+                  ScaffoldMessenger.of(
+                    dialogContext,
+                  ).showSnackBar(SnackBar(content: Text(state.message)));
                 }
 
                 if (state is S3UploadSuccess) {
@@ -292,8 +313,11 @@ class _AdBannerViewMobileState extends State<AdBannerViewMobile> {
                     ],
                   ),
                   onSubmit: () {
-                    final duration = int.tryParse(durationController.text.trim());
-                    final hasImage = selectedImageBytes != null ||
+                    final duration = int.tryParse(
+                      durationController.text.trim(),
+                    );
+                    final hasImage =
+                        selectedImageBytes != null ||
                         currentImageUrl.isNotEmpty;
                     if (!hasImage ||
                         bannerNameController.text.trim().isEmpty ||
@@ -397,6 +421,9 @@ class _AdBannerViewMobileState extends State<AdBannerViewMobile> {
     final durationController = TextEditingController(
       text: existing == null ? '' : existing.durationDays.toString(),
     );
+    final whatsappController = TextEditingController(
+      text: _extractLocalWhatsappNumber(existing?.whatsappNumber),
+    );
     String currentImageCsv = existing?.imageUrl ?? '';
 
     bool isUploading = false;
@@ -438,6 +465,9 @@ class _AdBannerViewMobileState extends State<AdBannerViewMobile> {
         durationDays: duration,
         imageUrl: finalImagesUrl,
         linkUrl: urlController.text.trim(),
+        whatsappNumber: _formatWhatsappNumberForApi(
+          whatsappController.text.trim(),
+        ),
         description: descController.text.trim(),
         createdAt: existing?.createdAt,
         updatedAt: existing?.updatedAt,
@@ -450,9 +480,9 @@ class _AdBannerViewMobileState extends State<AdBannerViewMobile> {
 
       _pendingMutationAction = isEditMode ? 'update' : 'create';
       if (isEditMode) {
-        context
-            .read<AdBannerBloc>()
-            .add(UpdateBanner(id: existing.id, banner: model));
+        context.read<AdBannerBloc>().add(
+          UpdateBanner(id: existing.id, banner: model),
+        );
       } else {
         context.read<AdBannerBloc>().add(CreateBanner(model));
       }
@@ -478,8 +508,9 @@ class _AdBannerViewMobileState extends State<AdBannerViewMobile> {
                     isUploading = false;
                     isSaving = false;
                   });
-                  ScaffoldMessenger.of(dialogContext)
-                      .showSnackBar(SnackBar(content: Text(state.message)));
+                  ScaffoldMessenger.of(
+                    dialogContext,
+                  ).showSnackBar(SnackBar(content: Text(state.message)));
                 }
 
                 if (state is S3UploadSuccess) {
@@ -610,8 +641,8 @@ class _AdBannerViewMobileState extends State<AdBannerViewMobile> {
                                       onTap: () {
                                         setDialogState(() {
                                           currentImageUrls.removeAt(index);
-                                          currentImageCsv =
-                                              currentImageUrls.join(',');
+                                          currentImageCsv = currentImageUrls
+                                              .join(',');
                                         });
                                       },
                                       child: Container(
@@ -661,7 +692,9 @@ class _AdBannerViewMobileState extends State<AdBannerViewMobile> {
                                       onTap: () {
                                         setDialogState(() {
                                           selectedImages.removeAt(index);
-                                          selectedImageBytesList.removeAt(index);
+                                          selectedImageBytesList.removeAt(
+                                            index,
+                                          );
                                         });
                                       },
                                       child: Container(
@@ -710,6 +743,17 @@ class _AdBannerViewMobileState extends State<AdBannerViewMobile> {
                         ],
                       ),
                       const SizedBox(height: 12),
+                      DynamicText('WhatsApp Number', style: AppThemes.f16w500),
+                      const SizedBox(height: 8),
+                      CustomTextFormField(
+                        controller: whatsappController,
+                        labelText: 'WhatsApp Number',
+                        keyboardType: TextInputType.number,
+                        inputFormatters: [
+                          FilteringTextInputFormatter.digitsOnly,
+                        ],
+                      ),
+                      const SizedBox(height: 12),
                       DynamicText('Description', style: AppThemes.f16w500),
                       const SizedBox(height: 8),
                       CustomTextFormField(
@@ -720,7 +764,9 @@ class _AdBannerViewMobileState extends State<AdBannerViewMobile> {
                     ],
                   ),
                   onSubmit: () {
-                    final duration = int.tryParse(durationController.text.trim());
+                    final duration = int.tryParse(
+                      durationController.text.trim(),
+                    );
                     if (nameController.text.trim().isEmpty ||
                         descController.text.trim().isEmpty ||
                         urlController.text.trim().isEmpty ||
@@ -775,7 +821,13 @@ class _AdBannerViewMobileState extends State<AdBannerViewMobile> {
           },
         );
       },
-    );
+    ).then((_) {
+      nameController.dispose();
+      descController.dispose();
+      urlController.dispose();
+      durationController.dispose();
+      whatsappController.dispose();
+    });
   }
 
   Widget _buildBannerList(List<AdBannerModel> banners) {
@@ -818,8 +870,9 @@ class _AdBannerViewMobileState extends State<AdBannerViewMobile> {
         }
 
         if (state is AdBannerError) {
-          ScaffoldMessenger.of(context)
-              .showSnackBar(SnackBar(content: Text(state.message)));
+          ScaffoldMessenger.of(
+            context,
+          ).showSnackBar(SnackBar(content: Text(state.message)));
           _pendingMutationAction = null;
         }
       },
@@ -903,8 +956,8 @@ class _AdBannerViewMobileState extends State<AdBannerViewMobile> {
                                           _currentFilter == 'offers'
                                               ? 'Offers'
                                               : _currentFilter == 'carousel'
-                                                  ? 'Ad Banner'
-                                                  : 'Filter',
+                                              ? 'Ad Banner'
+                                              : 'Filter',
                                           style: AppThemes.f16w500,
                                         ),
                                       ],
@@ -939,14 +992,15 @@ class _AdBannerViewMobileState extends State<AdBannerViewMobile> {
                                         builder: (context, state) {
                                           if (state is AdBannerLoading) {
                                             return Padding(
-                                              padding:
-                                                  const EdgeInsets.all(16),
+                                              padding: const EdgeInsets.all(16),
                                               child: Column(
                                                 children: List.generate(
                                                   6,
                                                   (index) => Padding(
                                                     padding: EdgeInsets.only(
-                                                      bottom: index == 5 ? 0 : 20,
+                                                      bottom: index == 5
+                                                          ? 0
+                                                          : 20,
                                                     ),
                                                     child:
                                                         const _AdBannerShimmerRowMobile(),
@@ -959,17 +1013,17 @@ class _AdBannerViewMobileState extends State<AdBannerViewMobile> {
                                           if (state is AdBannerMutating) {
                                             final shimmerCount =
                                                 state.banners.isEmpty
-                                                    ? 1
-                                                    : state.banners.length;
+                                                ? 1
+                                                : state.banners.length;
                                             return Padding(
-                                              padding:
-                                                  const EdgeInsets.all(16),
+                                              padding: const EdgeInsets.all(16),
                                               child: Column(
                                                 children: List.generate(
                                                   shimmerCount,
                                                   (index) => Padding(
                                                     padding: EdgeInsets.only(
-                                                      bottom: index ==
+                                                      bottom:
+                                                          index ==
                                                               shimmerCount - 1
                                                           ? 0
                                                           : 20,
@@ -983,18 +1037,21 @@ class _AdBannerViewMobileState extends State<AdBannerViewMobile> {
                                           }
 
                                           if (state is AdBannerLoaded) {
-                                            final filteredBanners =
-                                                state.banners.where((b) {
-                                              if (_currentFilter == 'offers') {
-                                                return b.type == 'offer' ||
-                                                    b.type == 'offers';
-                                              }
-                                              if (_currentFilter ==
-                                                  'carousel') {
-                                                return b.type == 'carousel';
-                                              }
-                                              return true;
-                                            }).toList();
+                                            final filteredBanners = state
+                                                .banners
+                                                .where((b) {
+                                                  if (_currentFilter ==
+                                                      'offers') {
+                                                    return b.type == 'offer' ||
+                                                        b.type == 'offers';
+                                                  }
+                                                  if (_currentFilter ==
+                                                      'carousel') {
+                                                    return b.type == 'carousel';
+                                                  }
+                                                  return true;
+                                                })
+                                                .toList();
 
                                             if (filteredBanners.isEmpty) {
                                               return const Padding(
@@ -1013,26 +1070,29 @@ class _AdBannerViewMobileState extends State<AdBannerViewMobile> {
 
                                           if (state is AdBannerError) {
                                             if (state.banners.isNotEmpty) {
-                                              final filteredBanners =
-                                                  state.banners.where((b) {
-                                                if (_currentFilter ==
-                                                    'offers') {
-                                                  return b.type == 'offer' ||
-                                                      b.type == 'offers';
-                                                }
-                                                if (_currentFilter ==
-                                                    'carousel') {
-                                                  return b.type == 'carousel';
-                                                }
-                                                return true;
-                                              }).toList();
+                                              final filteredBanners = state
+                                                  .banners
+                                                  .where((b) {
+                                                    if (_currentFilter ==
+                                                        'offers') {
+                                                      return b.type ==
+                                                              'offer' ||
+                                                          b.type == 'offers';
+                                                    }
+                                                    if (_currentFilter ==
+                                                        'carousel') {
+                                                      return b.type ==
+                                                          'carousel';
+                                                    }
+                                                    return true;
+                                                  })
+                                                  .toList();
                                               return _buildBannerList(
                                                 filteredBanners,
                                               );
                                             }
                                             return Padding(
-                                              padding:
-                                                  const EdgeInsets.all(20),
+                                              padding: const EdgeInsets.all(20),
                                               child: DynamicText(state.message),
                                             );
                                           }
@@ -1217,7 +1277,10 @@ class _MobileActionDialog extends StatelessWidget {
             mainAxisSize: MainAxisSize.min,
             children: [
               Padding(
-                padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 16),
+                padding: const EdgeInsets.symmetric(
+                  horizontal: 20,
+                  vertical: 16,
+                ),
                 child: Row(
                   children: [
                     Expanded(

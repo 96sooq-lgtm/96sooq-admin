@@ -1,5 +1,5 @@
 class ApiEndpoints {
-  static const String baseUrl = "https://nine6sooq-backend.onrender.com";
+  static const String baseUrl = "https://nine6sooq-backend-1.onrender.com";
 
   static const String login = "$baseUrl/api/admin/login";
   static const String addCategory = "$baseUrl/api/admin/categories/";

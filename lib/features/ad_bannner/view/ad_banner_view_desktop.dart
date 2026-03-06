@@ -29,6 +29,25 @@ class _AdBannerViewDesktopState extends State<AdBannerViewDesktop> {
   bool _hasLoaded = false;
   String? _pendingMutationAction;
   String _currentFilter = 'all';
+  static const String _omanCountryCode = '+968';
+
+  String _extractLocalWhatsappNumber(String? whatsappNumber) {
+    if (whatsappNumber == null) return '';
+    final sanitized = whatsappNumber.trim().replaceAll(RegExp(r'\s+'), '');
+    if (sanitized.startsWith(_omanCountryCode)) {
+      return sanitized.substring(_omanCountryCode.length);
+    }
+    if (sanitized.startsWith('968')) {
+      return sanitized.substring(3);
+    }
+    return sanitized.replaceAll(RegExp(r'\D'), '');
+  }
+
+  String? _formatWhatsappNumberForApi(String rawValue) {
+    final digits = rawValue.replaceAll(RegExp(r'\D'), '');
+    if (digits.isEmpty) return null;
+    return '$_omanCountryCode$digits';
+  }
 
   @override
   void initState() {
@@ -406,6 +425,9 @@ class _AdBannerViewDesktopState extends State<AdBannerViewDesktop> {
     final durationController = TextEditingController(
       text: existing == null ? '' : existing.durationDays.toString(),
     );
+    final whatsappController = TextEditingController(
+      text: _extractLocalWhatsappNumber(existing?.whatsappNumber),
+    );
     String currentImageCsv = existing?.imageUrl ?? '';
 
     bool isUploading = false;
@@ -447,6 +469,9 @@ class _AdBannerViewDesktopState extends State<AdBannerViewDesktop> {
         durationDays: duration,
         imageUrl: finalImagesUrl,
         linkUrl: urlController.text.trim(),
+        whatsappNumber: _formatWhatsappNumberForApi(
+          whatsappController.text.trim(),
+        ),
         description: descController.text.trim(),
         createdAt: existing?.createdAt,
         updatedAt: existing?.updatedAt,
@@ -744,6 +769,20 @@ class _AdBannerViewDesktopState extends State<AdBannerViewDesktop> {
                             ],
                           ),
                           const SizedBox(height: 12),
+                          DynamicText(
+                            'WhatsApp Number',
+                            style: AppThemes.f16w500,
+                          ),
+                          const SizedBox(height: 8),
+                          CustomTextFormField(
+                            controller: whatsappController,
+                            labelText: 'WhatsApp Number',
+                            keyboardType: TextInputType.number,
+                            inputFormatters: [
+                              FilteringTextInputFormatter.digitsOnly,
+                            ],
+                          ),
+                          const SizedBox(height: 12),
                           DynamicText('Description', style: AppThemes.f16w500),
                           const SizedBox(height: 8),
                           CustomTextFormField(
@@ -813,7 +852,13 @@ class _AdBannerViewDesktopState extends State<AdBannerViewDesktop> {
           },
         );
       },
-    );
+    ).then((_) {
+      nameController.dispose();
+      descController.dispose();
+      urlController.dispose();
+      durationController.dispose();
+      whatsappController.dispose();
+    });
   }
 
   Widget _buildBannerList(List<AdBannerModel> banners) {
