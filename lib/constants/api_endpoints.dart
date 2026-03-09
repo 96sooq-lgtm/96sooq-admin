@@ -27,6 +27,8 @@ class ApiEndpoints {
       "$baseUrl/api/admin/categories/$id/attributes";
   static String updateSubcategoryAttribute(String id, String attributeName) =>
       "$baseUrl/api/admin/categories/$id/attributes/$attributeName";
+  static String editCategoryAttributes(String id) =>
+      "$baseUrl/api/admin/categories/$id/attributes";
   static const String getDashboard = "$baseUrl/api/admin/dashboard";
   static const String getStores = "$baseUrl/api/admin/stores/";
   static String lockStore(String id) => "$baseUrl/api/admin/stores/$id/lock";

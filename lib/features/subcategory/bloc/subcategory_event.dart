@@ -50,3 +50,10 @@ class UpdateSubcategoryAttribute extends SubcategoryEvent {
     this.payload,
   );
 }
+
+class EditCategoryAttributes extends SubcategoryEvent {
+  final String subcategoryId;
+  final List<Map<String, dynamic>> attributes;
+
+  EditCategoryAttributes(this.subcategoryId, this.attributes);
+}

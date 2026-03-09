@@ -16,6 +16,7 @@ class SubcategoryBloc extends Bloc<SubcategoryEvent, SubcategoryState> {
     on<DeleteSubcategoryAttribute>(_deleteAttribute);
     on<CreateSubcategoryAttribute>(_createAttribute);
     on<UpdateSubcategoryAttribute>(_updateAttribute);
+    on<EditCategoryAttributes>(_editAttributes);
   }
 
   Future<void> _loadAll(
@@ -137,6 +138,19 @@ class SubcategoryBloc extends Bloc<SubcategoryEvent, SubcategoryState> {
         event.attributeName,
         event.payload,
       );
+      add(LoadSubcategories());
+      emit(SubcategorySuccess());
+    } catch (e) {
+      emit(SubcategoryError(e.toString()));
+    }
+  }
+
+  Future<void> _editAttributes(
+    EditCategoryAttributes event,
+    Emitter<SubcategoryState> emit,
+  ) async {
+    try {
+      await service.editAttributes(event.subcategoryId, event.attributes);
       add(LoadSubcategories());
       emit(SubcategorySuccess());
     } catch (e) {

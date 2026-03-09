@@ -148,6 +148,38 @@ class _AttributeMobileViewState extends State<AttributeMobileView> {
     );
   }
 
+  void _openEditAttributePopup(TranslationState langState, int index) {
+    final initialValue = _attributes[index];
+
+    showModalBottomSheet(
+      context: context,
+      isScrollControlled: true,
+      backgroundColor: Colors.transparent,
+      builder: (bottomSheetContext) {
+        return SafeArea(
+          child: Padding(
+            padding: EdgeInsets.only(
+              bottom: MediaQuery.of(bottomSheetContext).viewInsets.bottom,
+            ),
+            child: Container(
+              decoration: const BoxDecoration(
+                color: Colors.white,
+                borderRadius: BorderRadius.vertical(top: Radius.circular(24)),
+              ),
+              child: _AddAttributeForm(
+                langState: langState,
+                subcategory: widget.subcategory,
+                initialValue: initialValue,
+                isEditable: true,
+                allAttributes: _attributes,
+              ),
+            ),
+          ),
+        );
+      },
+    );
+  }
+
   @override
   Widget build(BuildContext context) {
     return BlocBuilder<TranslationBloc, TranslationState>(
@@ -467,7 +499,23 @@ class _AttributeMobileViewState extends State<AttributeMobileView> {
                     ),
                   ),
                 ),
-                const SizedBox(width: 8),
+                const SizedBox(width: 6),
+                InkWell(
+                  onTap: () => _openEditAttributePopup(langState, index),
+                  child: Container(
+                    decoration: BoxDecoration(
+                      border: Border.all(color: Colors.black12),
+                      borderRadius: BorderRadius.circular(6),
+                    ),
+                    padding: const EdgeInsets.all(4),
+                    child: const Icon(
+                      Icons.edit_outlined,
+                      color: Colors.black54,
+                      size: 20,
+                    ),
+                  ),
+                ),
+                const SizedBox(width: 6),
                 InkWell(
                   onTap: () => _openDeleteAttributeDialog(langState, index),
                   child: Container(
@@ -496,11 +544,15 @@ class _AddAttributeForm extends StatefulWidget {
   final TranslationState langState;
   final SubcategoryModel subcategory;
   final SubcategoryAttributeSchema? initialValue;
+  final bool isEditable;
+  final List<SubcategoryAttributeSchema> allAttributes;
 
   const _AddAttributeForm({
     required this.langState,
     required this.subcategory,
     this.initialValue,
+    this.isEditable = false,
+    this.allAttributes = const [],
   });
 
   @override
@@ -523,6 +575,7 @@ class _AddAttributeFormState extends State<_AddAttributeForm> {
   }
 
   bool get _isEditMode => _currentValue != null;
+  bool get _isFieldsEnabled => !_isEditMode || widget.isEditable;
 
   @override
   void initState() {
@@ -632,7 +685,33 @@ class _AddAttributeFormState extends State<_AddAttributeForm> {
 
     final String typeStr = type == 'select' ? 'dropdown' : type;
 
-    if (_isEditMode) {
+    if (_isEditMode && widget.isEditable) {
+      // Build the full attributes array with this attribute updated
+      final updatedAttributes = widget.allAttributes.map((attr) {
+        if (attr.labelEn == _currentValue!.labelEn) {
+          return <String, dynamic>{
+            'name': nameEn.toLowerCase().replaceAll(' ', '_'),
+            'label_en': nameEn,
+            'type': typeStr,
+            if (nameAr.isNotEmpty) 'label_ar': nameAr,
+            if (showsOptions) 'options': options.toList(),
+          };
+        }
+        return <String, dynamic>{
+          'name': attr.labelEn.toLowerCase().replaceAll(' ', '_'),
+          'label_en': attr.labelEn,
+          'type': attr.type,
+          if (attr.labelAr.isNotEmpty) 'label_ar': attr.labelAr,
+          if (attr.options != null && attr.options!.isNotEmpty)
+            'options': attr.options,
+        };
+      }).toList();
+
+      setState(() => _isLoading = true);
+      context.read<SubcategoryBloc>().add(
+        EditCategoryAttributes(widget.subcategory.id, updatedAttributes),
+      );
+    } else if (_isEditMode) {
       final payload = <String, dynamic>{};
 
       final currentKey = _currentValue!.labelEn.isNotEmpty
@@ -742,6 +821,10 @@ class _AddAttributeFormState extends State<_AddAttributeForm> {
                   ),
                 ),
               );
+
+              if (widget.isEditable) {
+                Navigator.of(context).pop();
+              }
             } else if (state is SubcategoryError && _isLoading) {
               setState(() => _isLoading = false);
               ScaffoldMessenger.of(
@@ -767,10 +850,14 @@ class _AddAttributeFormState extends State<_AddAttributeForm> {
                     mainAxisAlignment: MainAxisAlignment.spaceBetween,
                     children: [
                       DynamicText(
-                        _label(
-                          _isEditMode ? "Added Attributes" : "Add Attributes",
-                          _isEditMode ? "السمات المضافة" : "إضافة سمات",
-                        ),
+                        _isEditMode
+                            ? (widget.isEditable
+                                  ? _label("Edit Attribute", "تعديل السمة")
+                                  : _label(
+                                      "Added Attributes",
+                                      "السمات المضافة",
+                                    ))
+                            : _label("Add Attributes", "إضافة سمات"),
                         style: AppThemes.f18w600,
                       ),
                       InkWell(
@@ -797,7 +884,7 @@ class _AddAttributeFormState extends State<_AddAttributeForm> {
                   CustomTextFormField(
                     controller: nameEnController,
                     labelText: 'Fuel',
-                    enabled: !_isEditMode,
+                    enabled: _isFieldsEnabled,
                   ),
                   const SizedBox(height: 12),
                   Align(
@@ -814,7 +901,7 @@ class _AddAttributeFormState extends State<_AddAttributeForm> {
                     controller: nameArController,
                     labelText: '',
                     suffixIcon: const Icon(Icons.translate),
-                    enabled: !_isEditMode,
+                    enabled: _isFieldsEnabled,
                     onSuffixTap: () async {
                       final text = nameEnController.text.trim();
                       if (text.isNotEmpty) {
@@ -849,14 +936,14 @@ class _AddAttributeFormState extends State<_AddAttributeForm> {
                     ],
                   ),
                   if (showsOptions) ...[
-                    _isEditMode ? SizedBox() : const SizedBox(height: 24),
-                    _isEditMode
-                        ? SizedBox()
-                        : CustomButton(
+                    _isFieldsEnabled ? const SizedBox(height: 24) : SizedBox(),
+                    _isFieldsEnabled
+                        ? CustomButton(
                             text: "+ Value",
                             color: Colors.black,
                             onPressed: _addOptionDialog,
-                          ),
+                          )
+                        : SizedBox(),
                     const SizedBox(height: 16),
                     ...options.asMap().entries.map((entry) {
                       return Padding(
@@ -882,22 +969,20 @@ class _AddAttributeFormState extends State<_AddAttributeForm> {
                                   style: AppThemes.f14w400,
                                 ),
                               ),
-                              _isEditMode
-                                  ? SizedBox()
-                                  : InkWell(
-                                      onTap: _isEditMode
-                                          ? () {}
-                                          : () {
-                                              setState(() {
-                                                options.removeAt(entry.key);
-                                              });
-                                            },
+                              _isFieldsEnabled
+                                  ? InkWell(
+                                      onTap: () {
+                                        setState(() {
+                                          options.removeAt(entry.key);
+                                        });
+                                      },
                                       child: const Icon(
                                         Icons.close,
                                         size: 18,
                                         color: Colors.black54,
                                       ),
-                                    ),
+                                    )
+                                  : SizedBox(),
                             ],
                           ),
                         ),
@@ -905,18 +990,17 @@ class _AddAttributeFormState extends State<_AddAttributeForm> {
                     }),
                   ],
                   const SizedBox(height: 20),
-                  _isEditMode
-                      ? SizedBox()
-                      : DynamicText(
+                  _isFieldsEnabled
+                      ? DynamicText(
                           _label("Status", "الحالة"),
                           style: AppThemes.f14w400.copyWith(
                             color: const Color(0xFF6B7280),
                           ),
-                        ),
-                  _isEditMode ? SizedBox() : const SizedBox(height: 8),
-                  _isEditMode
-                      ? SizedBox()
-                      : Container(
+                        )
+                      : SizedBox(),
+                  _isFieldsEnabled ? const SizedBox(height: 8) : SizedBox(),
+                  _isFieldsEnabled
+                      ? Container(
                           padding: const EdgeInsets.symmetric(horizontal: 16),
                           decoration: BoxDecoration(
                             border: Border.all(
@@ -951,11 +1035,11 @@ class _AddAttributeFormState extends State<_AddAttributeForm> {
                               },
                             ),
                           ),
-                        ),
+                        )
+                      : SizedBox(),
                   const SizedBox(height: 32),
-                  _isEditMode
-                      ? SizedBox()
-                      : Row(
+                  _isFieldsEnabled
+                      ? Row(
                           children: [
                             Expanded(
                               child: InkWell(
@@ -990,7 +1074,8 @@ class _AddAttributeFormState extends State<_AddAttributeForm> {
                               ),
                             ),
                           ],
-                        ),
+                        )
+                      : SizedBox(),
                   const SizedBox(height: 16),
                 ],
               ),
@@ -1006,16 +1091,16 @@ class _AddAttributeFormState extends State<_AddAttributeForm> {
     final bool isSelected =
         type == value || (type == 'dropdown' && value == 'select');
     return GestureDetector(
-      onTap: _isEditMode
-          ? () {}
-          : () {
+      onTap: _isFieldsEnabled
+          ? () {
               setState(() {
                 type = value;
                 if (type == 'text') {
                   options.clear();
                 }
               });
-            },
+            }
+          : () {},
       child: Container(
         height: 48,
         decoration: BoxDecoration(

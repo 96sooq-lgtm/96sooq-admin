@@ -73,4 +73,14 @@ class SubcategoryService {
       data: payload,
     );
   }
+
+  Future<void> editAttributes(
+    String subcategoryId,
+    List<Map<String, dynamic>> attributes,
+  ) async {
+    await dio.patch(
+      ApiEndpoints.editCategoryAttributes(subcategoryId),
+      data: attributes,
+    );
+  }
 }

@@ -18,10 +18,14 @@ class AddAttributePopup extends StatefulWidget {
     super.key,
     required this.subcategoryId,
     this.initialValue,
+    this.isEditable = false,
+    this.allAttributes = const [],
   });
 
   final String subcategoryId;
   final AttributeUiItem? initialValue;
+  final bool isEditable;
+  final List<AttributeUiItem> allAttributes;
 
   @override
   State<AddAttributePopup> createState() => _AddAttributePopupState();
@@ -41,6 +45,7 @@ class _AddAttributePopupState extends State<AddAttributePopup> {
   bool _isLoading = false;
 
   bool get _isEditMode => _currentValue != null;
+  bool get _isFieldsEnabled => !_isEditMode || widget.isEditable;
   bool get _showsOptions => _selectedType != AttributeType.textField;
 
   @override
@@ -103,9 +108,34 @@ class _AddAttributePopupState extends State<AddAttributePopup> {
         ? 'dropdown'
         : _selectedType == AttributeType.radio
         ? 'radio'
-        : 'text';
+        : 'text_field';
 
-    if (_isEditMode) {
+    if (_isEditMode && widget.isEditable) {
+      // Build the full attributes array with this attribute updated
+      final updatedAttributes = widget.allAttributes.map((attr) {
+        if (attr.key == _currentValue!.key) {
+          return {
+            'name': nameEn.toLowerCase().replaceAll(' ', '_'),
+            'label_en': nameEn,
+            'type': typeStr,
+            if (nameAr.isNotEmpty) 'label_ar': nameAr,
+            if (_showsOptions) 'options': _options.toList(),
+          };
+        }
+        return {
+          'name': attr.key,
+          'label_en': attr.nameEn,
+          'type': attr.rawType.isNotEmpty ? attr.rawType : 'text_field',
+          if (attr.nameAr.isNotEmpty) 'label_ar': attr.nameAr,
+          if (attr.options.isNotEmpty) 'options': attr.options,
+        };
+      }).toList();
+
+      setState(() => _isLoading = true);
+      context.read<SubcategoryBloc>().add(
+        EditCategoryAttributes(widget.subcategoryId, updatedAttributes),
+      );
+    } else if (_isEditMode) {
       // Patch case (diff fields)
       final payload = <String, dynamic>{};
 
@@ -169,29 +199,6 @@ class _AddAttributePopupState extends State<AddAttributePopup> {
     }
   }
 
-  // Widget _buildShimmerOverlay(Widget child) {
-  //   if (!_isLoading) return child;
-
-  //   return Stack(
-  //     children: [
-  //       child,
-  //       Positioned.fill(
-  //         child: Container(
-  //           color: Colors.white.withValues(alpha: 0.8),
-  //           child: Shimmer.fromColors(
-  //             baseColor: Colors.grey[300]!,
-  //             highlightColor: Colors.grey[100]!,
-  //             child: Container(
-  //               color: Colors.white,
-  //               margin: const EdgeInsets.all(24),
-  //             ),
-  //           ),
-  //         ),
-  //       ),
-  //     ],
-  //   );
-  // }
-
   @override
   Widget build(BuildContext context) {
     final width = MediaQuery.sizeOf(context).width;
@@ -216,7 +223,7 @@ class _AddAttributePopupState extends State<AddAttributePopup> {
                         ? 'dropdown'
                         : _selectedType == AttributeType.radio
                         ? 'radio'
-                        : 'text',
+                        : 'text_field',
                     type: _selectedType,
                     isActive: _isActive,
                     options: List.from(_options),
@@ -234,7 +241,7 @@ class _AddAttributePopupState extends State<AddAttributePopup> {
                         ? 'dropdown'
                         : _selectedType == AttributeType.radio
                         ? 'radio'
-                        : 'text',
+                        : 'text_field',
                     type: _selectedType,
                     isActive: _isActive,
                     options: List.from(_options),
@@ -246,6 +253,10 @@ class _AddAttributePopupState extends State<AddAttributePopup> {
               ScaffoldMessenger.of(context).showSnackBar(
                 const SnackBar(content: Text('Attribute saved successfully!')),
               );
+
+              if (widget.isEditable) {
+                Navigator.of(context).pop();
+              }
             } else if (state is SubcategoryError && _isLoading) {
               setState(() => _isLoading = false);
               ScaffoldMessenger.of(
@@ -271,7 +282,11 @@ class _AddAttributePopupState extends State<AddAttributePopup> {
                     child: Row(
                       children: [
                         DynamicText(
-                          _isEditMode ? 'Added Attribute' : 'Add Attributes',
+                          _isEditMode
+                              ? (widget.isEditable
+                                    ? 'Edit Attribute'
+                                    : 'Added Attribute')
+                              : 'Add Attributes',
                           style: AppThemes.f24w500,
                         ),
                         const Spacer(),
@@ -301,7 +316,7 @@ class _AddAttributePopupState extends State<AddAttributePopup> {
                           CustomTextFormField(
                             labelText: 'Fuel',
                             controller: _nameEnController,
-                            enabled: !_isEditMode,
+                            enabled: _isFieldsEnabled,
                           ),
                           const SizedBox(height: 6),
                           Align(
@@ -311,7 +326,7 @@ class _AddAttributePopupState extends State<AddAttributePopup> {
                           CustomTextFormField(
                             labelText: '',
                             controller: _nameArController,
-                            enabled: !_isEditMode,
+                            enabled: _isFieldsEnabled,
                             suffixIcon: const Icon(Icons.translate),
                             onSuffixTap: () async {
                               final text = _nameEnController.text.trim();
@@ -338,19 +353,18 @@ class _AddAttributePopupState extends State<AddAttributePopup> {
                             selectedType: _selectedType,
                             onTypeChanged: (value) {
                               setState(() {
-                                _isEditMode
-                                    ? SizedBox()
-                                    : _selectedType = value;
+                                _isFieldsEnabled
+                                    ? _selectedType = value
+                                    : SizedBox();
                               });
                             },
                           ),
                           if (_showsOptions) ...[
-                            _isEditMode
-                                ? SizedBox()
-                                : const SizedBox(height: 14),
-                            _isEditMode
-                                ? SizedBox()
-                                : Row(
+                            _isFieldsEnabled
+                                ? const SizedBox(height: 14)
+                                : SizedBox(),
+                            _isFieldsEnabled
+                                ? Row(
                                     children: [
                                       Expanded(
                                         child: CustomTextFormField(
@@ -368,7 +382,8 @@ class _AddAttributePopupState extends State<AddAttributePopup> {
                                         ),
                                       ),
                                     ],
-                                  ),
+                                  )
+                                : SizedBox(),
                             if (_options.isNotEmpty) ...[
                               const SizedBox(height: 16),
                               ...List.generate(
@@ -386,18 +401,17 @@ class _AddAttributePopupState extends State<AddAttributePopup> {
                                           value: _options[index],
                                         ),
                                       ),
-                                      _isEditMode
-                                          ? SizedBox()
-                                          : IconButton(
-                                              onPressed: _isEditMode
-                                                  ? () {}
-                                                  : () => _removeOption(index),
+                                      _isFieldsEnabled
+                                          ? IconButton(
+                                              onPressed: () =>
+                                                  _removeOption(index),
                                               icon: const Icon(
                                                 Icons.close,
                                                 size: 18,
                                                 color: Color(0xFF6B7280),
                                               ),
-                                            ),
+                                            )
+                                          : SizedBox(),
                                     ],
                                   ),
                                 ),
@@ -405,13 +419,14 @@ class _AddAttributePopupState extends State<AddAttributePopup> {
                             ],
                           ],
                           const SizedBox(height: 16),
-                          _isEditMode
-                              ? SizedBox()
-                              : Text('Status', style: AppThemes.f18w400),
-                          _isEditMode ? SizedBox() : const SizedBox(height: 6),
-                          _isEditMode
-                              ? SizedBox()
-                              : Container(
+                          _isFieldsEnabled
+                              ? Text('Status', style: AppThemes.f18w400)
+                              : SizedBox(),
+                          _isFieldsEnabled
+                              ? const SizedBox(height: 6)
+                              : SizedBox(),
+                          _isFieldsEnabled
+                              ? Container(
                                   padding: const EdgeInsets.symmetric(
                                     horizontal: 16,
                                   ),
@@ -444,14 +459,14 @@ class _AddAttributePopupState extends State<AddAttributePopup> {
                                       },
                                     ),
                                   ),
-                                ),
+                                )
+                              : SizedBox(),
                         ],
                       ),
                     ),
                   ),
-                  _isEditMode
-                      ? SizedBox()
-                      : Padding(
+                  _isFieldsEnabled
+                      ? Padding(
                           padding: const EdgeInsets.fromLTRB(24, 0, 24, 24),
                           child: Row(
                             children: [
@@ -487,7 +502,8 @@ class _AddAttributePopupState extends State<AddAttributePopup> {
                               ),
                             ],
                           ),
-                        ),
+                        )
+                      : SizedBox(),
                 ],
               ),
             );

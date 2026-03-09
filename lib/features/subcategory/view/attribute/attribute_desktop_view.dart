@@ -52,6 +52,26 @@ class _AttributeDesktopViewState extends State<AttributeDesktopView> {
     );
   }
 
+  void _openEditAttributePopup(int index) {
+    final initialValue = _attributes[index];
+    showGeneralDialog(
+      context: context,
+      barrierDismissible: true,
+      barrierLabel: 'Edit attribute',
+      barrierColor: Colors.black.withValues(alpha: 0.45),
+      pageBuilder: (dialogContext, animation, secondaryAnimation) {
+        return SafeArea(
+          child: AddAttributePopup(
+            subcategoryId: widget.subcategory.id,
+            initialValue: initialValue,
+            isEditable: true,
+            allAttributes: _attributes,
+          ),
+        );
+      },
+    );
+  }
+
   void _deleteAttribute(int index) {
     if (index < 0 || index >= _attributes.length) return;
 
@@ -250,6 +270,8 @@ class _AttributeDesktopViewState extends State<AttributeDesktopView> {
                                     attribute: _attributes[index],
                                     onEdit: () =>
                                         _openAttributePopup(editIndex: index),
+                                    onEditAttributes: () =>
+                                        _openEditAttributePopup(index),
                                     onDelete: () => _deleteAttribute(index),
                                   );
                                 },

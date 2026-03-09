@@ -8,11 +8,13 @@ class AttributeTableRow extends StatelessWidget {
     super.key,
     required this.attribute,
     required this.onEdit,
+    required this.onEditAttributes,
     required this.onDelete,
   });
 
   final AttributeUiItem attribute;
   final VoidCallback onEdit;
+  final VoidCallback onEditAttributes;
   final VoidCallback onDelete;
 
   @override
@@ -99,7 +101,23 @@ class AttributeTableRow extends StatelessWidget {
                     ),
                   ),
                 ),
-                SizedBox(),
+                const SizedBox(width: 8),
+                InkWell(
+                  onTap: onEditAttributes,
+                  child: Container(
+                    decoration: BoxDecoration(
+                      border: Border.all(color: Colors.black12),
+                      borderRadius: BorderRadius.circular(6),
+                    ),
+                    padding: const EdgeInsets.all(4),
+                    child: const Icon(
+                      Icons.edit_outlined,
+                      color: Colors.black54,
+                      size: 20,
+                    ),
+                  ),
+                ),
+                const SizedBox(width: 4),
                 IconButton(
                   onPressed: onDelete,
                   icon: const Icon(
