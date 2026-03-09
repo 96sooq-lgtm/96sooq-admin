@@ -63138,7 +63138,7 @@ q===$&&A.a()
 q=q.length===0}else q=!1
 if(q){j.c.P(t.q).f.b_(B.Ne)
 return}if(i===B.eO)p="dropdown"
-else p=i===B.fO?"radio":"text_field"
+else p=i===B.fO?"radio":"text"
 i=j.y
 q=i!=null
 if(q&&j.a.e){i=j.a.f
@@ -63212,7 +63212,7 @@ o.m(0,"options",n)}return o}n=A.y(t.N,t.K)
 n.m(0,"name",o)
 n.m(0,q,a.b)
 o=a.d
-n.m(0,"type",o.length!==0?o:"text_field")
+n.m(0,"type",o.length!==0?o:"text")
 o=a.c
 if(o.length!==0)n.m(0,p,o)
 o=a.f
@@ -63241,39 +63241,39 @@ s.Z(new A.aQF(s))
 a.P(t.q).f.b_(A.cf(q,q,q,q,q,B.t,q,A.aJ(b.a,q,q,q,q,q,q,q,q,q,q,q),q,B.F,q,q,q,q,q,q,q,q,q,q))}},
 $S:42}
 A.aQE.prototype={
-$0(){var s,r,q,p,o,n,m,l="dropdown",k="text_field",j=this.a
-j.z=!1
-s=j.y
-r=j.d
-q=j.e
+$0(){var s,r,q,p,o,n,m,l="dropdown",k=this.a
+k.z=!1
+s=k.y
+r=k.d
+q=k.e
 if(s==null){r===$&&A.a()
 s=B.c.T(r.a.a)
 q===$&&A.a()
 q=B.c.T(q.a.a)
-p=j.r
+p=k.r
 p===$&&A.a()
 if(p===B.eO)o=l
-else o=p===B.fO?"radio":k
-n=j.w
+else o=p===B.fO?"radio":"text"
+n=k.w
 n===$&&A.a()
-m=j.x
+m=k.x
 m===$&&A.a()
 m=A.f6(m,!0,t.N)
 r=B.c.T(r.a.a)
-j.y=new A.ls(A.da(r.toLowerCase()," ","_"),s,q,o,p,m,n)}else{r===$&&A.a()
+k.y=new A.ls(A.da(r.toLowerCase()," ","_"),s,q,o,p,m,n)}else{r===$&&A.a()
 s=B.c.T(r.a.a)
 q===$&&A.a()
 q=B.c.T(q.a.a)
-r=j.r
+r=k.r
 r===$&&A.a()
 if(r===B.eO)p=l
-else p=r===B.fO?"radio":k
-o=j.w
+else p=r===B.fO?"radio":"text"
+o=k.w
 o===$&&A.a()
-n=j.x
+n=k.x
 n===$&&A.a()
 n=A.f6(n,!0,t.N)
-j.y=new A.ls(j.y.a,s,q,p,r,n,o)}},
+k.y=new A.ls(k.y.a,s,q,p,r,n,o)}},
 $S:0}
 A.aQF.prototype={
 $0(){return this.a.z=!1},
