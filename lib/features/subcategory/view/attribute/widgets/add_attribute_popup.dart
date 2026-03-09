@@ -108,7 +108,7 @@ class _AddAttributePopupState extends State<AddAttributePopup> {
         ? 'dropdown'
         : _selectedType == AttributeType.radio
         ? 'radio'
-        : 'text_field';
+        : 'text';
 
     if (_isEditMode && widget.isEditable) {
       // Build the full attributes array with this attribute updated
@@ -125,7 +125,7 @@ class _AddAttributePopupState extends State<AddAttributePopup> {
         return {
           'name': attr.key,
           'label_en': attr.nameEn,
-          'type': attr.rawType.isNotEmpty ? attr.rawType : 'text_field',
+          'type': attr.rawType.isNotEmpty ? attr.rawType : 'text',
           if (attr.nameAr.isNotEmpty) 'label_ar': attr.nameAr,
           if (attr.options.isNotEmpty) 'options': attr.options,
         };
@@ -223,7 +223,7 @@ class _AddAttributePopupState extends State<AddAttributePopup> {
                         ? 'dropdown'
                         : _selectedType == AttributeType.radio
                         ? 'radio'
-                        : 'text_field',
+                        : 'text',
                     type: _selectedType,
                     isActive: _isActive,
                     options: List.from(_options),
@@ -241,7 +241,7 @@ class _AddAttributePopupState extends State<AddAttributePopup> {
                         ? 'dropdown'
                         : _selectedType == AttributeType.radio
                         ? 'radio'
-                        : 'text_field',
+                        : 'text',
                     type: _selectedType,
                     isActive: _isActive,
                     options: List.from(_options),
