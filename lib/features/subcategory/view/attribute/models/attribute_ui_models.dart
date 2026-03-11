@@ -9,6 +9,7 @@ class AttributeUiItem {
   final String rawType;
   final AttributeType type;
   final List<String> options;
+  final List<String>? optionsAr;
   final bool isActive;
 
   const AttributeUiItem({
@@ -18,6 +19,7 @@ class AttributeUiItem {
     required this.rawType,
     required this.type,
     required this.options,
+    this.optionsAr,
     required this.isActive,
   });
 
@@ -28,6 +30,7 @@ class AttributeUiItem {
     String? rawType,
     AttributeType? type,
     List<String>? options,
+    List<String>? optionsAr,
     bool? isActive,
   }) {
     return AttributeUiItem(
@@ -37,6 +40,7 @@ class AttributeUiItem {
       rawType: rawType ?? this.rawType,
       type: type ?? this.type,
       options: options ?? this.options,
+      optionsAr: optionsAr ?? this.optionsAr,
       isActive: isActive ?? this.isActive,
     );
   }
@@ -75,6 +79,7 @@ class AttributeUiItem {
       rawType: schema.type,
       type: _fromTypeString(schema.type),
       options: schema.options ?? const <String>[],
+      optionsAr: schema.optionsAr,
       isActive: true,
     );
   }

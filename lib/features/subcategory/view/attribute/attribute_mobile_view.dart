@@ -453,7 +453,9 @@ class _AttributeMobileViewState extends State<AttributeMobileView> {
           Expanded(
             flex: 2,
             child: DynamicText(
-              isRTL ? item.labelAr : item.labelEn,
+              item.labelAr.isNotEmpty
+                  ? '${item.labelEn} | ${item.labelAr}'
+                  : item.labelEn,
               style: AppThemes.f14w400,
             ),
           ),
@@ -560,12 +562,14 @@ class _AddAttributeForm extends StatefulWidget {
 }
 
 class _AddAttributeFormState extends State<_AddAttributeForm> {
-  late TextEditingController nameEnController;
-  late TextEditingController nameArController;
+  late final TextEditingController nameEnController;
+  late final TextEditingController nameArController;
+  late final TextEditingController optionController;
+  late final TextEditingController optionArController;
   late String type;
   late bool isRequired;
-  List<String> options = [];
-  final TextEditingController optionController = TextEditingController();
+  late List<String> options;
+  late List<String> optionsAr;
 
   bool _isLoading = false;
   SubcategoryAttributeSchema? _currentValue;
@@ -582,6 +586,8 @@ class _AddAttributeFormState extends State<_AddAttributeForm> {
     super.initState();
     _currentValue = widget.initialValue;
     _initializeFields(_currentValue);
+    optionController = TextEditingController();
+    optionArController = TextEditingController();
   }
 
   void _initializeFields(SubcategoryAttributeSchema? value) {
@@ -597,6 +603,7 @@ class _AddAttributeFormState extends State<_AddAttributeForm> {
     }
     isRequired = value?.required ?? true;
     options = List.from(value?.options ?? []);
+    optionsAr = List.from(value?.optionsAr ?? []);
   }
 
   @override
@@ -604,6 +611,7 @@ class _AddAttributeFormState extends State<_AddAttributeForm> {
     nameEnController.dispose();
     nameArController.dispose();
     optionController.dispose();
+    optionArController.dispose();
     super.dispose();
   }
 
@@ -614,9 +622,33 @@ class _AddAttributeFormState extends State<_AddAttributeForm> {
         return AlertDialog(
           backgroundColor: AppColors.whiteTextColor,
           title: Text(_label("Add Option", "إضافة خيار")),
-          content: CustomTextFormField(
-            controller: optionController,
-            labelText: _label("Option value", "قيمة الخيار"),
+          content: Column(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              CustomTextFormField(
+                controller: optionController,
+                labelText: _label("Option (English)", "الخيار (بالإنجليزية)"),
+              ),
+              const SizedBox(height: 12),
+              CustomTextFormField(
+                controller: optionArController,
+                labelText: _label("Option (Arabic)", "الخيار (بالعربية)"),
+                suffixIcon: const Icon(Icons.translate),
+                onSuffixTap: () async {
+                  final text = optionController.text.trim();
+                  if (text.isNotEmpty) {
+                    final translated = await TranslationService.translate(
+                      text,
+                      'ar',
+                    );
+                    if (!mounted) return;
+                    setState(() {
+                      optionArController.text = translated;
+                    });
+                  }
+                },
+              ),
+            ],
           ),
           actions: [
             TextButton(
@@ -625,10 +657,14 @@ class _AddAttributeFormState extends State<_AddAttributeForm> {
             ),
             TextButton(
               onPressed: () {
-                if (optionController.text.trim().isNotEmpty) {
+                final enVal = optionController.text.trim();
+                final arVal = optionArController.text.trim();
+                if (enVal.isNotEmpty) {
                   setState(() {
-                    options.add(optionController.text.trim());
+                    options.add(enVal);
+                    optionsAr.add(arVal);
                     optionController.clear();
+                    optionArController.clear();
                   });
                 }
                 Navigator.pop(context);
@@ -695,6 +731,8 @@ class _AddAttributeFormState extends State<_AddAttributeForm> {
             'type': typeStr,
             if (nameAr.isNotEmpty) 'label_ar': nameAr,
             if (showsOptions) 'options': options.toList(),
+            if (showsOptions && optionsAr.isNotEmpty)
+              'options_ar': optionsAr.toList(),
           };
         }
         return <String, dynamic>{
@@ -704,6 +742,8 @@ class _AddAttributeFormState extends State<_AddAttributeForm> {
           if (attr.labelAr.isNotEmpty) 'label_ar': attr.labelAr,
           if (attr.options != null && attr.options!.isNotEmpty)
             'options': attr.options,
+          if (attr.optionsAr != null && attr.optionsAr!.isNotEmpty)
+            'options_ar': attr.optionsAr,
         };
       }).toList();
 
@@ -742,6 +782,17 @@ class _AddAttributeFormState extends State<_AddAttributeForm> {
         payload['options'] = options.isEmpty ? [] : options.toList();
       }
 
+      final bool optionsArChanged =
+          _currentValue!.optionsAr == null ||
+          optionsAr.length != _currentValue!.optionsAr!.length ||
+          optionsAr.asMap().entries.any(
+            (e) => e.value != _currentValue!.optionsAr![e.key],
+          );
+
+      if (optionsArChanged) {
+        payload['options_ar'] = optionsAr.isEmpty ? [] : optionsAr.toList();
+      }
+
       if (payload.isEmpty) {
         ScaffoldMessenger.of(
           context,
@@ -760,6 +811,7 @@ class _AddAttributeFormState extends State<_AddAttributeForm> {
         "label_ar": nameAr,
         "type": typeStr,
         "options": options.isEmpty ? [] : options.toList(),
+        "options_ar": optionsAr.isEmpty ? [] : optionsAr.toList(),
         "required": isRequired,
         "status": "active",
       };
@@ -800,6 +852,7 @@ class _AddAttributeFormState extends State<_AddAttributeForm> {
                     required: isRequired,
                     status: 'active',
                     options: List.from(options),
+                    optionsAr: List.from(optionsAr),
                   );
                 } else {
                   _currentValue = SubcategoryAttributeSchema(
@@ -810,6 +863,7 @@ class _AddAttributeFormState extends State<_AddAttributeForm> {
                     required: isRequired,
                     status: _currentValue!.status,
                     options: List.from(options),
+                    optionsAr: List.from(optionsAr),
                   );
                 }
               });
@@ -965,7 +1019,10 @@ class _AddAttributeFormState extends State<_AddAttributeForm> {
                             children: [
                               Expanded(
                                 child: DynamicText(
-                                  entry.value,
+                                  entry.key < optionsAr.length &&
+                                          optionsAr[entry.key].isNotEmpty
+                                      ? '${entry.value} | ${optionsAr[entry.key]}'
+                                      : entry.value,
                                   style: AppThemes.f14w400,
                                 ),
                               ),
@@ -974,6 +1031,9 @@ class _AddAttributeFormState extends State<_AddAttributeForm> {
                                       onTap: () {
                                         setState(() {
                                           options.removeAt(entry.key);
+                                          if (entry.key < optionsAr.length) {
+                                            optionsAr.removeAt(entry.key);
+                                          }
                                         });
                                       },
                                       child: const Icon(

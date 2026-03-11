@@ -35,9 +35,11 @@ class _AddAttributePopupState extends State<AddAttributePopup> {
   late final TextEditingController _nameEnController;
   late final TextEditingController _nameArController;
   late final TextEditingController _optionController;
+  late final TextEditingController _optionArController;
   late AttributeType _selectedType;
   late bool _isActive;
   late List<String> _options;
+  late List<String> _optionsAr;
 
   // Track if we've successfully created this attribute, so subsequent saves are updates
   AttributeUiItem? _currentValue;
@@ -54,6 +56,7 @@ class _AddAttributePopupState extends State<AddAttributePopup> {
     _currentValue = widget.initialValue;
     _initializeFields(_currentValue);
     _optionController = TextEditingController();
+    _optionArController = TextEditingController();
   }
 
   void _initializeFields(AttributeUiItem? item) {
@@ -62,6 +65,7 @@ class _AddAttributePopupState extends State<AddAttributePopup> {
     _selectedType = item?.type ?? AttributeType.dropdown;
     _isActive = item?.isActive ?? true;
     _options = List<String>.from(item?.options ?? const <String>[]);
+    _optionsAr = List<String>.from(item?.optionsAr ?? const <String>[]);
   }
 
   @override
@@ -69,21 +73,28 @@ class _AddAttributePopupState extends State<AddAttributePopup> {
     _nameEnController.dispose();
     _nameArController.dispose();
     _optionController.dispose();
+    _optionArController.dispose();
     super.dispose();
   }
 
   void _addOption() {
-    final option = _optionController.text.trim();
-    if (option.isEmpty) return;
+    final optionEn = _optionController.text.trim();
+    final optionAr = _optionArController.text.trim();
+    if (optionEn.isEmpty) return;
     setState(() {
-      _options.add(option);
+      _options.add(optionEn);
+      _optionsAr.add(optionAr);
       _optionController.clear();
+      _optionArController.clear();
     });
   }
 
   void _removeOption(int index) {
     setState(() {
       _options.removeAt(index);
+      if (index < _optionsAr.length) {
+        _optionsAr.removeAt(index);
+      }
     });
   }
 
@@ -120,6 +131,8 @@ class _AddAttributePopupState extends State<AddAttributePopup> {
             'type': typeStr,
             if (nameAr.isNotEmpty) 'label_ar': nameAr,
             if (_showsOptions) 'options': _options.toList(),
+            if (_showsOptions && _optionsAr.isNotEmpty)
+              'options_ar': _optionsAr.toList(),
           };
         }
         return {
@@ -128,6 +141,8 @@ class _AddAttributePopupState extends State<AddAttributePopup> {
           'type': attr.rawType.isNotEmpty ? attr.rawType : 'text',
           if (attr.nameAr.isNotEmpty) 'label_ar': attr.nameAr,
           if (attr.options.isNotEmpty) 'options': attr.options,
+          if (attr.optionsAr != null && attr.optionsAr!.isNotEmpty)
+            'options_ar': attr.optionsAr,
         };
       }).toList();
 
@@ -169,6 +184,17 @@ class _AddAttributePopupState extends State<AddAttributePopup> {
         payload['options'] = _options.isEmpty ? [] : _options.toList();
       }
 
+      final bool optionsArChanged =
+          _currentValue!.optionsAr == null ||
+          _optionsAr.length != _currentValue!.optionsAr!.length ||
+          _optionsAr.asMap().entries.any(
+            (e) => e.value != _currentValue!.optionsAr![e.key],
+          );
+
+      if (optionsArChanged) {
+        payload['options_ar'] = _optionsAr.isEmpty ? [] : _optionsAr.toList();
+      }
+
       if (payload.isEmpty) {
         ScaffoldMessenger.of(
           context,
@@ -188,6 +214,7 @@ class _AddAttributePopupState extends State<AddAttributePopup> {
         "label_ar": nameAr,
         "type": typeStr,
         "options": _options.isEmpty ? [] : _options.toList(),
+        "options_ar": _optionsAr.isEmpty ? [] : _optionsAr.toList(),
         "required": _isActive,
         "status": "active",
       };
@@ -227,6 +254,7 @@ class _AddAttributePopupState extends State<AddAttributePopup> {
                     type: _selectedType,
                     isActive: _isActive,
                     options: List.from(_options),
+                    optionsAr: List.from(_optionsAr),
                     key: _nameEnController.text.trim().toLowerCase().replaceAll(
                       ' ',
                       '_',
@@ -245,6 +273,7 @@ class _AddAttributePopupState extends State<AddAttributePopup> {
                     type: _selectedType,
                     isActive: _isActive,
                     options: List.from(_options),
+                    optionsAr: List.from(_optionsAr),
                     key: _currentValue!.key,
                   );
                 }
@@ -367,19 +396,56 @@ class _AddAttributePopupState extends State<AddAttributePopup> {
                                 ? Row(
                                     children: [
                                       Expanded(
-                                        child: CustomTextFormField(
-                                          labelText: 'Option value',
-                                          controller: _optionController,
+                                        child: Column(
+                                          children: [
+                                            Row(
+                                              children: [
+                                                Expanded(
+                                                  child: CustomTextFormField(
+                                                    labelText: 'Option (EN)',
+                                                    controller:
+                                                        _optionController,
+                                                  ),
+                                                ),
+                                                const SizedBox(width: 10),
+                                                Expanded(
+                                                  child: CustomTextFormField(
+                                                    labelText: 'Option (AR)',
+                                                    controller:
+                                                        _optionArController,
+                                                    suffixIcon: const Icon(
+                                                      Icons.translate,
+                                                    ),
+                                                    onSuffixTap: () async {
+                                                      final text =
+                                                          _optionController.text
+                                                              .trim();
+                                                      if (text.isNotEmpty) {
+                                                        final translated =
+                                                            await TranslationService.translate(
+                                                              text,
+                                                              'ar',
+                                                            );
+                                                        if (!mounted) return;
+                                                        setState(() {
+                                                          _optionArController
+                                                                  .text =
+                                                              translated;
+                                                        });
+                                                      }
+                                                    },
+                                                  ),
+                                                ),
+                                              ],
+                                            ),
+                                          ],
                                         ),
                                       ),
                                       const SizedBox(width: 10),
-                                      SizedBox(
-                                        width: 154,
-                                        child: CustomButton(
-                                          text: '+ Add',
-                                          onPressed: _addOption,
-                                          color: AppColors.primaryColor,
-                                        ),
+                                      CustomButton(
+                                        text: '+ Add',
+                                        onPressed: _addOption,
+                                        color: AppColors.primaryColor,
                                       ),
                                     ],
                                   )
@@ -398,7 +464,11 @@ class _AddAttributePopupState extends State<AddAttributePopup> {
                                     children: [
                                       Expanded(
                                         child: AttributeOptionItem(
-                                          value: _options[index],
+                                          value:
+                                              index < _optionsAr.length &&
+                                                  _optionsAr[index].isNotEmpty
+                                              ? '${_options[index]} | ${_optionsAr[index]}'
+                                              : _options[index],
                                         ),
                                       ),
                                       _isFieldsEnabled

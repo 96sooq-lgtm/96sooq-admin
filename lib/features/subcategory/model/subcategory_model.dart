@@ -6,6 +6,7 @@ class SubcategoryAttributeSchema {
   final bool required;
   final String status; // 1. Add this field
   final List<String>? options;
+  final List<String>? optionsAr;
 
   SubcategoryAttributeSchema({
     required this.key,
@@ -15,6 +16,7 @@ class SubcategoryAttributeSchema {
     required this.required,
     required this.status, // 2. Add to constructor
     required this.options,
+    this.optionsAr,
   });
 
   factory SubcategoryAttributeSchema.fromJson(Map<String, dynamic> json) {
@@ -27,6 +29,9 @@ class SubcategoryAttributeSchema {
       status: json['status'] ?? 'active', // 3. Handle from JSON
       options: json['options'] is List
           ? List<String>.from(json['options'])
+          : null,
+      optionsAr: json['options_ar'] is List
+          ? List<String>.from(json['options_ar'])
           : null,
     );
   }
@@ -41,6 +46,7 @@ class SubcategoryAttributeSchema {
       "required": required,
       "status": status, // 4. Add to serialization
       if (options != null) "options": options,
+      if (optionsAr != null) "options_ar": optionsAr,
     };
   }
 }

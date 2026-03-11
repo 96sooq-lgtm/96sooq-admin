@@ -29,7 +29,9 @@ class AttributeTableRow extends StatelessWidget {
           Expanded(
             flex: 4,
             child: Text(
-              attribute.nameEn,
+              attribute.nameAr.isNotEmpty
+                  ? '${attribute.nameEn} | ${attribute.nameAr}'
+                  : attribute.nameEn,
               style: AppThemes.f20w400.copyWith(fontSize: 24),
             ),
           ),
